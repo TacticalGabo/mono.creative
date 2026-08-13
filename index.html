@@ -134,21 +134,25 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
      ámbito los re-declarara, pisaría el valor heredado del documento y
      rompería el fade de desktop y el layout responsive. */
 :root,.bgfade,.about,.team,.more,.cta,.foot{
+  /* progreso remapeado del TEXTO: el fondo cruza con --fade-p en todo el
+     tramo, pero las letras esperan hasta p=.42 y cruzan rápido (ventana de
+     .16). Así nunca acompañan al fondo por la zona de gris medio. */
+  --fp-txt:clamp(0,calc((var(--fade-p,0) - .42) / .16),1);
   --bg:color-mix(in oklab,var(--bg-l) calc(var(--fade-p,0) * 100%),var(--bg-d));
-  --txt:color-mix(in oklab,var(--txt-l) calc(var(--fade-p,0) * 100%),var(--txt-d));
-  --h3c:color-mix(in oklab,var(--h3c-l) calc(var(--fade-p,0) * 100%),var(--h3c-d));
+  --txt:color-mix(in oklab,var(--txt-l) calc(var(--fp-txt) * 100%),var(--txt-d));
+  --h3c:color-mix(in oklab,var(--h3c-l) calc(var(--fp-txt) * 100%),var(--h3c-d));
   --accent:color-mix(in oklab,var(--accent-l) calc(var(--fade-p,0) * 100%),var(--accent-d));
   --lime400:color-mix(in oklab,var(--lime400-l) calc(var(--fade-p,0) * 100%),var(--lime400-d));
-  --body:color-mix(in oklab,var(--body-l) calc(var(--fade-p,0) * 100%),var(--body-d));
-  --body-strong:color-mix(in oklab,var(--body-strong-l) calc(var(--fade-p,0) * 100%),var(--body-strong-d));
-  --muted:color-mix(in oklab,var(--muted-l) calc(var(--fade-p,0) * 100%),var(--muted-d));
-  --sect:color-mix(in oklab,var(--sect-l) calc(var(--fade-p,0) * 100%),var(--sect-d));
-  --cap-strong:color-mix(in oklab,var(--cap-strong-l) calc(var(--fade-p,0) * 100%),var(--cap-strong-d));
-  --cap-strong2:color-mix(in oklab,var(--cap-strong2-l) calc(var(--fade-p,0) * 100%),var(--cap-strong2-d));
+  --body:color-mix(in oklab,var(--body-l) calc(var(--fp-txt) * 100%),var(--body-d));
+  --body-strong:color-mix(in oklab,var(--body-strong-l) calc(var(--fp-txt) * 100%),var(--body-strong-d));
+  --muted:color-mix(in oklab,var(--muted-l) calc(var(--fp-txt) * 100%),var(--muted-d));
+  --sect:color-mix(in oklab,var(--sect-l) calc(var(--fp-txt) * 100%),var(--sect-d));
+  --cap-strong:color-mix(in oklab,var(--cap-strong-l) calc(var(--fp-txt) * 100%),var(--cap-strong-d));
+  --cap-strong2:color-mix(in oklab,var(--cap-strong2-l) calc(var(--fp-txt) * 100%),var(--cap-strong2-d));
   --cap-weak:color-mix(in oklab,var(--cap-weak-l) calc(var(--fade-p,0) * 100%),var(--cap-weak-d));
   --border:color-mix(in oklab,var(--border-l) calc(var(--fade-p,0) * 100%),var(--border-d));
 --hair:1px;   /* fijo: interpolarlo forzaba layout del documento en cada frame del cruce */
-  --capsule-text:color-mix(in oklab,var(--capsule-text-l) calc(var(--fade-p,0) * 100%),var(--capsule-text-d));
+  --capsule-text:color-mix(in oklab,var(--capsule-text-l) calc(var(--fp-txt) * 100%),var(--capsule-text-d));
   --surface-showcase:color-mix(in oklab,var(--surface-showcase-l) calc(var(--fade-p,0) * 100%),var(--surface-showcase-d));
   --surface-showcase-2:color-mix(in oklab,var(--surface-showcase-2-l) calc(var(--fade-p,0) * 100%),var(--surface-showcase-2-d));
   --bezel:color-mix(in oklab,var(--bezel-l) calc(var(--fade-p,0) * 100%),var(--bezel-d));
@@ -158,22 +162,22 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
   --chip-tx-on:color-mix(in oklab,var(--chip-tx-on-l) calc(var(--fade-p,0) * 100%),var(--chip-tx-on-d));
   --chip-tx-off:color-mix(in oklab,var(--chip-tx-off-l) calc(var(--fade-p,0) * 100%),var(--chip-tx-off-d));
   --team-bd:color-mix(in oklab,var(--team-bd-l) calc(var(--fade-p,0) * 100%),var(--team-bd-d));
-  --team-name:color-mix(in oklab,var(--team-name-l) calc(var(--fade-p,0) * 100%),var(--team-name-d));
+  --team-name:color-mix(in oklab,var(--team-name-l) calc(var(--fp-txt) * 100%),var(--team-name-d));
   --team-label:color-mix(in oklab,var(--team-label-l) calc(var(--fade-p,0) * 100%),var(--team-label-d));
-  --team-lead:color-mix(in oklab,var(--team-lead-l) calc(var(--fade-p,0) * 100%),var(--team-lead-d));
+  --team-lead:color-mix(in oklab,var(--team-lead-l) calc(var(--fp-txt) * 100%),var(--team-lead-d));
   --link-card:color-mix(in oklab,var(--link-card-l) calc(var(--fade-p,0) * 100%),var(--link-card-d));
-  --sticker:color-mix(in oklab,var(--sticker-l) calc(var(--fade-p,0) * 100%),var(--sticker-d));
+  --sticker:color-mix(in oklab,var(--sticker-l) calc(var(--fp-txt) * 100%),var(--sticker-d));
   --sticker-lime:color-mix(in oklab,var(--sticker-lime-l) calc(var(--fade-p,0) * 100%),var(--sticker-lime-d));
-  --cta-h:color-mix(in oklab,var(--cta-h-l) calc(var(--fade-p,0) * 100%),var(--cta-h-d));
-  --cta-b:color-mix(in oklab,var(--cta-b-l) calc(var(--fade-p,0) * 100%),var(--cta-b-d));
+  --cta-h:color-mix(in oklab,var(--cta-h-l) calc(var(--fp-txt) * 100%),var(--cta-h-d));
+  --cta-b:color-mix(in oklab,var(--cta-b-l) calc(var(--fp-txt) * 100%),var(--cta-b-d));
   --email:color-mix(in oklab,var(--email-l) calc(var(--fade-p,0) * 100%),var(--email-d));
-  --footer-legal:color-mix(in oklab,var(--footer-legal-l) calc(var(--fade-p,0) * 100%),var(--footer-legal-d));
-  --nav-link:color-mix(in oklab,var(--nav-link-l) calc(var(--fade-p,0) * 100%),var(--nav-link-d));
+  --footer-legal:color-mix(in oklab,var(--footer-legal-l) calc(var(--fp-txt) * 100%),var(--footer-legal-d));
+  --nav-link:color-mix(in oklab,var(--nav-link-l) calc(var(--fp-txt) * 100%),var(--nav-link-d));
   --nav-link-on:color-mix(in oklab,var(--nav-link-on-l) calc(var(--fade-p,0) * 100%),var(--nav-link-on-d));
   --btn1-fill:color-mix(in oklab,var(--btn1-fill-l) calc(var(--fade-p,0) * 100%),var(--btn1-fill-d));
   --btn1-stroke:color-mix(in oklab,var(--btn1-stroke-l) calc(var(--fade-p,0) * 100%),var(--btn1-stroke-d));
   --btn1-arrow:color-mix(in oklab,var(--btn1-arrow-l) calc(var(--fade-p,0) * 100%),var(--btn1-arrow-d));
-  --btn1-label:color-mix(in oklab,var(--btn1-label-l) calc(var(--fade-p,0) * 100%),var(--btn1-label-d));
+  --btn1-label:color-mix(in oklab,var(--btn1-label-l) calc(var(--fp-txt) * 100%),var(--btn1-label-d));
   --btn2-fill:color-mix(in oklab,var(--btn2-fill-l) calc(var(--fade-p,0) * 100%),var(--btn2-fill-d));
   --btn2-stroke:color-mix(in oklab,var(--btn2-stroke-l) calc(var(--fade-p,0) * 100%),var(--btn2-stroke-d));
   --btn2-arrow:color-mix(in oklab,var(--btn2-arrow-l) calc(var(--fade-p,0) * 100%),var(--btn2-arrow-d));
@@ -633,7 +637,38 @@ a:hover{color:var(--lime400)}
   .about-h{max-width:413px;margin-left:0}
   .logo-h3{top:-4px;width:70px;height:29.174px}
   .about-col-mid{grid-column:2;grid-row:1/span 2;display:flex;flex-direction:column;align-items:flex-start;margin-top:-45px}
-  .cluster-wrap{order:0;margin:0;padding:0;width:100%;z-index:auto;pointer-events:auto;aspect-ratio:auto;-webkit-mask-image:linear-gradient(to bottom,transparent 0,rgba(0,0,0,.35) 9%,#000 20%);mask-image:linear-gradient(to bottom,transparent 0,rgba(0,0,0,.35) 9%,#000 20%)}
+  /* MÁSCARA DEL CLÚSTER — leer entero antes de tocar un solo número.
+     El SVG SOBRESALE de .cluster-wrap por los dos lados: el hijo mide 2.4951x
+     el ancho y la caja 1.8401x, y va subido 70px. La línea divisoria (el
+     <rect y=726.999 width=270> del SVG) cae en 2.0719·W - 70, y el borde
+     inferior de la caja en 1.8401·W: la línea SALE de la caja en cuanto
+     0.2318·W > 70, o sea W > 302.04px. Y .cluster-d tiene max-width:302.699px,
+     que se alcanza a ~1415px de viewport. Con la columna al tope la línea
+     queda 0,14px POR DEBAJO del borde. Nada más arriba cambia: de 1415px en
+     adelante W ya no se mueve, así que el recorte es permanente.
+
+     Poner una máscara RECORTA el elemento a su caja: mask-clip vale border-box
+     por defecto y lo que se pinta fuera de esa caja no se dibuja. Ese es el
+     recorte real, y por eso NO bastaba con tocar mask-size. Aquí van las tres
+     piezas, y las tres hacen falta:
+
+       1. padding-bottom:12px + margin-bottom:-12px  ->  la CAJA crece 12px por
+          abajo (mask-clip ya la incluye) y el margen negativo devuelve el
+          layout a su sitio exacto: .rule y el alto de la rejilla no se mueven.
+          12px contra 0,14px de desbordamiento es margen de sobra, y en el SVG
+          no hay NADA entre y=728 e y=756, así que no aparece nada nuevo.
+       2. mask-origin:content-box  ->  los porcentajes de la máscara siguen
+          midiéndose contra la caja de contenido (H, sin el padding), así que
+          el desvanecido de arriba queda idéntico al píxel a cualquier ancho.
+       3. mask-size:100% 400% con los topes divididos entre 4 (2.25% / 5% en
+          vez de 9% / 20%)  ->  mismo desvanecido (5% x 4H = 20% x H) pero la
+          zona opaca cubre de 0.2H a 4H, así que la costura del mosaico
+          (mask-repeat es 'repeat' por defecto) queda lejísimos del dibujo,
+          que vive entre -0.37H y 1.06H.
+
+     Sigue en 'repeat' A PROPÓSITO: con 'no-repeat' lo que sobresale por ARRIBA
+     se borraría. Ver errors and incidents §3. */
+  .cluster-wrap{order:0;margin:0 0 -12px;padding:0 0 12px;width:100%;z-index:auto;pointer-events:auto;aspect-ratio:auto;-webkit-mask-image:linear-gradient(to bottom,transparent 0,rgba(0,0,0,.35) 2.25%,#000 5%);mask-image:linear-gradient(to bottom,transparent 0,rgba(0,0,0,.35) 2.25%,#000 5%);-webkit-mask-size:100% 400%;mask-size:100% 400%;-webkit-mask-origin:content-box;mask-origin:content-box}
   /* En desktop vuelve la MÁSCARA, no la capa superpuesta. Dos motivos:
      · aquí .cluster-d>* se sale muchísimo de la caja del wrapper (su alto es
        calc(100cqw*756/303)), y un ::after con inset:0 solo cubre la caja, así
