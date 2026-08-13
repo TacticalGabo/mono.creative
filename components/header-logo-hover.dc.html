@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  a { color: #d8d3c7; }
+  a:hover { color: #ffffff; }
+</style>
+</helmet>
+<div ref="{{ rootRef }}" style="position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible">
+  <svg viewBox="-6 -15 216 52" shape-rendering="geometricPrecision" style="position:absolute;left:-2.941%;top:-71.43%;width:105.88%;height:auto;display:block;overflow:visible">
+    <defs>
+      <path ref="{{ sampleRef }}" d="" fill="none"></path>
+    </defs>
+    <path ref="{{ blobRef }}" d="" fill="currentColor" fill-rule="evenodd"></path>
+  </svg>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;speed&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:1,&quot;min&quot;:0.4,&quot;max&quot;:2,&quot;step&quot;:0.05,&quot;unit&quot;:&quot;×&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;fps&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:12,&quot;min&quot;:8,&quot;max&quot;:30,&quot;step&quot;:1,&quot;unit&quot;:&quot;fps&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;weld&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:1,&quot;min&quot;:0.4,&quot;max&quot;:2,&quot;step&quot;:0.05,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;handDrawn&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:0,&quot;min&quot;:0,&quot;max&quot;:2,&quot;step&quot;:0.1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;detail&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:1.6,&quot;min&quot;:0.6,&quot;max&quot;:4,&quot;step&quot;:0.2,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;shapeColor&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#B8FF00&quot;,&quot;options&quot;:[&quot;#B8FF00&quot;,&quot;#f4f1ea&quot;,&quot;#0e0e0d&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Color&quot;}}">
+const CENTER = { x: 102, y: 10.5 };
+const BLOB_SCALE = 1.45;
+const E2 = { center: { x: 31.9, y: 14 }, scale: 1.343 };
+const N_OUT = 170, N_HOLE = 44;
+const SEQ = [
+  ['logo', 0.8], ['merge', 0.75], ['blob', 0.1],
+  ['split', 0.7], ['simbolo', 1.5], ['emerge', 1.3], ['logo-2', 0.4]
+];
+const TOTAL = SEQ.reduce((a, s) => a + s[1], 0);
+// 1) logo → símbolo   2) símbolo → logo
+const IN_DUR = 1.24, OUT_DUR = 1.04;
+
+// lienzo interno: la soldadura se resuelve como geometría y se emite en curvas
+const VIEW = { x: -6, y: -15, w: 216, h: 52 };
+const PX = 4;
+const W = VIEW.w * PX, H = VIEW.h * PX;
+
+const CASES = {
+  1: [['l', 'b']], 2: [['b', 'r']], 3: [['l', 'r']], 4: [['t', 'r']],
+  5: [['l', 't'], ['b', 'r']], 6: [['t', 'b']], 7: [['l', 't']], 8: [['t', 'l']],
+  9: [['t', 'b']], 10: [['t', 'r'], ['l', 'b']], 11: [['t', 'r']], 12: [['l', 'r']],
+  13: [['b', 'r']], 14: [['l', 'b']]
+};
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.t0 = null;
+    this.lastFrame = -1;
+    this.ready = false;
+    this.u = 0;
+    this.hovering = false;
+    this.settled = -1;
+    this.f = new Float32Array(W * H);
+    this.g = new Float32Array(W * H);
+  }
+
+  componentDidMount() {
+    const c = document.createElement('canvas');
+    c.width = W;
+    c.height = H;
+    this.ctx = c.getContext('2d', { willReadFrequently: true });
+    this.loop = this.loop.bind(this);
+var self = this;
+    // prepare() bloquea el hilo 40-90 ms justo cuando aparece la página, así que
+    // se cede el hueco al navegador. El bucle ya está protegido por this.ready.
+    // El sondeo de MCgeom no es cancelable: por eso el guard de self.dead, para
+    // no escribir sobre nodos ya desconectados.
+    window.MCgeom(function(g){
+      if (self.dead) return;
+      const run = function(){ if (!self.dead) self.prepare(g.brandmarks); };
+      if (typeof requestIdleCallback === 'function') requestIdleCallback(run, { timeout: 120 });
+      else setTimeout(run, 0);
+    });
+    this.raf = requestAnimationFrame(this.loop);
+    this.watchVisibility();
+    // el hover se escucha en el contenedor real: cubre todo el hueco del logotipo
+    const host = (this.rootEl && this.rootEl.parentElement) || this.rootEl;
+    if (host) {
+      this.host = host;
+      // el hover solo cuenta en desktop; por debajo de 768 px manda el toque.
+      // La MediaQueryList se crea una sola vez: es reactiva, y fabricarla en
+      // cada evento de puntero era trabajo tirado. El ancho sí se lee al vuelo
+      // porque el punto de corte tiene que evaluarse en el momento.
+      const mq = window.matchMedia ? window.matchMedia('(hover:hover) and (pointer:fine)') : null;
+      const fine = () => !!mq && mq.matches && window.innerWidth >= 768;
+      this.fine = fine;
+      // se guardan las funciones que de verdad se registran: antes se quitaban
+      // otras distintas, así que los listeners sobrevivían al desmontaje
+      this.hoverIn = () => { if (fine()) this.hovering = true; };
+      this.hoverOut = () => { if (fine()) this.hovering = false; };
+      host.addEventListener('mouseenter', this.hoverIn);
+      host.addEventListener('mouseleave', this.hoverOut);
+      // toque: cambia de estado, se mantiene 0,6 s y navega si hay enlace
+      this.onTap = (e) => {
+        if (fine() || this.tapTimer) return;
+        const link = host.getAttribute('data-href') || (host.parentElement && host.parentElement.getAttribute('data-href'));
+        if (link) e.preventDefault();
+        this.hovering = true;
+        this.tapTimer = setTimeout(() => {
+          this.hovering = false;
+          this.tapTimer = null;
+          if (link) window.location.href = link;
+        }, IN_DUR * 1000 + 600);
+      };
+      host.addEventListener('click', this.onTap);
+    }
+  }
+
+  componentWillUnmount() {
+    // marca primero: el sondeo de MCgeom no se puede cancelar y puede llegar tarde
+    this.dead = true;
+    cancelAnimationFrame(this.raf);
+    // sin esto el IntersectionObserver retenía el componente para siempre
+    if (this.io) this.io.disconnect();
+    if (this.host) {
+      this.host.removeEventListener('mouseenter', this.hoverIn);
+      this.host.removeEventListener('mouseleave', this.hoverOut);
+      if (this.onTap) this.host.removeEventListener('click', this.onTap);
+      if (this.tapTimer) clearTimeout(this.tapTimer);
+    }
+  }
+
+
+  // Fuera de pantalla no se dibuja nada. Estos campos de fusión (canvas +
+  // desenfoque + marching squares) son lo más caro de la página y seguían
+  // reconstruyéndose aunque el componente estuviera lejos del viewport o
+  // en display:none. El reloj no se toca: al volver, la animación aparece
+  // donde le tocaba, no reiniciada.
+  watchVisibility() {
+    const ref = this.rootEl || this.shape || this.blob || this.sampleEl || this.group;
+    if (!ref || typeof IntersectionObserver !== 'function') return;
+    let node = ref.ownerSVGElement || ref;
+    node = node.parentElement || node;
+    this.visible = true;
+    this.io = new IntersectionObserver((es) => {
+      for (const e of es) this.visible = e.isIntersecting;
+      // el SVG está en position:absolute con overflow:visible y sobresale mucho
+      // de la caja observada: con 150 px se congelaba estando todavía a la vista
+    }, { rootMargin: '400px' });
+    this.io.observe(node);
+  }
+
+  renderVals() {
+    const set = (k) => (el) => { this[k] = el; };
+    return {
+      rootRef: set('rootEl'), sampleRef: set('sampleEl'), blobRef: set('blob')
+    };
+  }
+
+  sample(d, n) {
+    this.sampleEl.setAttribute('d', d);
+    const total = this.sampleEl.getTotalLength();
+    const out = [];
+    for (let i = 0; i < n; i++) {
+      const p = this.sampleEl.getPointAtLength((i / n) * total);
+      out.push([p.x, p.y]);
+    }
+    return out;
+  }
+
+  align(from, to) {
+    const n = from.length, step = Math.max(1, Math.floor(n / 60));
+    let best = { cost: Infinity, off: 0, dir: 1 };
+    for (const dir of [1, -1]) {
+      for (let off = 0; off < n; off++) {
+        let cost = 0;
+        for (let i = 0; i < n; i += step) {
+          const j = ((off + dir * i) % n + n) % n;
+          const dx = to[i][0] - from[j][0], dy = to[i][1] - from[j][1];
+          cost += dx * dx + dy * dy;
+        }
+        if (cost < best.cost) best = { cost: cost, off: off, dir: dir };
+      }
+    }
+    const out = [];
+    for (let i = 0; i < n; i++) out.push(from[((best.off + best.dir * i) % n + n) % n]);
+    return out;
+  }
+
+  centroid(pts) {
+    let x = 0, y = 0;
+    for (const p of pts) { x += p[0]; y += p[1]; }
+    return [x / pts.length, y / pts.length];
+  }
+
+  prepare(m) {
+    if (!this.sampleEl) return;
+    const minX = (pts) => { let v = Infinity; for (const p of pts) if (p[0] < v) v = p[0]; return v; };
+    const rawSym = [this.sample(m.E2_MARK[0], N_OUT), this.sample(m.E2_MARK[1], N_OUT)];
+    const symX0 = Math.min(minX(rawSym[0]), minX(rawSym[1]));
+    const LEFT = 0;
+    const e2 = (p) => [
+      LEFT + (p[0] - symX0) * E2.scale,
+      CENTER.y + (p[1] - E2.center.y) * E2.scale
+    ];
+    const symTargets = [rawSym[0].map(e2), rawSym[1].map(e2)];
+    const symCenter = this.centroid(symTargets[1]);
+    const loose = rawSym[1];
+    const lc = this.centroid(loose);
+    const looseX0 = minX(loose);
+    const blobShape = loose.map((p) => [
+      LEFT + (p[0] - looseX0) * BLOB_SCALE,
+      CENTER.y + (p[1] - lc[1]) * BLOB_SCALE
+    ]);
+    const BLOB_CX = LEFT + (lc[0] - looseX0) * BLOB_SCALE;
+
+    const sources = m.E1_WORD.concat(m.E1_MARK);
+    this.shapes = [];
+    for (let s = 0; s < sources.length; s++) {
+      const isMark = s >= m.E1_WORD.length;
+      const markIdx = s - m.E1_WORD.length;
+      const subs = sources[s].split(/(?=M)/).filter((t) => t.trim().length > 3);
+      const parts = [];
+      for (let k = 0; k < subs.length; k++) {
+        const n = k === 0 ? N_OUT : N_HOLE;
+        const lock = this.sample(subs[k], n);
+        let blob, sym;
+        if (k === 0) {
+          blob = this.align(blobShape, lock);
+          sym = isMark
+            ? this.align(symTargets[markIdx], blob)
+            : blob.map((p) => [symCenter[0] + (p[0] - BLOB_CX) * 0.3, symCenter[1] + (p[1] - CENTER.y) * 0.3]);
+        } else {
+          blob = lock.map(() => [BLOB_CX, CENTER.y]);
+          sym = lock.map(() => [symCenter[0], symCenter[1]]);
+        }
+        parts.push({ lock: lock, blob: blob, sym: sym });
+      }
+      this.shapes.push({ raw: sources[s], parts: parts, isMark: isMark, cx: this.centroid(parts[0].lock)[0] });
+    }
+    const xs = this.shapes.map((s) => s.cx);
+    const min = Math.min.apply(null, xs), max = Math.max.apply(null, xs);
+    this.shapes.forEach((s) => { s.order = (s.cx - min) / (max - min); });
+    this.restD = this.shapes.map((s) => s.raw).join(' ');
+    this.ready = true;
+  }
+
+  clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+  easeInOut(p) { return p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2; }
+  spring(p) { return p >= 1 ? 1 : 1 - Math.exp(-6.4 * p) * Math.cos(5.9 * p); }
+
+  segmentAt(sec) {
+    let acc = 0;
+    for (let i = 0; i < SEQ.length; i++) {
+      if (sec < acc + SEQ[i][1]) return { name: SEQ[i][0], p: (sec - acc) / SEQ[i][1] };
+      acc += SEQ[i][1];
+    }
+    return { name: SEQ[SEQ.length - 1][0], p: 1 };
+  }
+
+  boxBlur(src, tmp, r) {
+    const w = W, h = H, span = 2 * r + 1;
+    for (let y = 0; y < h; y++) {
+      const row = y * w;
+      let sum = src[row] * (r + 1);
+      for (let i = 1; i <= r; i++) sum += src[row + (i < w ? i : w - 1)];
+      for (let x = 0; x < w; x++) {
+        tmp[row + x] = sum / span;
+        const add = x + r + 1, sub = x - r;
+        sum += src[row + (add < w ? add : w - 1)] - src[row + (sub > 0 ? sub : 0)];
+      }
+    }
+    for (let x = 0; x < w; x++) {
+      let sum = tmp[x] * (r + 1);
+      for (let i = 1; i <= r; i++) sum += tmp[(i < h ? i : h - 1) * w + x];
+      for (let y = 0; y < h; y++) {
+        src[y * w + x] = sum / span;
+        const add = y + r + 1, sub = y - r;
+        sum += tmp[(add < h ? add : h - 1) * w + x] - tmp[(sub > 0 ? sub : 0) * w + x];
+      }
+    }
+  }
+
+  trace(field, T, spacing) {
+    const pts = new Map(), adj = new Map();
+    const HK = W * H;
+    const ptOn = (key, ax, ay, bx, by, va, vb) => {
+      if (!pts.has(key)) {
+        const t = (va - T) / (va - vb);
+        pts.set(key, [VIEW.x + (ax + (bx - ax) * t) / PX, VIEW.y + (ay + (by - ay) * t) / PX]);
+      }
+      return key;
+    };
+    const link = (a, b) => {
+      if (!adj.has(a)) adj.set(a, []);
+      if (!adj.has(b)) adj.set(b, []);
+      adj.get(a).push(b);
+      adj.get(b).push(a);
+    };
+    // antes se fabricaba un objeto con cuatro closures por cada celda de
+    // contorno: miles de allocaciones por frame para nada. Misma aritmética y
+    // mismo orden de evaluación, sin reservar memoria.
+    const edgePt = (which, i, j, r0, r1, v00, v10, v11, v01) => {
+      switch (which) {
+        case 't': return ptOn(r0 + i, i, j, i + 1, j, v00, v10);
+        case 'b': return ptOn(r1 + i, i, j + 1, i + 1, j + 1, v01, v11);
+        case 'l': return ptOn(HK + r0 + i, i, j, i, j + 1, v00, v01);
+        default: return ptOn(HK + r0 + i + 1, i + 1, j, i + 1, j + 1, v10, v11);
+      }
+    };
+    for (let j = 0; j < H - 1; j++) {
+      const r0 = j * W, r1 = (j + 1) * W;
+      for (let i = 0; i < W - 1; i++) {
+        const v00 = field[r0 + i], v10 = field[r0 + i + 1];
+        const v11 = field[r1 + i + 1], v01 = field[r1 + i];
+        const idx = (v00 > T ? 8 : 0) | (v10 > T ? 4 : 0) | (v11 > T ? 2 : 0) | (v01 > T ? 1 : 0);
+        if (idx === 0 || idx === 15) continue;
+        const segs = CASES[idx];
+        for (let k = 0; k < segs.length; k++) {
+          const s = segs[k];
+          link(edgePt(s[0], i, j, r0, r1, v00, v10, v11, v01),
+               edgePt(s[1], i, j, r0, r1, v00, v10, v11, v01));
+        }
+      }
+    }
+    const seen = new Set();
+    let d = '';
+    for (const start of adj.keys()) {
+      if (seen.has(start)) continue;
+      const loop = [];
+      let cur = start, prev = null;
+      while (cur !== undefined && !seen.has(cur)) {
+        seen.add(cur);
+        loop.push(pts.get(cur));
+        const ns = adj.get(cur) || [];
+        let next;
+        for (const n of ns) { if (n !== prev && !seen.has(n)) { next = n; break; } }
+        prev = cur;
+        cur = next;
+      }
+      if (loop.length > 10) d += this.curvePath(this.resample(loop, spacing));
+    }
+    return d;
+  }
+
+  resample(loop, spacing) {
+    const n = loop.length, seg = [];
+    let total = 0;
+    for (let i = 0; i < n; i++) {
+      const a = loop[i], b = loop[(i + 1) % n];
+      // hypot escala contra desbordamiento, que aquí no puede pasar, y en V8 sale
+      // varias veces más caro
+      const dx = b[0] - a[0], dy = b[1] - a[1];
+      const len = Math.sqrt(dx * dx + dy * dy);
+      seg.push(len);
+      total += len;
+    }
+    const m = Math.max(16, Math.min(260, Math.round(total / spacing)));
+    const out = [];
+    let si = 0, sacc = 0;
+    for (let i = 0; i < m; i++) {
+      const target = (i / m) * total;
+      while (sacc + seg[si] < target && si < n - 1) { sacc += seg[si]; si++; }
+      const a = loop[si], b = loop[(si + 1) % n];
+      const t = seg[si] > 0 ? (target - sacc) / seg[si] : 0;
+      out.push([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]);
+    }
+    return out;
+  }
+
+  curvePath(p) {
+    const n = p.length;
+    if (n < 3) return '';
+    let d = 'M' + p[0][0].toFixed(2) + ' ' + p[0][1].toFixed(2);
+    for (let i = 0; i < n; i++) {
+      const p0 = p[(i - 1 + n) % n], p1 = p[i], p2 = p[(i + 1) % n], p3 = p[(i + 2) % n];
+      d += 'C' + (p1[0] + (p2[0] - p0[0]) / 6).toFixed(2) + ' ' + (p1[1] + (p2[1] - p0[1]) / 6).toFixed(2) +
+           ' ' + (p2[0] - (p3[0] - p1[0]) / 6).toFixed(2) + ' ' + (p2[1] - (p3[1] - p1[1]) / 6).toFixed(2) +
+           ' ' + p2[0].toFixed(2) + ' ' + p2[1].toFixed(2);
+    }
+    return d + 'Z';
+  }
+
+  loop(now) {
+    this.raf = requestAnimationFrame(this.loop);
+    if (this.visible === false) return;
+    if (this.t0 === null) this.t0 = now;
+    if (!this.ready) return;
+
+    const speed = this.props.speed ?? 1;
+    const fps = this.props.fps ?? 12;
+    const boil = this.props.handDrawn ?? 0;
+    const weld = this.props.weld ?? 1;
+    const detail = this.props.detail ?? 1.6;
+
+    const frame = Math.floor(((now - this.t0) / 1000) * speed * fps);
+    if (frame === this.lastFrame) return;
+    this.lastFrame = frame;
+    const bt = frame / fps;
+
+    // u: 0 = logo · 1 = símbolo. El hover lo lleva a 1; al salir, de vuelta a 0.
+    const goingIn = this.hovering;
+    const target = goingIn ? 1 : 0;
+    const step = (speed / fps) / (goingIn ? IN_DUR : OUT_DUR);
+    if (this.u < target) this.u = Math.min(target, this.u + step);
+    else if (this.u > target) this.u = Math.max(target, this.u - step);
+    const u = this.u;
+    if ((u === 0 || u === 1) && this.settled === u) return;
+    this.settled = (u === 0 || u === 1) ? u : -1;
+
+    let a = 0, b = 0, wave = 0;
+    if (goingIn) {
+      // tramo 1: fusión y separación en símbolo
+      if (u < 0.5) { a = u * 2; wave = 1; } else { a = 1; b = (u - 0.5) * 2; }
+    } else {
+      // tramo 2: el símbolo se reparte de vuelta en el logotipo
+      a = u; wave = -1;
+    }
+
+    const blend = wave < 0 ? this.clamp01(a * 1.35) : Math.max(this.easeInOut(a), b);
+    const boost = wave < 0 ? 1.7 : 1;
+
+    // en reposo se dibuja el vector original del logo, sin reconstruir nada
+    if (blend <= 0.02 && boil === 0) {
+      if (this.lastD !== 'rest') { this.blob.setAttribute('d', this.restD); this.lastD = 'rest'; }
+      return;
+    }
+    this.lastD = '';
+
+    const ds = [];
+    for (const s of this.shapes) {
+      let ta, tb, direct = 0;
+      if (wave < 0) {
+        const lag = (1 - s.order) * 0.5;
+        direct = this.easeInOut(this.clamp01((a * 1.5 - lag) / (1.5 - lag)));
+        ta = 1; tb = 1;
+      } else if (wave > 0) {
+        const lag = (1 - s.order) * 0.4;
+        ta = this.easeInOut(this.clamp01((a * 1.4 - lag) / (1 - lag * 0.2)));
+        tb = 0;
+      } else {
+        ta = this.easeInOut(a);
+        tb = s.isMark ? this.spring(b) : this.easeInOut(b);
+      }
+      const jitter = boil * (0.1 + 0.9 * (direct > 0 ? direct * (1 - direct) : ta * (1 - ta))) * (direct > 0 ? direct : Math.max(ta, tb));
+
+      let d = '';
+      for (const part of s.parts) {
+        const n = part.lock.length;
+        for (let i = 0; i < n; i++) {
+          const L = part.lock[i], B = part.blob[i], S = part.sym[i];
+          let px, py;
+          if (wave < 0) {
+            px = L[0] + (S[0] - L[0]) * direct;
+            py = L[1] + (S[1] - L[1]) * direct;
+          } else {
+            const bx = L[0] + (B[0] - L[0]) * ta, by = L[1] + (B[1] - L[1]) * ta;
+            px = bx + (S[0] - bx) * tb;
+            py = by + (S[1] - by) * tb;
+          }
+          const ang = (i / n) * Math.PI * 2;
+          d += (i === 0 ? 'M' : 'L') +
+            (px + Math.sin(bt * 2.2 + ang * 7 + s.order * 5) * jitter).toFixed(2) + ' ' +
+            (py + Math.cos(bt * 1.8 + ang * 5 + s.order * 5) * jitter).toFixed(2);
+        }
+        d += 'Z';
+      }
+      ds.push(d);
+    }
+
+    const r = Math.max(1, Math.round(1.55 * weld * blend * boost * PX));
+    const ctx = this.ctx;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    ctx.setTransform(PX, 0, 0, PX, -VIEW.x * PX, -VIEW.y * PX);
+    ctx.fillStyle = '#fff';
+    for (const d of ds) ctx.fill(new Path2D(d), 'evenodd');
+    const img = ctx.getImageData(0, 0, W, H).data;
+    const f = this.f;
+    for (let i = 0, n = W * H; i < n; i++) f[i] = img[i * 4 + 3] / 255;
+    this.boxBlur(f, this.g, r);
+    this.boxBlur(f, this.g, r);
+    const out = this.trace(f, 0.5, detail);
+    if (out) this.blob.setAttribute('d', out);
+
+  }
+}
+
+</script>
+</body>
+</html>

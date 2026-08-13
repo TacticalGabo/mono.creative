@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  a { color: #d8d3c7; }
+  a:hover { color: #ffffff; }
+</style>
+</helmet>
+<div style="position:relative;width:100%;height:100%;overflow:visible">
+  <svg viewBox="-70 -250 856 750" shape-rendering="geometricPrecision" style="position:absolute;left:-9.78%;top:-84.46%;width:119.55%;height:auto;display:block;overflow:visible">
+    <defs>
+      <path ref="{{ sampleRef }}" d="" fill="none"></path>
+      <linearGradient id="hero-seq-beam" x1="0" y1="225" x2="0" y2="468" gradientUnits="userSpaceOnUse">
+        <stop offset="0" stop-color="currentColor" stop-opacity="1" ref="{{ stopTopRef }}"></stop>
+        <stop offset="0.38" stop-color="currentColor" stop-opacity="0.42" ref="{{ stopMidRef }}"></stop>
+        <stop offset="0.8" stop-color="currentColor" stop-opacity="0" ref="{{ stopBotRef }}"></stop>
+      </linearGradient>
+    </defs>
+    <g ref="{{ groupRef }}">
+      <path ref="{{ blobRef }}" d="" fill="currentColor"></path>
+      <path ref="{{ morphRef }}" d="" fill="currentColor" fill-rule="evenodd" style="display:none"></path>
+    </g>
+    <path ref="{{ beamRef }}" d="" fill="url(#hero-seq-beam)" style="display:none"></path>
+  </svg>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;speed&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:1,&quot;min&quot;:0.4,&quot;max&quot;:2,&quot;step&quot;:0.05,&quot;unit&quot;:&quot;×&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;fps&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:12,&quot;min&quot;:8,&quot;max&quot;:60,&quot;step&quot;:1,&quot;unit&quot;:&quot;fps&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;dropPixels&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:85,&quot;min&quot;:10,&quot;max&quot;:200,&quot;step&quot;:5,&quot;unit&quot;:&quot;px&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;handDrawn&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:0,&quot;min&quot;:0,&quot;max&quot;:2,&quot;step&quot;:0.1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;detail&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:9,&quot;min&quot;:5,&quot;max&quot;:24,&quot;step&quot;:1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;shapeColor&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#B8FF00&quot;,&quot;options&quot;:[&quot;#B8FF00&quot;,&quot;#f4f1ea&quot;,&quot;#FF0000&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Color&quot;}}">
+const BLOBS = [
+  { cx: 116, cy: 148, rx: 116, ry: 148, arc: 26, delay: 0.10, wob: 1.0 },
+  { cx: 302, cy: 148, rx: 116, ry: 148, arc: -18, delay: 0.17, wob: 1.35 },
+  { cx: 595.5, cy: 148, rx: 120.5, ry: 148, arc: -34, delay: 0.0, wob: 0.8 }
+];
+const TARGET = { cx: 120.5, cy: 148, rx: 120.5, ry: 148 };
+const LAMP = { anchor: { x: 250, y: 243 } };
+const FLOWER = { foot: { x: 70, y: 1058 }, box: { w: 805, h: 1060 } };
+const BLOB_H = TARGET.ry * 2;
+const LAMP_DX = 0;
+const FALL_LEAD = 1.05;
+const N = 240, N_HOLE = 72;
+
+// malla de la fusión: la unión suave se calcula como geometría, no como filtro
+const GRID = { x0: -60, y0: -62, x1: 780, y1: 358, cell: 4 };
+const K_BLEND = 62;               // ancho de la soldadura entre masas
+
+const SEQ = [
+  ['hold-logo', 1.7], ['fuse', 0.75], ['hold-blob', 0.08],
+  ['to-lamp', 1.25], ['hold-lamp', 0.4], ['beam-in', 0.5], ['beam-hold', 1.9], ['beam-out', 0.7], ['lamp-rest', 0.95],
+  ['from-lamp', 1.05], ['defuse', 0.7], ['hold-logo-2', 1.7],
+  ['fuse-2', 0.7], ['hold-blob-2', 0.08], ['to-flower', 0.85], ['flower-fall', 2.5], ['from-flower', 0.8],
+  ['defuse-2', 0.7], ['hold-logo-3', 1.7]
+];
+const TOTAL = SEQ.reduce((a, s) => a + s[1], 0);
+
+const CASES = {
+  1: [['l', 'b']], 2: [['b', 'r']], 3: [['l', 'r']], 4: [['t', 'r']],
+  5: [['l', 't'], ['b', 'r']], 6: [['t', 'b']], 7: [['l', 't']], 8: [['t', 'l']],
+  9: [['t', 'b']], 10: [['t', 'r'], ['l', 'b']], 11: [['t', 'r']], 12: [['l', 'r']],
+  13: [['b', 'r']], 14: [['l', 'b']]
+};
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.t0 = null;
+    this.lastFrame = -1;
+    this.ready = false;
+    this.settled = false;   // true = la silueta congelada ya está dibujada
+    this.nx = Math.round((GRID.x1 - GRID.x0) / GRID.cell) + 1;
+    this.ny = Math.round((GRID.y1 - GRID.y0) / GRID.cell) + 1;
+    this.field = new Float32Array(this.nx * this.ny);
+  }
+
+  componentDidMount() {
+    this.loop = this.loop.bind(this);
+var self = this;
+    // MCgeom hace polling y no se puede cancelar: si el componente ya murió,
+    // el callback tiene que salir solo. prepare() muestrea cientos de puntos
+    // del SVG y bloquea el hilo 15-30 ms, así que se aplaza a un hueco libre;
+    // el bucle de dibujo ya no pinta nada hasta que this.ready es true.
+    const idle = typeof window.requestIdleCallback === 'function'
+      ? function (fn) { window.requestIdleCallback(fn, { timeout: 120 }); }
+      : function (fn) { setTimeout(fn, 0); };
+    window.MCgeom(function(g){
+      if (self.dead) return;
+      idle(function () { if (!self.dead) self.prepare(g.shapes, g.flower); });
+    });
+    this.raf = requestAnimationFrame(this.loop);
+    this.watchVisibility();
+    // La secuencia empieza cuando se va la pantalla de carga, no al montar.
+    // t0 se fija en el primer frame dibujado, que ocurre debajo del overlay: si
+    // la carga tarda unos segundos, el icono asoma ya en modo lámpara. Al
+    // recibir el aviso se pone t0 a null y el bucle vuelve a arrancar en el
+    // fotograma 0. El aviso lo emite una sola vez la pantalla de carga.
+    this.reinicia = function () { self.t0 = null; self.lastFrame = -1; };
+    window.addEventListener('mc:arranca', this.reinicia);
+  }
+
+  componentWillUnmount() { this.dead = true; cancelAnimationFrame(this.raf); if (this.io) this.io.disconnect(); if (this.reinicia) window.removeEventListener('mc:arranca', this.reinicia); }
+
+
+  // Fuera de pantalla no se dibuja nada. Estos campos de fusión (canvas +
+  // desenfoque + marching squares) son lo más caro de la página y seguían
+  // reconstruyéndose aunque el componente estuviera lejos del viewport o
+  // en display:none. El reloj no se toca: al volver, la animación aparece
+  // donde le tocaba, no reiniciada.
+  watchVisibility() {
+    const ref = this.rootEl || this.shape || this.blob || this.sampleEl || this.group;
+    if (!ref || typeof IntersectionObserver !== 'function') return;
+    let node = ref.ownerSVGElement || ref;
+    node = node.parentElement || node;
+    this.visible = true;
+    // 400px y no 150: el SVG va en position:absolute y sobresale hasta
+    // top:-84% de la caja observada, así que con 150px podía congelarse
+    // estando todavía a la vista.
+    this.io = new IntersectionObserver((es) => {
+      for (const e of es) this.visible = e.isIntersecting;
+      this.settled = false;   // al despertar hay que redibujar sí o sí
+    }, { rootMargin: '400px' });
+    this.io.observe(node);
+  }
+
+  renderVals() {
+    const set = (k) => (el) => { this[k] = el; };
+    return {
+      groupRef: set('group'), sampleRef: set('sampleEl'),
+      blobRef: set('blob'), morphRef: set('morph'), beamRef: set('beam'),
+      stopTopRef: set('stopTop'), stopMidRef: set('stopMid'), stopBotRef: set('stopBot')
+    };
+  }
+
+  sample(d, n) {
+    this.sampleEl.setAttribute('d', d);
+    const total = this.sampleEl.getTotalLength();
+    const out = [];
+    for (let i = 0; i < n; i++) {
+      const p = this.sampleEl.getPointAtLength((i / n) * total);
+      out.push([p.x, p.y]);
+    }
+    return out;
+  }
+
+  blobFor(target) {
+    let best = { cost: Infinity, off: 0, dir: 1 };
+    for (const dir of [1, -1]) {
+      for (let off = 0; off < N; off++) {
+        let cost = 0;
+        for (let i = 0; i < N; i += 3) {
+          const j = ((off + dir * i) % N + N) % N;
+          const a = (j / N) * Math.PI * 2;
+          const dx = target[i][0] - (TARGET.cx + Math.cos(a) * TARGET.rx);
+          const dy = target[i][1] - (TARGET.cy + Math.sin(a) * TARGET.ry);
+          cost += dx * dx + dy * dy;
+        }
+        if (cost < best.cost) best = { cost: cost, off: off, dir: dir };
+      }
+    }
+    const pts = [];
+    for (let i = 0; i < N; i++) {
+      const j = ((best.off + best.dir * i) % N + N) % N;
+      const a = (j / N) * Math.PI * 2;
+      pts.push([TARGET.cx + Math.cos(a) * TARGET.rx, TARGET.cy + Math.sin(a) * TARGET.ry]);
+    }
+    return pts;
+  }
+
+  prepare(shapes, flower) {
+    if (!this.sampleEl) return;
+    const fit = (pts) => {
+      let lo = Infinity, hi = -Infinity, x0 = Infinity, x1 = -Infinity;
+      for (const p of pts) {
+        if (p[1] < lo) lo = p[1];
+        if (p[1] > hi) hi = p[1];
+        if (p[0] < x0) x0 = p[0];
+        if (p[0] > x1) x1 = p[0];
+      }
+      return { scale: BLOB_H / (hi - lo), cx: (x0 + x1) / 2, cy: (lo + hi) / 2, x0: x0 };
+    };
+    const lampRaw = this.sample(shapes.STATE2_A, N);
+    const lampFit = fit(lampRaw);
+    this.lampScale = lampFit.scale * 1.56;
+    this.lampCenter = { x: lampFit.x0, y: lampFit.cy };
+    const LEFT = BLOBS[0].cx - BLOBS[0].rx;
+    this.leftEdge = LEFT;
+    const lamp = lampRaw.map((p) => [
+      LEFT + LAMP_DX + (p[0] - this.lampCenter.x) * this.lampScale,
+      TARGET.cy + (p[1] - this.lampCenter.y) * this.lampScale
+    ]);
+    this.lamp = { pts: lamp, blob: this.blobFor(lamp) };
+
+    const fLocal = this.sample(flower.FLOWER_OUTER, N);
+    const fHole = this.sample(flower.FLOWER_HOLE, N_HOLE);
+    const flowerFit = fit(fLocal);
+    this.flowerScale = flowerFit.scale * 1.634;
+    const stage = (p) => [
+      LEFT + (p[0] - flowerFit.x0) * this.flowerScale,
+      TARGET.cy + (p[1] - flowerFit.cy) * this.flowerScale
+    ];
+    this.flower = { local: fLocal, hole: fHole, stage: stage, blob: this.blobFor(fLocal.map(stage)) };
+
+    if (this.beam) this.beam.setAttribute('d', shapes.STATE2_B);
+    this.ready = true;
+  }
+
+  clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+  spring(p) { return p >= 1 ? 1 : 1 - Math.exp(-6.0 * p) * Math.cos(5.6 * p); }
+  easeOut(p) { return 1 - Math.pow(1 - p, 3); }
+  easeInOut(p) { return p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2; }
+  swing(tt, freq, damp) { return tt <= 0 ? 0 : Math.exp(-damp * tt) * Math.sin(freq * tt); }
+
+  // ---------- unión suave de elipses como contorno vectorial ----------
+  buildField(ovals, k) {
+    const f = this.field, cell = GRID.cell, nx = this.nx, ny = this.ny;
+    for (let j = 0; j < ny; j++) {
+      const y = GRID.y0 + j * cell;
+      const row = j * nx;
+      for (let i = 0; i < nx; i++) {
+        const x = GRID.x0 + i * cell;
+        let s = -1e9;
+        for (let o = 0; o < ovals.length; o++) {
+          const v = ovals[o];
+          const dx = (x - v.cx) / v.rx, dy = (y - v.cy) / v.ry;
+          const si = (1 - Math.sqrt(dx * dx + dy * dy)) * (v.rx < v.ry ? v.rx : v.ry);
+          if (k <= 0.01) { if (si > s) s = si; }
+          else {
+            const m = si > s ? si : s;
+            const h = Math.max(k - Math.abs(si - s), 0) / k;
+            s = m + h * h * k * 0.25;
+          }
+        }
+        f[row + i] = s;
+      }
+    }
+  }
+
+  contours() {
+    const f = this.field, nx = this.nx, ny = this.ny, cell = GRID.cell;
+    const pts = new Map(), adj = new Map();
+    const ptOn = (key, ax, ay, bx, by, va, vb) => {
+      if (!pts.has(key)) {
+        const t = va / (va - vb);
+        pts.set(key, [ax + (bx - ax) * t, ay + (by - ay) * t]);
+      }
+      return key;
+    };
+    const link = (a, b) => {
+      if (!adj.has(a)) adj.set(a, []);
+      if (!adj.has(b)) adj.set(b, []);
+      adj.get(a).push(b);
+      adj.get(b).push(a);
+    };
+    // Un único closure izado en vez de un objeto con 4 closures POR CELDA de
+    // contorno. Mismos puntos y mismo orden de evaluación: los argumentos de
+    // link() se evalúan de izquierda a derecha, igual que antes.
+    const side = (c, i, j, x0, y0, x1, y1, v00, v10, v11, v01) => {
+      if (c === 't') return ptOn('h' + i + '_' + j, x0, y0, x1, y0, v00, v10);
+      if (c === 'b') return ptOn('h' + i + '_' + (j + 1), x0, y1, x1, y1, v01, v11);
+      if (c === 'l') return ptOn('v' + i + '_' + j, x0, y0, x0, y1, v00, v01);
+      return ptOn('v' + (i + 1) + '_' + j, x1, y0, x1, y1, v10, v11);
+    };
+    for (let j = 0; j < ny - 1; j++) {
+      for (let i = 0; i < nx - 1; i++) {
+        const v00 = f[j * nx + i], v10 = f[j * nx + i + 1];
+        const v11 = f[(j + 1) * nx + i + 1], v01 = f[(j + 1) * nx + i];
+        const idx = (v00 > 0 ? 8 : 0) | (v10 > 0 ? 4 : 0) | (v11 > 0 ? 2 : 0) | (v01 > 0 ? 1 : 0);
+        const segs = CASES[idx];
+        if (!segs) continue;
+        const x0 = GRID.x0 + i * cell, y0 = GRID.y0 + j * cell;
+        const x1 = x0 + cell, y1 = y0 + cell;
+        for (let k = 0; k < segs.length; k++) {
+          const s = segs[k];
+          link(side(s[0], i, j, x0, y0, x1, y1, v00, v10, v11, v01), side(s[1], i, j, x0, y0, x1, y1, v00, v10, v11, v01));
+        }
+      }
+    }
+    const seen = new Set(), loops = [];
+    for (const start of adj.keys()) {
+      if (seen.has(start)) continue;
+      const loop = [];
+      let cur = start, prev = null;
+      while (cur !== undefined && !seen.has(cur)) {
+        seen.add(cur);
+        loop.push(pts.get(cur));
+        const ns = adj.get(cur) || [];
+        let next;
+        for (const n of ns) { if (n !== prev && !seen.has(n)) { next = n; break; } }
+        prev = cur;
+        cur = next;
+      }
+      if (loop.length > 8) loops.push(loop);
+    }
+    return loops;
+  }
+
+  resample(loop, spacing) {
+    const n = loop.length, seg = [];
+    let total = 0;
+    for (let i = 0; i < n; i++) {
+      const a = loop[i], b = loop[(i + 1) % n];
+      const dx = b[0] - a[0], dy = b[1] - a[1];
+      const len = Math.sqrt(dx * dx + dy * dy);   // hypot es mucho más lento aquí
+      seg.push(len);
+      total += len;
+    }
+    const m = Math.max(24, Math.min(200, Math.round(total / spacing)));
+    const out = [];
+    let acc = 0, si = 0, sacc = 0;
+    for (let i = 0; i < m; i++) {
+      const target = (i / m) * total;
+      while (sacc + seg[si] < target && si < n - 1) { sacc += seg[si]; si++; }
+      const a = loop[si], b = loop[(si + 1) % n];
+      const t = seg[si] > 0 ? (target - sacc) / seg[si] : 0;
+      out.push([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]);
+    }
+    return out;
+  }
+
+  // Catmull-Rom cerrado → curvas cúbicas: contorno suave de verdad, sin blur
+  curvePath(p) {
+    const n = p.length;
+    if (n < 3) return '';
+    let d = 'M' + p[0][0].toFixed(1) + ' ' + p[0][1].toFixed(1);
+    for (let i = 0; i < n; i++) {
+      const p0 = p[(i - 1 + n) % n], p1 = p[i], p2 = p[(i + 1) % n], p3 = p[(i + 2) % n];
+      const c1x = p1[0] + (p2[0] - p0[0]) / 6, c1y = p1[1] + (p2[1] - p0[1]) / 6;
+      const c2x = p2[0] - (p3[0] - p1[0]) / 6, c2y = p2[1] - (p3[1] - p1[1]) / 6;
+      d += 'C' + c1x.toFixed(1) + ' ' + c1y.toFixed(1) + ' ' + c2x.toFixed(1) + ' ' + c2y.toFixed(1) +
+           ' ' + p2[0].toFixed(1) + ' ' + p2[1].toFixed(1);
+    }
+    return d + 'Z';
+  }
+
+  flowerPose(tt, dropPx) {
+    if (tt < 0) return { drop: -dropPx, s1: 0, s2: -tt * 0.9, sx: 1 - tt * 0.12, sy: 1 + tt * 0.16 };
+    const fall = 1 - Math.exp(-4.6 * tt) * Math.cos(7.4 * tt);
+    const squash = -Math.exp(-3.0 * tt) * Math.cos(8.6 * tt);
+    return {
+      drop: -dropPx * (1 - fall),
+      s1: this.swing(tt, 8.0, 3.3),
+      s2: this.swing(Math.max(0, tt - 0.12), 7.2, 2.9),
+      sx: 1 + squash * 0.15,
+      sy: 1 - squash * 0.21
+    };
+  }
+
+  warpFlower(pt, i, pose, boil, bt) {
+    const x = pt[0], y = pt[1];
+    const u = this.clamp01((FLOWER.box.h - y) / FLOWER.box.h);
+    const head = this.clamp01((620 - y) / 420);
+    const inLeaf = x > 300 && y > 620 && y < 850 ? this.clamp01((x - 300) / 260) : 0;
+    const whip = pose.s1 * Math.pow(u, 1.75) * 60;
+    const wob = boil * (0.35 + head);
+    const px = x + whip + inLeaf * pose.s2 * 46 + Math.sin(bt * 2.3 + i * 0.41) * 3.2 * wob;
+    const py = y + pose.drop + inLeaf * pose.s2 * -22 + Math.cos(bt * 1.9 + i * 0.33) * 2.6 * wob;
+    return this.flower.stage([
+      FLOWER.foot.x + (px - FLOWER.foot.x) * pose.sx,
+      FLOWER.foot.y - (FLOWER.foot.y - py) * pose.sy
+    ]);
+  }
+
+  morphPoints(from, to, mE, boil, bt, stagger) {
+    // Dos buffers persistentes de N puntos mutables. Antes cada frame creaba
+    // 240 arrays aquí + otros 720 en los tres pases de suavizado, más los tres
+    // out.slice(). Ahora los pases hacen ping-pong entre A y B, que es
+    // exactamente lo mismo que leer de la copia y escribir en el destino.
+    let out = this.mpA;
+    if (!out) {
+      out = this.mpA = new Array(N);
+      const other = this.mpB = new Array(N);
+      for (let i = 0; i < N; i++) { out[i] = [0, 0]; other[i] = [0, 0]; }
+    }
+    const tau = Math.PI * 2;
+    for (let i = 0; i < N; i++) {
+      // la onda de retardo es periódica: sin costura entre el primer y el último punto
+      const wave = stagger * 0.5 * (1 - Math.cos((i / N) * tau));
+      const local = this.easeOut(this.clamp01((mE * (1 + stagger) - wave) / (1 - wave * 0.15)));
+      const o = out[i];
+      o[0] = from[i][0] + (to[i][0] - from[i][0]) * local + Math.sin(bt * 2.1 + (i / N) * tau * 9) * 2.2 * boil;
+      o[1] = from[i][1] + (to[i][1] - from[i][1]) * local + Math.cos(bt * 1.7 + (i / N) * tau * 7) * 2.2 * boil;
+    }
+    // el pliegue del brazo forma un pico a mitad del camino: se relaja y desaparece al llegar
+    const relax = 4 * mE * (1 - mE);
+    if (relax > 0.02) {
+      const passes = 3, w = 0.5 * relax;
+      let dst = out === this.mpA ? this.mpB : this.mpA;
+      for (let k = 0; k < passes; k++) {
+        const src = out;
+        for (let i = 0; i < N; i++) {
+          const a = src[(i - 1 + N) % N], b = src[i], c = src[(i + 1) % N];
+          const o = dst[i];
+          o[0] = b[0] + w * (a[0] + c[0] - 2 * b[0]) / 2;
+          o[1] = b[1] + w * (a[1] + c[1] - 2 * b[1]) / 2;
+        }
+        const swap = out; out = dst; dst = swap;
+      }
+    }
+    return out;
+  }
+
+  segmentAt(sec) {
+    let acc = 0;
+    for (let i = 0; i < SEQ.length; i++) {
+      if (sec < acc + SEQ[i][1]) return { name: SEQ[i][0], p: (sec - acc) / SEQ[i][1], dur: SEQ[i][1] };
+      acc += SEQ[i][1];
+    }
+    const last = SEQ[SEQ.length - 1];
+    return { name: last[0], p: 1, dur: last[1] };
+  }
+
+  loop(now) {
+    this.raf = requestAnimationFrame(this.loop);
+    if (this.visible === false) return;
+    if (this.t0 === null) this.t0 = now;
+    if (!this.ready) return;
+
+    const speed = this.props.speed ?? 1;
+    const fps = this.props.fps ?? 12;
+    const boil = this.props.handDrawn ?? 0;
+    const dropPx = this.props.dropPixels ?? 85;
+    const detail = this.props.detail ?? 9;
+
+    const frame = Math.floor(((now - this.t0) / 1000) * speed * fps);
+    if (frame === this.lastFrame) return;
+    this.lastFrame = frame;
+    const bt = frame / fps;
+    const seg = this.segmentAt(bt % TOTAL);
+    const p = this.clamp01(seg.p);
+
+    let fuseT = 0, morphT = 0, shape = null, beamT = 0, flickT = 0, fallTT = -1, settle = -1;
+    switch (seg.name) {
+      case 'hold-logo': case 'hold-logo-2': case 'hold-logo-3': settle = p * seg.dur; break;
+      case 'fuse': case 'fuse-2': fuseT = p; break;
+      case 'hold-blob': case 'hold-blob-2': fuseT = 1; break;
+      case 'to-lamp': fuseT = 1; shape = 'lamp'; morphT = p; break;
+      case 'hold-lamp': fuseT = 1; shape = 'lamp'; morphT = 1; break;
+      case 'beam-in': fuseT = 1; shape = 'lamp'; morphT = 1; beamT = p; break;
+      case 'beam-hold': fuseT = 1; shape = 'lamp'; morphT = 1; beamT = 1; break;
+      case 'beam-out': fuseT = 1; shape = 'lamp'; morphT = 1; beamT = 1; flickT = p; break;
+      case 'lamp-rest': fuseT = 1; shape = 'lamp'; morphT = 1; break;
+      case 'from-lamp': fuseT = 1; shape = 'lamp'; morphT = 1 - p; break;
+      case 'defuse': case 'defuse-2': fuseT = 1 - p; break;
+      case 'to-flower': fuseT = 1; shape = 'flower'; morphT = p; fallTT = (p - FALL_LEAD) * seg.dur; break;
+      case 'flower-fall': fuseT = 1; shape = 'flower'; morphT = 1; fallTT = (1 - FALL_LEAD) * 0.85 + p * seg.dur; break;
+      case 'from-flower': fuseT = 1; shape = 'flower'; morphT = 1 - p; fallTT = 6; break;
+    }
+
+    const mE = shape === 'lamp' ? this.easeInOut(morphT) : this.easeOut(morphT);
+
+    const showPath = morphT > 0 && shape;
+    // escribir style/setAttribute con el mismo valor sigue invalidando estilo
+    // en el navegador: solo se toca el DOM cuando el valor cambia de verdad
+    const blobDisp = showPath ? 'none' : '';
+    if (this.blob && this.blobDisp !== blobDisp) { this.blob.style.display = blobDisp; this.blobDisp = blobDisp; }
+    const morphDisp = showPath ? '' : 'none';
+    if (this.morph && this.morphDisp !== morphDisp) { this.morph.style.display = morphDisp; this.morphDisp = morphDisp; }
+
+    // SALTO DE FASE. El campo escalar solo depende de `fuseT` y de `boil`
+    // (handDrawn, 0 por defecto). Con boil 0 y fuseT 0 los tres óvalos salen
+    // constantes, así que buildField + contours + resample + curvePath dan la
+    // MISMA `d` frame a frame: se dibuja una vez y se congela. Eso cubre
+    // hold-logo, hold-logo-2 y hold-logo-3, 1,7 s cada uno = 5,1 s de los
+    // 19,32 s del ciclo (el 26 %). En cuanto fuseT o boil dejan de ser 0 la
+    // bandera cae y se vuelve a calcular. El transform del grupo sí sigue
+    // actualizándose: el rebote de `settle` se anima durante esas fases.
+    const frozen = boil === 0 && fuseT === 0 && !showPath;
+    if (!frozen) this.settled = false;
+
+    // Cuando la fase está congelada no entra en ninguna de las dos ramas: la
+    // `d` del blob ya está puesta y overshoot vale 0 (e === 0 en las tres masas).
+    let overshoot = 0;
+    if (!showPath && !(frozen && this.settled)) {
+      // posiciones de las tres masas y unión suave calculada como curva
+      const ovals = [];
+      for (let i = 0; i < BLOBS.length; i++) {
+        const b = BLOBS[i];
+        const q = this.clamp01((fuseT - b.delay) / (1 - b.delay));
+        const e = this.spring(q);
+        overshoot = Math.max(overshoot, e - 1);
+        const w = boil * (1 - 0.65 * e) * b.wob;
+        ovals.push({
+          cx: b.cx + (TARGET.cx - b.cx) * e + Math.sin(bt * 1.9 + i * 2.1) * 4.5 * w,
+          cy: b.cy + (TARGET.cy - b.cy) * e + Math.sin(Math.PI * q) * b.arc + Math.cos(bt * 1.5 + i * 1.3) * 3.5 * w,
+          rx: Math.max(8, b.rx + (TARGET.rx - b.rx) * e + Math.sin(bt * 2.4 + i * 0.7) * 4 * w),
+          ry: Math.max(8, b.ry + (TARGET.ry - b.ry) * e - Math.sin(bt * 2.4 + i * 0.7) * 3.2 * w)
+        });
+      }
+      const avgE = this.clamp01(fuseT);
+      this.buildField(ovals, K_BLEND * Math.pow(1 - avgE, 1.1));
+      let d = '';
+      for (const loop of this.contours()) d += this.curvePath(this.resample(loop, detail));
+      if (d) this.blob.setAttribute('d', d);
+      this.settled = frozen;
+    } else if (showPath) {
+      let pts, hole = null;
+      if (shape === 'lamp') {
+        pts = this.morphPoints(this.lamp.blob, this.lamp.pts, mE, boil, bt, 0.05);
+      } else {
+        const pose = this.flowerPose(fallTT, dropPx);
+        // buffer reusado: `to` solo se consume dentro de este mismo frame
+        const local = this.flower.local;
+        const to = this.toBuf || (this.toBuf = new Array(local.length));
+        for (let i = 0; i < local.length; i++) to[i] = this.warpFlower(local[i], i, pose, boil, bt);
+        pts = this.morphPoints(this.flower.blob, to, mE, boil, bt, 0.42);
+        const c = this.flower.stage([FLOWER.box.w / 2, FLOWER.box.h / 2]);
+        const k = this.easeOut(this.clamp01(morphT * 1.25 - 0.25));
+        hole = this.flower.hole.map((pt) => {
+          const s = this.warpFlower(pt, 0, pose, 0, bt);
+          return [c[0] + (s[0] - c[0]) * k, c[1] + (s[1] - c[1]) * k];
+        });
+      }
+      let d = this.curvePath(pts);
+      if (hole) d += this.curvePath(hole);
+      // el pliegue del brazo se auto-solapa a mitad del morph: nonzero lo rellena en vez de abrir una grieta
+      const rule = shape === 'lamp' ? 'nonzero' : 'evenodd';
+      if (this.fillRule !== rule) { this.morph.setAttribute('fill-rule', rule); this.fillRule = rule; }
+      if (this.morphD !== d) { this.morph.setAttribute('d', d); this.morphD = d; }
+    }
+
+    if (this.beam) {
+      if (beamT <= 0) {
+        this.beam.style.display = 'none';
+      } else {
+        const k = 0.16 + 0.84 * this.spring(beamT);
+        let op = this.clamp01(beamT * 2.2);
+        if (flickT <= 0 && beamT < 1) {
+          // parpadeo al encenderse: dos chispazos antes de quedarse estable
+          const PAT_ON = [0, 0.9, 0, 0.55, 0, 1, 0.8, 1];
+          op *= PAT_ON[Math.min(PAT_ON.length - 1, Math.floor(beamT * PAT_ON.length))];
+        }
+        if (flickT > 0) {
+          // parpadeo al apagarse: destellos cada vez más cortos hasta quedar apagada
+          const PAT = [1, 0, 1, 0, 0.85, 0, 0.5, 0];
+          op *= PAT[Math.min(PAT.length - 1, Math.floor(flickT * PAT.length))];
+        }
+        this.beam.style.display = '';
+        this.beam.style.opacity = String(op * 0.6);
+        this.beam.setAttribute('transform',
+          'translate(' + (this.leftEdge + LAMP_DX) + ' ' + (TARGET.cy - 3) + ') scale(' + this.lampScale.toFixed(4) + ') translate(' + (-this.lampCenter.x) + ' ' + (-this.lampCenter.y) + ') ' +
+          'translate(' + LAMP.anchor.x + ' ' + LAMP.anchor.y + ') scale(' + k.toFixed(4) + ') translate(' + (-LAMP.anchor.x) + ' ' + (-LAMP.anchor.y) + ')');
+      }
+    }
+
+    if (this.group) {
+      // al recomponerse el logo, un rebote amortiguado evita el frenazo seco
+      const bounce = settle >= 0 ? 0.06 * Math.exp(-7.5 * settle) * Math.cos(16 * settle) : 0;
+      const s = overshoot * 0.9 + bounce;
+      const tf = 'translate(' + TARGET.cx + ' ' + TARGET.cy + ') scale(' + (1 + s).toFixed(4) + ' ' + (1 - s).toFixed(4) + ') translate(' + (-TARGET.cx) + ' ' + (-TARGET.cy) + ')';
+      if (this.groupTf !== tf) { this.group.setAttribute('transform', tf); this.groupTf = tf; }
+    }
+
+  }
+}
+
+</script>
+</body>
+</html>

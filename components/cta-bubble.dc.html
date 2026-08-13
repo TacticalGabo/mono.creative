@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  a { color: #d8d3c7; }
+  a:hover { color: #ffffff; }
+</style>
+</helmet>
+<div style="position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible">
+  <svg viewBox="-12 -14 94 58" shape-rendering="geometricPrecision" style="position:absolute;left:-17.14%;top:-48.28%;width:134.29%;height:auto;display:block;overflow:visible">
+    <defs>
+      <path ref="{{ sampleRef }}" d="" fill="none"></path>
+    </defs>
+    <path ref="{{ shapeRef }}" d="" fill="currentColor"></path>
+  </svg>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;speed&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:1,&quot;min&quot;:0.4,&quot;max&quot;:2,&quot;step&quot;:0.05,&quot;unit&quot;:&quot;×&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;fps&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:24,&quot;min&quot;:8,&quot;max&quot;:60,&quot;step&quot;:1,&quot;unit&quot;:&quot;fps&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;wobble&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:2.5,&quot;min&quot;:0,&quot;max&quot;:3,&quot;step&quot;:0.1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;detail&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:0.55,&quot;min&quot;:0.25,&quot;max&quot;:2,&quot;step&quot;:0.05,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;shapeColor&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#B8FF00&quot;,&quot;options&quot;:[&quot;#B8FF00&quot;,&quot;#f4f1ea&quot;,&quot;#0e0e0d&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Color&quot;}}">
+const E1 = { w: 70, h: 30 };
+const E2 = { w: 37, h: 37 };
+const N = 300;
+const BUBBLE_SCALE = 1.584;            // el globo crece respecto al alto del logo
+const SEQ = [
+  ['logo', 0.9], ['merge', 1.0], ['blob', 0.12], ['to-bubble', 1.1],
+  ['wobble', 4.0], ['from-bubble', 1.0], ['defuse', 0.9]
+];
+const TOTAL = SEQ.reduce((a, s) => a + s[1], 0);
+
+// lienzo interno: las siluetas reales se sueldan como geometría y salen en curvas
+const VIEW = { x: -12, y: -14, w: 94, h: 58 };
+const PX = 9;
+const W = Math.round(VIEW.w * PX), H = Math.round(VIEW.h * PX);
+const K_WELD = 2.1;
+
+const CASES = {
+  1: [['l', 'b']], 2: [['b', 'r']], 3: [['l', 'r']], 4: [['t', 'r']],
+  5: [['l', 't'], ['b', 'r']], 6: [['t', 'b']], 7: [['l', 't']], 8: [['t', 'l']],
+  9: [['t', 'b']], 10: [['t', 'r'], ['l', 'b']], 11: [['t', 'r']], 12: [['l', 'r']],
+  13: [['b', 'r']], 14: [['l', 'b']]
+};
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.t0 = null;
+    this.lastFrame = -1;
+    this.ready = false;
+    this.geomKey = null;   // clave de la última geometría de fusión dibujada
+    this.f = new Float32Array(W * H);
+    this.g = new Float32Array(W * H);
+  }
+
+  componentDidMount() {
+    const c = document.createElement('canvas');
+    c.width = W;
+    c.height = H;
+    this.ctx = c.getContext('2d', { willReadFrequently: true });
+    this.loop = this.loop.bind(this);
+var self = this;
+    // MCgeom hace polling y no se puede cancelar: si el componente ya murió,
+    // el callback tiene que salir solo. prepare() muestrea cientos de puntos
+    // del SVG y bloquea el hilo 15-30 ms, así que se aplaza a un hueco libre;
+    // el bucle de dibujo ya no pinta nada hasta que this.ready es true.
+    const idle = typeof window.requestIdleCallback === 'function'
+      ? function (fn) { window.requestIdleCallback(fn, { timeout: 120 }); }
+      : function (fn) { setTimeout(fn, 0); };
+    window.MCgeom(function(g){
+      if (self.dead) return;
+      idle(function () { if (!self.dead) self.prepare(g.bubble); });
+    });
+    this.raf = requestAnimationFrame(this.loop);
+    this.watchVisibility();
+  }
+
+  componentWillUnmount() { this.dead = true; cancelAnimationFrame(this.raf); if (this.io) this.io.disconnect(); }
+
+
+  // Fuera de pantalla no se dibuja nada. Estos campos de fusión (canvas +
+  // desenfoque + marching squares) son lo más caro de la página y seguían
+  // reconstruyéndose aunque el componente estuviera lejos del viewport o
+  // en display:none. El reloj no se toca: al volver, la animación aparece
+  // donde le tocaba, no reiniciada.
+  watchVisibility() {
+    const ref = this.rootEl || this.shape || this.blob || this.sampleEl || this.group;
+    if (!ref || typeof IntersectionObserver !== 'function') return;
+    let node = ref.ownerSVGElement || ref;
+    node = node.parentElement || node;
+    this.visible = true;
+    // 400px y no 150: el SVG va en position:absolute y sobresale hasta
+    // top:-48% de la caja observada, así que con 150px podía congelarse
+    // estando todavía a la vista.
+    this.io = new IntersectionObserver((es) => {
+      for (const e of es) this.visible = e.isIntersecting;
+      this.geomKey = null;   // al despertar hay que redibujar sí o sí
+    }, { rootMargin: '400px' });
+    this.io.observe(node);
+  }
+
+  renderVals() {
+    const set = (k) => (el) => { this[k] = el; };
+    return {
+      sampleRef: set('sampleEl'), shapeRef: set('shape')
+    };
+  }
+
+  sample(d, n) {
+    this.sampleEl.setAttribute('d', d);
+    const total = this.sampleEl.getTotalLength();
+    const out = [];
+    for (let i = 0; i < n; i++) {
+      const p = this.sampleEl.getPointAtLength((i / n) * total);
+      out.push([p.x, p.y]);
+    }
+    return out;
+  }
+
+  align(from, to) {
+    const n = from.length, step = Math.max(1, Math.floor(n / 70));
+    let best = { cost: Infinity, off: 0, dir: 1 };
+    for (const dir of [1, -1]) {
+      for (let off = 0; off < n; off++) {
+        let cost = 0;
+        for (let i = 0; i < n; i += step) {
+          const j = ((off + dir * i) % n + n) % n;
+          const dx = to[i][0] - from[j][0], dy = to[i][1] - from[j][1];
+          cost += dx * dx + dy * dy;
+        }
+        if (cost < best.cost) best = { cost: cost, off: off, dir: dir };
+      }
+    }
+    const out = [];
+    for (let i = 0; i < n; i++) out.push(from[((best.off + best.dir * i) % n + n) % n]);
+    return out;
+  }
+
+  bbox(pts) {
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    for (const p of pts) {
+      if (p[0] < x0) x0 = p[0];
+      if (p[0] > x1) x1 = p[0];
+      if (p[1] < y0) y0 = p[1];
+      if (p[1] > y1) y1 = p[1];
+    }
+    return { x0: x0, y0: y0, x1: x1, y1: y1, w: x1 - x0, h: y1 - y0 };
+  }
+
+  prepare(m) {
+    if (!this.sampleEl) return;
+    // las dos masas del logo, tal cual vienen del SVG
+    this.left = this.sample(m.E1_LEFT, N);
+    this.right = this.sample(m.E1_RIGHT, N);
+    const rb = this.bbox(this.right);
+    // masa fusionada: el lóbulo derecho, anclado al borde izquierdo del logo
+    const LEFT = this.bbox(this.left).x0;
+    this.leftEdge = LEFT;
+    this.merged = { cx: LEFT + rb.w / 2, cy: E1.h / 2, rx: rb.w / 2, ry: rb.h / 2 };
+    const oval = [];
+    for (let i = 0; i < N; i++) {
+      const a = (i / N) * Math.PI * 2;
+      oval.push([this.merged.cx + Math.cos(a) * this.merged.rx, this.merged.cy + Math.sin(a) * this.merged.ry]);
+    }
+    // cada silueta real viaja punto a punto hacia la masa fusionada
+    this.fuseFrom = [this.left, this.right];
+    this.fuseTo = [this.align(oval, this.left), this.align(oval, this.right)];
+
+    const raw = this.sample(m.E2_BUBBLE, N);
+    const bb = this.bbox(raw);
+    const s = (E1.h / bb.h) * BUBBLE_SCALE;
+    // el globo se ancla por su borde izquierdo al del logo
+    this.bubble = raw.map((p) => [
+      LEFT + (p[0] - bb.x0) * s,
+      E1.h / 2 + (p[1] - (bb.y0 + bb.y1) / 2) * s
+    ]);
+    // óvalo de partida del morph, alineado con la silueta del globo
+    const start = [];
+    for (let i = 0; i < N; i++) {
+      const a = (i / N) * Math.PI * 2;
+      start.push([this.merged.cx + Math.cos(a) * this.merged.rx, this.merged.cy + Math.sin(a) * this.merged.ry]);
+    }
+    this.bubbleStart = this.align(start, this.bubble);
+    this.ready = true;
+  }
+
+  clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+  spring(p) { return p >= 1 ? 1 : 1 - Math.exp(-6.0 * p) * Math.cos(5.6 * p); }
+  easeInOut(p) { return p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2; }
+  easeOut(p) { return 1 - Math.pow(1 - p, 3); }
+
+  boxBlur(src, tmp, r) {
+    const w = W, h = H, span = 2 * r + 1;
+    for (let y = 0; y < h; y++) {
+      const row = y * w;
+      let sum = src[row] * (r + 1);
+      for (let i = 1; i <= r; i++) sum += src[row + (i < w ? i : w - 1)];
+      for (let x = 0; x < w; x++) {
+        tmp[row + x] = sum / span;
+        const add = x + r + 1, sub = x - r;
+        sum += src[row + (add < w ? add : w - 1)] - src[row + (sub > 0 ? sub : 0)];
+      }
+    }
+    for (let x = 0; x < w; x++) {
+      let sum = tmp[x] * (r + 1);
+      for (let i = 1; i <= r; i++) sum += tmp[(i < h ? i : h - 1) * w + x];
+      for (let y = 0; y < h; y++) {
+        src[y * w + x] = sum / span;
+        const add = y + r + 1, sub = y - r;
+        sum += tmp[(add < h ? add : h - 1) * w + x] - tmp[(sub > 0 ? sub : 0) * w + x];
+      }
+    }
+  }
+
+  contours(field, T) {
+    const f = field, nx = W, ny = H;
+    const pts = new Map(), adj = new Map();
+    const HK = nx * ny;
+    const ptOn = (key, ax, ay, bx, by, va, vb) => {
+      if (!pts.has(key)) {
+        const t = (va - T) / (va - vb);
+        pts.set(key, [VIEW.x + (ax + (bx - ax) * t) / PX, VIEW.y + (ay + (by - ay) * t) / PX]);
+      }
+      return key;
+    };
+    const link = (a, b) => {
+      if (!adj.has(a)) adj.set(a, []);
+      if (!adj.has(b)) adj.set(b, []);
+      adj.get(a).push(b);
+      adj.get(b).push(a);
+    };
+    // Un único closure izado en vez de un objeto con 4 closures POR CELDA de
+    // contorno (~2.500 celdas por frame = ~12.500 objetos). Mismos puntos y
+    // mismo orden de evaluación: los argumentos de link() se evalúan de
+    // izquierda a derecha, igual que antes.
+    const side = (c, i, j, r0, r1, v00, v10, v11, v01) => {
+      if (c === 't') return ptOn(r0 + i, i, j, i + 1, j, v00, v10);
+      if (c === 'b') return ptOn(r1 + i, i, j + 1, i + 1, j + 1, v01, v11);
+      if (c === 'l') return ptOn(HK + r0 + i, i, j, i, j + 1, v00, v01);
+      return ptOn(HK + r0 + i + 1, i + 1, j, i + 1, j + 1, v10, v11);
+    };
+    for (let j = 0; j < ny - 1; j++) {
+      const r0 = j * nx, r1 = (j + 1) * nx;
+      for (let i = 0; i < nx - 1; i++) {
+        const v00 = f[r0 + i], v10 = f[r0 + i + 1];
+        const v11 = f[r1 + i + 1], v01 = f[r1 + i];
+        const idx = (v00 > T ? 8 : 0) | (v10 > T ? 4 : 0) | (v11 > T ? 2 : 0) | (v01 > T ? 1 : 0);
+        if (idx === 0 || idx === 15) continue;
+        const segs = CASES[idx];
+        for (let k = 0; k < segs.length; k++) {
+          const s = segs[k];
+          link(side(s[0], i, j, r0, r1, v00, v10, v11, v01), side(s[1], i, j, r0, r1, v00, v10, v11, v01));
+        }
+      }
+    }
+    const seen = new Set(), loops = [];
+    for (const start of adj.keys()) {
+      if (seen.has(start)) continue;
+      const loop = [];
+      let cur = start, prev = null;
+      while (cur !== undefined && !seen.has(cur)) {
+        seen.add(cur);
+        loop.push(pts.get(cur));
+        const ns = adj.get(cur) || [];
+        let next;
+        for (const n of ns) { if (n !== prev && !seen.has(n)) { next = n; break; } }
+        prev = cur;
+        cur = next;
+      }
+      if (loop.length > 10) loops.push(loop);
+    }
+    return loops;
+  }
+
+  resample(loop, spacing) {
+    const n = loop.length, seg = [];
+    let total = 0;
+    for (let i = 0; i < n; i++) {
+      const a = loop[i], b = loop[(i + 1) % n];
+      const dx = b[0] - a[0], dy = b[1] - a[1];
+      seg.push(Math.sqrt(dx * dx + dy * dy));   // hypot es mucho más lento aquí
+      total += seg[i];
+    }
+    const m = Math.max(24, Math.min(240, Math.round(total / spacing)));
+    const out = [];
+    let si = 0, sacc = 0;
+    for (let i = 0; i < m; i++) {
+      const target = (i / m) * total;
+      while (sacc + seg[si] < target && si < n - 1) { sacc += seg[si]; si++; }
+      const a = loop[si], b = loop[(si + 1) % n];
+      const t = seg[si] > 0 ? (target - sacc) / seg[si] : 0;
+      out.push([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]);
+    }
+    return out;
+  }
+
+  curvePath(p) {
+    const n = p.length;
+    if (n < 3) return '';
+    let d = 'M' + p[0][0].toFixed(2) + ' ' + p[0][1].toFixed(2);
+    for (let i = 0; i < n; i++) {
+      const p0 = p[(i - 1 + n) % n], p1 = p[i], p2 = p[(i + 1) % n], p3 = p[(i + 2) % n];
+      d += 'C' + (p1[0] + (p2[0] - p0[0]) / 6).toFixed(2) + ' ' + (p1[1] + (p2[1] - p0[1]) / 6).toFixed(2) +
+           ' ' + (p2[0] - (p3[0] - p1[0]) / 6).toFixed(2) + ' ' + (p2[1] - (p3[1] - p1[1]) / 6).toFixed(2) +
+           ' ' + p2[0].toFixed(2) + ' ' + p2[1].toFixed(2);
+    }
+    return d + 'Z';
+  }
+
+  segmentAt(sec) {
+    let acc = 0;
+    for (let i = 0; i < SEQ.length; i++) {
+      if (sec < acc + SEQ[i][1]) return { name: SEQ[i][0], p: (sec - acc) / SEQ[i][1] };
+      acc += SEQ[i][1];
+    }
+    return { name: SEQ[SEQ.length - 1][0], p: 1 };
+  }
+
+  loop(now) {
+    this.raf = requestAnimationFrame(this.loop);
+    if (this.visible === false) return;
+    if (this.t0 === null) this.t0 = now;
+    if (!this.ready) return;
+
+    const speed = this.props.speed ?? 1;
+    const fps = this.props.fps ?? 24;
+    const wobAmt = this.props.wobble ?? 2.5;
+    const detail = this.props.detail ?? 0.55;
+
+    const frame = Math.floor(((now - this.t0) / 1000) * speed * fps);
+    if (frame === this.lastFrame) return;
+    this.lastFrame = frame;
+    const bt = frame / fps;
+    const seg = this.segmentAt(bt % TOTAL);
+    const p = this.clamp01(seg.p);
+
+    let fuse = 0, morph = 0;
+    switch (seg.name) {
+      case 'logo': break;
+      case 'merge': fuse = p; break;
+      case 'blob': fuse = 1; break;
+      case 'to-bubble': fuse = 1; morph = p; break;
+      case 'wobble': fuse = 1; morph = 1; break;
+      case 'from-bubble': fuse = 1; morph = 1 - p; break;
+      case 'defuse': fuse = 1 - p; break;
+    }
+
+    // SALTO DE FASE. La rama de fusión (morph <= 0) no tiene ningún término
+    // animado por tiempo: la geometría depende solo del nombre del segmento
+    // (elige spring o easeInOut), de `fuse` y de `detail`. `wobble` solo entra
+    // en la otra rama. Así que cuando la clave repite, la `d` sería idéntica y
+    // nos ahorramos getImageData (846x522 = 1,68 MB), la copia de 441.612
+    // valores a this.f, dos box-blur y el marching squares.
+    //   'logo'  → fuse = 0 fijo   → se salta toda la fase (0,9 s)
+    //   'blob'  → fuse = 1 fijo   → se salta toda la fase (0,12 s)
+    //   'merge' / 'defuse' → fuse cambia cada frame, la clave no repite nunca.
+    // La rama del morph depende de `bt` (wobble/respiración), ahí NO se salta:
+    // se invalida la clave para forzar el redibujo al volver a la fusión.
+    if (morph <= 0) {
+      const key = seg.name + '|' + fuse + '|' + detail;
+      if (key === this.geomKey) return;
+      this.geomKey = key;
+    } else {
+      this.geomKey = null;
+    }
+
+    let d = '';
+    if (morph <= 0) {
+      // fase de fusión: las siluetas reales del logo, soldadas como geometría
+      const e = seg.name === 'defuse' ? this.easeInOut(this.clamp01(fuse)) : this.spring(this.clamp01(fuse));
+      const ctx = this.ctx;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, W, H);
+      ctx.setTransform(PX, 0, 0, PX, -VIEW.x * PX, -VIEW.y * PX);
+      ctx.fillStyle = '#fff';
+      for (let s = 0; s < 2; s++) {
+        const from = this.fuseFrom[s], to = this.fuseTo[s];
+        let path = '';
+        for (let i = 0; i < N; i++) {
+          path += (i === 0 ? 'M' : 'L') +
+            (from[i][0] + (to[i][0] - from[i][0]) * e).toFixed(2) + ' ' +
+            (from[i][1] + (to[i][1] - from[i][1]) * e).toFixed(2);
+        }
+        ctx.fill(new Path2D(path + 'Z'));
+      }
+      const img = ctx.getImageData(0, 0, W, H).data;
+      const f = this.f;
+      for (let i = 0, n = W * H; i < n; i++) f[i] = img[i * 4 + 3] / 255;
+      const r = Math.max(1, Math.round(K_WELD * PX * Math.pow(1 - this.clamp01(fuse), 1.4)));
+      if (r > 1) { this.boxBlur(f, this.g, r); this.boxBlur(f, this.g, r); }
+      for (const loop of this.contours(f, 0.5)) d += this.curvePath(this.resample(loop, detail));
+    } else {
+      // morph al globo + wobble perpetuo, con onda de retardo periódica
+      const mE = this.easeOut(morph);
+      const tau = Math.PI * 2;
+      const stagger = 0.22;
+      const settle = seg.name === 'wobble' ? Math.min(1, seg.p / 0.8) : 0;
+      const amp = wobAmt * (0.32 + 0.5 * (1 - settle));
+      const pts = [];
+      for (let i = 0; i < N; i++) {
+        const a = (i / N) * tau;
+        const wave = stagger * 0.5 * (1 - Math.cos(a));
+        const local = this.easeOut(this.clamp01((mE * (1 + stagger) - wave) / (1 - wave * 0.15)));
+        const s = this.bubbleStart[i], t = this.bubble[i];
+        // respiración orgánica: dos armónicos desfasados sobre la normal
+        const n1 = Math.sin(a * 3 + bt * 1.5) * 0.55 + Math.sin(a * 5 - bt * 1.05) * 0.3;
+        const cx = this.merged.cx, cy = this.merged.cy;
+        const bx = s[0] + (t[0] - s[0]) * local, by = s[1] + (t[1] - s[1]) * local;
+        const dx = bx - cx, dy = by - cy;
+        const len = Math.sqrt(dx * dx + dy * dy) || 1;   // hypot cuesta de más en N=300
+        const k = n1 * amp * morph;
+        pts.push([bx + (dx / len) * k, by + (dy / len) * k]);
+      }
+      d = this.curvePath(pts);
+    }
+    if (d) this.shape.setAttribute('d', d);
+
+  }
+}
+
+</script>
+</body>
+</html>
