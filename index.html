@@ -1143,21 +1143,27 @@ a:hover{color:var(--lime400)}
     var chips=document.querySelectorAll('.chip');
     if(!chips.length)return setTimeout(init,120);
     // cada pestaña arranca el mosaico en un estado distinto del ciclo de 14 s
-    var OFFSET=[0,3.5,7], names=null;
+    var OFFSET=[0,3.5,7], names=null, metas=null;
     // cada pestaña muestra otro conjunto de imágenes, como si fueran otros proyectos
     var SHOTS=[
       ['./assets/work-enjin-darkmode.webp','./assets/work-jupiter-dtf-v3.webp','./assets/work-bedrock-web.webp','./assets/work-enjin-beam.webp'],
-      ['./assets/shot-detail-3.jpg','./assets/shot-phone-2.jpg','./assets/shot-banner-wide-motion.webp','./assets/shot-detail-2.webp'],
-      ['./assets/shot-detail-1-motion.webp','./assets/work-jupiter-dtf.jpg','./assets/shot-detail-2.webp','./assets/shot-phone-1-motion.webp']
+      ['./assets/work-enjin-beam.webp','./assets/shot-phone-2.jpg','./assets/work-enjin-nfts.webp','./assets/shot-detail-2.webp'],
+      ['./assets/work-sensive.webp','./assets/work-various-ecommerce.webp','./assets/work-mascota-manyada.webp','./assets/work-panama-convention-center.webp']
     ];
+    // Pestanas con proyectos reales: nombre y resto del caption por casilla.
+    // null = esa pestana sigue como estaba (relleno con 'Project name').
+    var NOMBRES=[null,['Enjin beam',null,'enjin',null],['Sensive','various brands','Mascota Manyada','Panama Convention Center']];
+    var METAS=[null,[' · ux/ui Design · 2024',null,' · nfts & animations · 2025',null],[' · design & illustration · 2020',' · ecommerce · 2025',' · illustration · 2025',' · ux/ui Design · 2025']];
     function grid(){ return document.querySelector('.grid2'); }
     function figures(){ return document.querySelectorAll('.grid2 .fig'); }
     function remember(){
       if(names)return;
-      names=[];
+      names=[]; metas=[];
       figures().forEach(function(f){
         var b=f.querySelector('.cap b');
         names.push(b?b.textContent:'');
+        var t=b&&b.nextSibling;
+        metas.push(t&&t.nodeType===3?t.nodeValue:null);
       });
     }
     // EN MOVIL LA FOTO SE VE ENTERA. El aspecto de cada caja viene fijo del
@@ -1186,7 +1192,10 @@ a:hover{color:var(--lime400)}
       remember();
       figures().forEach(function(f,i){
         var b=f.querySelector('.cap b');
-        if(b)b.textContent=idx===0?names[i]:'Project name';
+        var nom=NOMBRES[idx]&&NOMBRES[idx][i]!=null?NOMBRES[idx][i]:(idx===0?names[i]:'Project name');
+        if(b)b.textContent=nom;
+        var meta=METAS[idx]&&METAS[idx][i]!=null?METAS[idx][i]:(idx===0?metas[i]:null);
+        if(b&&meta!=null){ var t=b.nextSibling; if(t&&t.nodeType===3)t.nodeValue=meta; }
         var shot=f.querySelector('.shot');
         if(shot&&SHOTS[idx]&&SHOTS[idx][i])shot.style.backgroundImage='url('+SHOTS[idx][i]+')';
         if(shot)encaja(shot);
