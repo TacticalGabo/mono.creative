@@ -591,7 +591,7 @@ a:hover{color:var(--lime400)}
 .f-jupiter{margin-bottom:0}
 .shot{position:relative;width:100%;border-radius:10px;background-position:center;background-size:cover;background-repeat:no-repeat}
 .shot::after{content:"";position:absolute;left:0;top:0;width:100%;height:100%;border-radius:inherit;background:#fff;opacity:0;transition:opacity .5s ease;pointer-events:none}
-.fig:hover .shot::after{opacity:.3}
+.fig:hover .shot::after{opacity:.1}
 .sc-card{position:relative}
 .sc-card::after{content:"";position:absolute;left:0;top:0;width:100%;height:100%;border-radius:inherit;background:#fff;opacity:0;transition:opacity .5s ease;pointer-events:none}
 /* solo los teléfonos o el caption activan el hover, no el resto de la tarjeta */
@@ -934,7 +934,9 @@ a:hover{color:var(--lime400)}
     var el=e.target.closest?e.target.closest('[data-scroll]'):null;if(!el)return;
     var t=document.querySelector(el.getAttribute('data-scroll'));if(!t)return;
     var start=window.pageYOffset;
-    var end=Math.max(0,t.getBoundingClientRect().top+start-32);
+    // margen extra por enlace: data-scroll-up="40" aterriza 40 px mas arriba
+    var extra=parseFloat(el.getAttribute('data-scroll-up'))||0;
+    var end=Math.max(0,t.getBoundingClientRect().top+start-32-extra);
     var dist=Math.abs(end-start);if(dist<2)return;
     var dur=Math.min(1800,Math.max(450,dist*0.55)),t0=null;
     if(raf)cancelAnimationFrame(raf);
@@ -1144,7 +1146,7 @@ a:hover{color:var(--lime400)}
     var OFFSET=[0,3.5,7], names=null;
     // cada pestaña muestra otro conjunto de imágenes, como si fueran otros proyectos
     var SHOTS=[
-      ['./assets/work-enjin-darkmode.webp','./assets/work-jupiter-dtf.webp','./assets/work-bedrock-web.webp','./assets/work-enjin-beam.webp'],
+      ['./assets/work-enjin-darkmode.webp','./assets/work-jupiter-dtf-v3.webp','./assets/work-bedrock-web.webp','./assets/work-enjin-beam.webp'],
       ['./assets/shot-detail-3.jpg','./assets/shot-phone-2.jpg','./assets/shot-banner-wide-motion.webp','./assets/shot-detail-2.webp'],
       ['./assets/shot-detail-1-motion.webp','./assets/work-jupiter-dtf.jpg','./assets/shot-detail-2.webp','./assets/shot-phone-1-motion.webp']
     ];
@@ -1806,7 +1808,7 @@ a:hover{color:var(--lime400)}
       <div class="nav-links">
         <span class="nav-link" data-scroll=".work">Work</span>
         <span class="nav-link" data-scroll=".team">About</span>
-        <span class="nav-link" data-scroll=".about">Services</span>
+        <span class="nav-link" data-scroll=".about" data-scroll-up="40">Services</span>
       </div>
       <div class="btn" data-comp="button/dark" role="button" tabindex="0">
         <div class="btn-fluid"><svg class="btn-shape" width="147" height="41.5" viewBox="0 0 147 41.5" fill="none"><clipPath class="bclip" id="bclip1"><path d="M33.25 13.65C36.23 5.46 44.03 0 52.75 0L126.25 0C137.71 0 147 9.29 147 20.75C147 32.21 137.71 41.5 126.25 41.5L52.75 41.5C44.13 41.5 36.41 36.17 33.35 28.12L32.9 28.08C29.99 37.48 21.99 42.99 13.89 41.15C5.8 39.32 -0.05 30.67 0 20.62C0.05 10.58 5.99 2.02 14.1 0.3C22.21 -1.41 30.16 4.21 32.97 13.65Z"></path></clipPath><path class="bpath" d="M33.25 13.65C36.23 5.46 44.03 0 52.75 0L126.25 0C137.71 0 147 9.29 147 20.75C147 32.21 137.71 41.5 126.25 41.5L52.75 41.5C44.13 41.5 36.41 36.17 33.35 28.12L32.9 28.08C29.99 37.48 21.99 42.99 13.89 41.15C5.8 39.32 -0.05 30.67 0 20.62C0.05 10.58 5.99 2.02 14.1 0.3C22.21 -1.41 30.16 4.21 32.97 13.65Z" fill="var(--btn1-fill)" stroke="var(--btn1-stroke)" stroke-width="1" clip-path="url(#bclip1)"></path></svg><i class="btn-dot"></i></div>
@@ -1851,7 +1853,7 @@ a:hover{color:var(--lime400)}
     <div class="grid2">
       <div class="col">
         <figure class="fig f-gvrn" data-project="enjin-darkmode"><div class="shot" style="aspect-ratio:1.7267;background-image:url(./assets/work-enjin-darkmode.webp)"></div><figcaption class="cap"><b>Enjin darkmode</b> · ux/ui Design · 2023</figcaption></figure>
-        <figure class="fig f-beam" data-project="jupiter-dtf"><div class="shot" style="aspect-ratio:1.2047;background-image:url(./assets/work-jupiter-dtf.webp)"></div><figcaption class="cap"><b>Jupiter</b> · JUP DTF · 2025</figcaption></figure>
+        <figure class="fig f-beam" data-project="jupiter-dtf"><div class="shot" style="aspect-ratio:1.2047;background-image:url(./assets/work-jupiter-dtf-v3.webp)"></div><figcaption class="cap"><b>Jupiter</b> · JUP DTF · 2025</figcaption></figure>
       </div>
       <div class="col">
         <figure class="fig f-bedrock" data-project="bedrock"><div class="shot" style="aspect-ratio:1.2163;background-image:url(./assets/work-bedrock-web.webp)"></div><figcaption class="cap"><b>Bedrock</b> · ux/ui Design · 2025</figcaption></figure>
@@ -2023,9 +2025,11 @@ class Component extends DCLogic {
     // aquí, por separado, para que tocar uno no mueva el otro.
     // mobile:  el final manda (+220) y el inicio se ha ido subiendo: 30 px
     //          primero y 25 más después, así que el tramo queda en 175 px.
-    // desktop: tramo de 120 px, bajado 40 px entero.
+    // desktop: tramo de 120 px, bajado 40 px y luego SUBIDO 60 px entero
+    //          (2026-09-20): el salto de "Services" aterrizaba en mitad del
+    //          cruce, asi que inicio y final se movieron 60 px hacia arriba.
     if (window.innerWidth < 768) { fs += 165; fe += 220; }
-    else { fs += 40; fe += 40; }
+    else { fs -= 80; fe -= 120; }   // tramo de 80 px
     fe = fe > fs ? fe : fs + 200;
     window.__mcFadeAnchor = { sel: sel, start: fs, end: fe };
     var page = document.querySelector('.page');
