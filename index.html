@@ -2,6 +2,8 @@
 <html>
 <head>
 <meta charset="utf-8">
+<link rel="icon" type="image/svg+xml" href="./assets/logo-favicon-48x29.svg?v=3">
+<title>mono.creative</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="./vendor/support.js"></script>
 </head>
@@ -388,8 +390,10 @@ a:hover{color:var(--lime400)}
 .body{font-size:14px;line-height:1.7;color:var(--body)}
 .mono{font-family:var(--mono);font-size:13px;line-height:24px}
 .cap{font-family:var(--mono);font-size:13px;line-height:24px;text-transform:uppercase;color:var(--cap-weak);white-space:nowrap}
-.cap b,.cap em{text-transform:none;transition:color .5s ease}
-.fig:hover .cap b,.fig:hover .cap em,.showcase:hover .sc-cap em{color:var(--accent)}
+@media (min-width:768px){.grid3 .cap,.grid2b .cap{white-space:normal;text-wrap:pretty}}
+@media (max-width:767.9px){.cap{white-space:normal;text-wrap:pretty}}
+.cap b,.cap em{text-transform:uppercase;transition:color .5s ease}
+.fig:hover .cap b,.fig:hover .cap em,.showcase:has(.phone:hover,.sc-cap:hover) .sc-cap em{color:var(--accent)}
 .cap b{font-weight:400;color:var(--cap-strong)}
 .cap em{font-style:normal;color:var(--cap-strong2)}
 .accent{color:var(--accent)}
@@ -590,7 +594,14 @@ a:hover{color:var(--lime400)}
 .fig:hover .shot::after{opacity:.3}
 .sc-card{position:relative}
 .sc-card::after{content:"";position:absolute;left:0;top:0;width:100%;height:100%;border-radius:inherit;background:#fff;opacity:0;transition:opacity .5s ease;pointer-events:none}
-.showcase:hover .sc-card::after{opacity:.3}
+/* solo los teléfonos o el caption activan el hover, no el resto de la tarjeta */
+.showcase:has(.phone:hover,.sc-cap:hover) .sc-card::after{opacity:.3}
+/* el velo de la tarjeta queda debajo de los teléfonos; cada teléfono lleva el suyo,
+   así solo se aclara el que está en hover (o ambos si el hover es sobre el caption) */
+.sc-card .phone{z-index:1}
+.phone::after{content:"";position:absolute;inset:0;border-radius:inherit;background:#fff;opacity:0;transition:opacity .5s ease;pointer-events:none}
+.phone:hover::after,.showcase:has(.sc-cap:hover) .phone::after{opacity:.3}
+.sc-cap{width:fit-content}
 .fig figcaption{margin-top:12px}
 .f-gvrn{order:1}.f-bedrock{order:2}.f-beam{order:3}.f-jupiter{order:4}
 @media (min-width:768px){
@@ -740,12 +751,23 @@ a:hover{color:var(--lime400)}
 /* more stuff */
 .more{margin-top:52px;position:relative}
 .showcase{position:relative;margin-top:16px}
-.sc-card{width:100%;height:330px;border-radius:16px;background:linear-gradient(var(--surface-showcase-2),var(--surface-showcase-2)),var(--surface-showcase);display:flex;justify-content:center;gap:19.44px;padding-top:56px}
-.phone{position:relative;width:119.28px;height:226.056px;flex:none;border-radius:12.505px;background:var(--bezel);overflow:hidden}
+.sc-card{width:100%;height:553.94px;border-radius:16px;background:linear-gradient(var(--surface-showcase-2),var(--surface-showcase-2)),var(--surface-showcase);display:flex;justify-content:center;gap:19.44px;padding-top:56px}
+.phone{position:relative;width:237.443px;height:450px;flex:none;border-radius:24.893px;background:var(--bezel);overflow:hidden}
 .phone i{position:absolute;left:5.164%;top:6.792%;width:88.725%;height:82.99%;background-position:center;background-size:cover;background-repeat:no-repeat}
+/* video a todo el ancho de la pantalla del mockup; lo que sobra en alto se recorta abajo */
+.phone video{position:absolute;left:5.164%;top:6.792%;width:88.725%;height:82.99%;object-fit:cover;object-position:top center;display:block}
 .sc-cap{margin-top:12px}
-.banner{margin-top:23px;margin-bottom:0}
-.banner .shot{aspect-ratio:312/282;border-radius:12.343331337px;background-image:url(./assets/shot-banner-wide-motion.webp);background-position:38.515% 50%;background-size:160.446% 100%}
+/* mobile: solo el primer teléfono, centrado y a 32px del borde superior */
+@media (max-width:767.9px){
+  .sc-card{height:450px;padding-top:32px;overflow:hidden}
+  .sc-card .phone:nth-child(n+2){display:none}
+}
+.grid2b{margin-top:23px;display:flex;flex-direction:column}
+.banner{margin-bottom:24px}
+.grid2b .banner:last-child{margin-bottom:0}
+.banner .shot{aspect-ratio:518/300;border-radius:12.343331337px;background-position:center;background-size:cover}
+.b-1 .shot{background-image:url(./assets/work-sensive.webp)}
+.b-2 .shot{background-image:url(./assets/work-panama-convention-center.webp)}
 .grid3{margin-top:24px;display:flex;flex-direction:column}
 .grid3 .shot{aspect-ratio:341/229;border-radius:12.343331337px}
 .grid3 .fig:last-child{margin-bottom:0}
@@ -753,12 +775,16 @@ a:hover{color:var(--lime400)}
 @media (min-width:768px){
   .more{margin-top:121px}
   .showcase{margin-top:16.5px}
-  .sc-card{height:513.13px;gap:35.6px;padding-top:49.374px}
-  .phone{width:218.653px;height:414.383px;border-radius:22.923330307px}
+  .sc-card{height:598.75px;gap:35.6px;padding-top:49.374px}
+  /* teléfono escalado ×1.207 (marco + video en proporción) hasta 500px de alto */
+  .phone{width:263.828px;height:500px;border-radius:27.66px}
   .sc-cap{position:absolute;left:21.4px;bottom:13.8px;margin:0}
-  .banner{margin-top:14.4px}
-  .banner .shot{aspect-ratio:1058/282.133;background-position:center;background-size:cover}
-  .grid3{margin-top:22.2px;display:grid;grid-template-columns:1fr 1fr 1fr;column-gap:17.3px}
+  .grid2b{margin-top:14.4px;display:grid;grid-template-columns:minmax(0,518fr) minmax(0,523fr);column-gap:16.602px;align-items:start}
+  .banner{margin-bottom:0}
+  .banner .shot{border-radius:14px}
+  .b-1 .shot{aspect-ratio:518/300}
+  .b-2 .shot{aspect-ratio:523/300}
+  .grid3{margin-top:22.2px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:17.3px}
   .grid3 .fig{margin-bottom:0}
   .grid3 .fig:last-child figcaption{display:block}
 }
@@ -1118,7 +1144,7 @@ a:hover{color:var(--lime400)}
     var OFFSET=[0,3.5,7], names=null;
     // cada pestaña muestra otro conjunto de imágenes, como si fueran otros proyectos
     var SHOTS=[
-      ['./assets/work-gvrn.webp','./assets/work-beam.webp','./assets/work-bedrock.webp','./assets/work-jupiter-dtf.jpg'],
+      ['./assets/work-enjin-darkmode.webp','./assets/work-jupiter-dtf.webp','./assets/work-bedrock-web.webp','./assets/work-enjin-beam.webp'],
       ['./assets/shot-detail-3.jpg','./assets/shot-phone-2.jpg','./assets/shot-banner-wide-motion.webp','./assets/shot-detail-2.webp'],
       ['./assets/shot-detail-1-motion.webp','./assets/work-jupiter-dtf.jpg','./assets/shot-detail-2.webp','./assets/shot-phone-1-motion.webp']
     ];
@@ -1824,12 +1850,12 @@ a:hover{color:var(--lime400)}
     </div>
     <div class="grid2">
       <div class="col">
-        <figure class="fig f-gvrn"><div class="shot" style="aspect-ratio:1.7267;background-image:url(./assets/work-gvrn.webp)"></div><figcaption class="cap"><b>GVRN</b> · web · 2026</figcaption></figure>
-        <figure class="fig f-beam"><div class="shot" style="aspect-ratio:1.2047;background-image:url(./assets/work-beam.webp)"></div><figcaption class="cap"><b>Beam</b> · product · 2025</figcaption></figure>
+        <figure class="fig f-gvrn" data-project="enjin-darkmode"><div class="shot" style="aspect-ratio:1.7267;background-image:url(./assets/work-enjin-darkmode.webp)"></div><figcaption class="cap"><b>Enjin darkmode</b> · ux/ui Design · 2023</figcaption></figure>
+        <figure class="fig f-beam" data-project="jupiter-dtf"><div class="shot" style="aspect-ratio:1.2047;background-image:url(./assets/work-jupiter-dtf.webp)"></div><figcaption class="cap"><b>Jupiter</b> · JUP DTF · 2025</figcaption></figure>
       </div>
       <div class="col">
-        <figure class="fig f-bedrock"><div class="shot" style="aspect-ratio:1.2163;background-image:url(./assets/work-bedrock.webp)"></div><figcaption class="cap"><b>Bedrock</b> · web · 2026</figcaption></figure>
-        <figure class="fig f-jupiter"><div class="shot" style="aspect-ratio:1.7433;background-image:url(./assets/work-jupiter-dtf.jpg)"></div><figcaption class="cap"><b>Jupiter DTF</b> · product · 2025</figcaption></figure>
+        <figure class="fig f-bedrock" data-project="bedrock"><div class="shot" style="aspect-ratio:1.2163;background-image:url(./assets/work-bedrock-web.webp)"></div><figcaption class="cap"><b>Bedrock</b> · ux/ui Design · 2025</figcaption></figure>
+        <figure class="fig f-jupiter" data-project="enjin-beam"><div class="shot" style="aspect-ratio:1.7433;background-image:url(./assets/work-enjin-beam.webp)"></div><figcaption class="cap"><b>Enjin beam</b> · ux/ui Design · 2024</figcaption></figure>
       </div>
     </div>
   </section>
@@ -1928,16 +1954,19 @@ Then we set the base for launch and growth, with clear files, clean rules and <b
     </div>
     <div class="showcase" data-comp="showcase">
       <div class="sc-card">
-        <div class="phone"><i style="background-image:url(./assets/shot-phone-1-motion.webp)"></i></div>
-        <div class="phone"><i style="background-image:url(./assets/shot-phone-2.jpg)"></i></div>
+        <div class="phone"><video data-src="./assets/gvrn1" src="./assets/gvrn1-352.mp4" autoplay muted loop playsinline preload="metadata" aria-hidden="true"></video></div>
+        <div class="phone"><video data-src="./assets/gvrn2" src="./assets/gvrn2-352.mp4" autoplay muted loop playsinline preload="metadata" aria-hidden="true"></video></div>
       </div>
-      <p class="cap sc-cap"><em>Project Name</em> · product · 2025</p>
+      <p class="cap sc-cap" data-project="gvrn-ai"><em>gvrn.ai</em> · ux/ui Design · 2026</p>
     </div>
-    <figure class="fig banner"><div class="shot"></div><figcaption class="cap"><em>Project Name</em> · product · 2025</figcaption></figure>
+    <div class="grid2b">
+      <figure class="fig banner b-1" data-project="sensive"><div class="shot"></div><figcaption class="cap"><em>Sensive</em> · design &amp; illustration · 2020</figcaption></figure>
+      <figure class="fig banner b-2" data-project="panama-convention-center"><div class="shot"></div><figcaption class="cap"><em>Panama Convention Center</em> · ux/ui Design · 2025</figcaption></figure>
+    </div>
     <div class="grid3">
-      <figure class="fig"><div class="shot" style="background-image:url(./assets/shot-detail-1-motion.webp)"></div><figcaption class="cap"><em>Project Name</em> · product · 2025</figcaption></figure>
-      <figure class="fig"><div class="shot" style="background-image:url(./assets/shot-detail-2.webp)"></div><figcaption class="cap"><em>Project Name</em> · product · 2025</figcaption></figure>
-      <figure class="fig"><div class="shot" style="background-image:url(./assets/shot-detail-3.jpg)"></div><figcaption class="cap"><em>Project Name</em> · product · 2025</figcaption></figure>
+      <figure class="fig" data-project="mascota-manyada"><div class="shot" style="background-image:url(./assets/work-mascota-manyada.webp)"></div><figcaption class="cap"><em>Mascota Manyada</em> · illustration · 2025</figcaption></figure>
+      <figure class="fig" data-project="enjin-nfts"><div class="shot" style="background-image:url(./assets/work-enjin-nfts.webp)"></div><figcaption class="cap"><em>enjin</em> · nfts &amp; animations · 2025</figcaption></figure>
+      <figure class="fig" data-project="various-brands-ecommerce"><div class="shot" style="background-image:url(./assets/work-various-ecommerce.webp)"></div><figcaption class="cap"><em>various brands</em> · ecommerce · 2025</figcaption></figure>
     </div>
   </section>
 
@@ -2022,6 +2051,35 @@ class Component extends DCLogic {
   }
   renderVals(){ return {}; }
 }
+</script>
+<script>
+// videos de los teléfonos: el DOM se re-renderiza y el <video> nuevo pierde la
+// propiedad muted, así que Chrome bloquea el autoplay. Se fuerza mute + play, y
+// se pausan fuera de pantalla para no gastar CPU.
+(function(){
+  var io='IntersectionObserver' in window ? new IntersectionObserver(function(es){
+    es.forEach(function(e){ var v=e.target; if(e.isIntersecting){ var p=v.play(); if(p&&p.catch)p.catch(function(){}); } else v.pause(); });
+  }) : null;
+  function arm(){
+    document.querySelectorAll('.phone video').forEach(function(v){
+      if(v.__mc)return; v.__mc=1;
+      v.muted=true; v.defaultMuted=true; v.playsInline=true; v.loop=true;
+      // variante pre-escalada al tamaño real en píxeles de pantalla: el navegador
+      // casi no reescala y las líneas de 1px no se borran
+      var base=v.getAttribute('data-src');
+      if(base&&v.getBoundingClientRect().width>0){
+        var need=v.getBoundingClientRect().width*(window.devicePixelRatio||1), w=468;
+        [234,352,468].some(function(s){ if(s>=need*0.95){ w=s; return true; } });
+        var url=base+'-'+w+'.mp4';
+        if(v.getAttribute('src')!==url)v.setAttribute('src',url);
+      }
+      if(io)io.observe(v); else { var p=v.play(); if(p&&p.catch)p.catch(function(){}); }
+    });
+  }
+  arm();
+  var q=0;
+  new MutationObserver(function(){ if(q)return; q=requestAnimationFrame(function(){ q=0; arm(); }); }).observe(document.documentElement,{childList:true,subtree:true});
+})();
 </script>
 </body>
 </html>
