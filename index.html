@@ -1154,7 +1154,7 @@ a:hover{color:var(--lime400)}
     var SHOTS=[
       ['./assets/work-enjin-darkmode.webp','./assets/work-jupiter-dtf-v3.webp','./assets/work-bedrock-web.webp','./assets/work-enjin-beam.webp'],
       ['./assets/work-enjin-beam.webp','./assets/shot-phone-2.jpg','./assets/work-enjin-nfts.webp','./assets/shot-detail-2.webp'],
-      ['./assets/work-sensive.webp','./assets/work-various-ecommerce.webp','./assets/work-mascota-manyada.webp','./assets/work-panama-convention-center.webp']
+      ['./assets/work-sensive.webp','./assets/work-various-ecommerce-v2.webp','./assets/work-mascota-manyada.webp','./assets/work-panama-convention-center.webp']
     ];
     // Pestanas con proyectos reales: nombre y resto del caption por casilla.
     // null = esa pestana sigue como estaba (relleno con 'Project name').
@@ -1180,6 +1180,8 @@ a:hover{color:var(--lime400)}
     // la foto. No vale un valor fijo porque las pestañas meten imágenes de
     // aspectos muy distintos (de 1,25 a 1,78), así que se toma el aspecto real
     // de cada imagen. Con la caja al aspecto de la foto, el cover ya no recorta.
+    var BGPOS={'./assets/work-enjin-beam.webp':'center min(calc(50% + 40px),0px)',
+               './assets/work-sensive.webp':'center min(calc(50% + 20px),0px)'};
     function encaja(shot){
       if(window.innerWidth>=768)return;
       var u=(getComputedStyle(shot).backgroundImage||'').match(/url\((['"]?)([\s\S]*?)\1\)/);
@@ -1203,7 +1205,11 @@ a:hover{color:var(--lime400)}
         var meta=METAS[idx]&&METAS[idx][i]!=null?METAS[idx][i]:(idx===0?metas[i]:null);
         if(b&&meta!=null){ var t=b.nextSibling; if(t&&t.nodeType===3)t.nodeValue=meta; }
         var shot=f.querySelector('.shot');
-        if(shot&&SHOTS[idx]&&SHOTS[idx][i])shot.style.backgroundImage='url('+SHOTS[idx][i]+')';
+        if(shot&&SHOTS[idx]&&SHOTS[idx][i]){
+          shot.style.backgroundImage='url('+SHOTS[idx][i]+')';
+          /* ajuste manual por imagen: bajar 40 px sin dejar hueco arriba */
+          shot.style.backgroundPosition=BGPOS[SHOTS[idx][i]]||'';
+        }
         if(shot)encaja(shot);
       });
       var els=g.querySelectorAll('.fig,.shot');
@@ -1894,7 +1900,7 @@ a:hover{color:var(--lime400)}
       </div>
       <div class="col">
         <figure class="fig f-bedrock" data-project="bedrock"><div class="shot" style="aspect-ratio:1.2163;background-image:url(./assets/work-bedrock-web.webp)"></div><figcaption class="cap"><b>Bedrock</b> · ux/ui Design · 2025</figcaption></figure>
-        <figure class="fig f-jupiter" data-project="enjin-beam"><div class="shot" style="aspect-ratio:1.7433;background-image:url(./assets/work-enjin-beam.webp)"></div><figcaption class="cap"><b>Enjin beam</b> · ux/ui Design · 2024</figcaption></figure>
+        <figure class="fig f-jupiter" data-project="enjin-beam"><div class="shot" style="aspect-ratio:1.7433;background-image:url(./assets/work-enjin-beam.webp);background-position:center min(calc(50% + 40px),0px)"></div><figcaption class="cap"><b>Enjin beam</b> · ux/ui Design · 2024</figcaption></figure>
       </div>
     </div>
   </section>
@@ -2005,7 +2011,7 @@ Then we set the base for launch and growth, with clear files, clean rules and <b
     <div class="grid3">
       <figure class="fig" data-project="mascota-manyada"><div class="shot" style="background-image:url(./assets/work-mascota-manyada.webp)"></div><figcaption class="cap"><em>Mascota Manyada</em> · illustration · 2025</figcaption></figure>
       <figure class="fig" data-project="enjin-nfts"><div class="shot" style="background-image:url(./assets/work-enjin-nfts.webp)"></div><figcaption class="cap"><em>enjin</em> · nfts &amp; animations · 2025</figcaption></figure>
-      <figure class="fig" data-project="various-brands-ecommerce"><div class="shot" style="background-image:url(./assets/work-various-ecommerce.webp)"></div><figcaption class="cap"><em>various brands</em> · ecommerce · 2025</figcaption></figure>
+      <figure class="fig" data-project="various-brands-ecommerce"><div class="shot" style="background-image:url(./assets/work-various-ecommerce-v2.webp)"></div><figcaption class="cap"><em>various brands</em> · ecommerce · 2025</figcaption></figure>
     </div>
   </section>
 
