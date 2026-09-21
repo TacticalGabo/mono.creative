@@ -385,7 +385,7 @@ a:hover{color:var(--lime400)}
 .h3{font-size:28px;font-weight:600;line-height:1.15;letter-spacing:-1.44px}
 .h6{font-size:24px;font-weight:600;line-height:46px;letter-spacing:-1px;color:var(--cta-h)}
 .h7{font-size:32px;font-weight:600;line-height:1.16;letter-spacing:-2px;text-align:center;color:var(--cta-h)}
-.sect{font-size:16px;font-weight:500;line-height:1;letter-spacing:-.8px;white-space:nowrap;color:var(--sect)}
+.sect{font-size:20px;font-weight:500;line-height:1;letter-spacing:-.8px;white-space:nowrap;color:var(--sect)}
 .lead{font-size:22px;line-height:31.9px;letter-spacing:-.22px;color:var(--team-lead)}
 .body{font-size:14px;line-height:1.7;color:var(--body)}
 .mono{font-family:var(--mono);font-size:13px;line-height:24px}
@@ -410,7 +410,7 @@ a:hover{color:var(--lime400)}
 /* nav */
 .nav{height:100px;display:flex;align-items:center;justify-content:space-between;padding-inline:var(--mnav);position:relative;z-index:2}
 .nav-logo{display:flex;align-items:center;gap:8px}
-.nav-anim-m{position:relative;display:inline-block;width:53.998px;height:22.909px;flex:none;color:var(--accent)}
+.nav-anim-m{position:relative;display:inline-block;width:62px;height:26.304px;flex:none;color:var(--accent)}
 .nav-anim{display:none}
 @media (min-width:768px){
   .nav-anim{position:relative;display:inline-block;width:204px;height:21px;flex:none;color:var(--accent)}
@@ -426,8 +426,11 @@ a:hover{color:var(--lime400)}
 .nav-link:hover{color:var(--accent)}
 .nav-link:hover::after,.nav-link.on::after{transform:scaleX(1)}
 .nav-link.on{color:var(--nav-link-on)}
-.menu{width:40px;height:42px;border-radius:12px;border:1px solid var(--border);display:flex;flex-direction:column;gap:7px;justify-content:center;align-items:center}
-.menu span{width:18px;height:1.6px;background:var(--nav-link)}
+.menu{position:relative;width:48px;height:48px;border-radius:12px;display:flex;flex-direction:column;gap:7.39px;justify-content:center;align-items:center}
+.menu span{width:19px;height:1.69px;background:var(--nav-link)}
+/* contorno en SVG: un border CSS de 1.2px Chrome lo redondea a 1px; el trazo SVG no (igual que el CTA) */
+.menu-ring{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.menu-ring rect{fill:none;stroke:var(--btn1-stroke);stroke-width:1.2px}
 @media (min-width:768px){
   .nav-anim-m{display:none}
   .logo-mark{display:none !important}
@@ -1859,7 +1862,7 @@ a:hover{color:var(--lime400)}
         <svg class="btn-arr al" width="12.22" height="14.67" viewBox="11.9 14.75 10 12" fill="none" overflow="visible" style="color:var(--btn1-arrow)"><path d="M12.3984 20.747H21.3984M17.8726 23.7109L21.3984 20.747L17.8726 17.7832" stroke="currentColor" stroke-width="1.2" vector-effect="non-scaling-stroke"></path></svg>
         <svg class="btn-arr ar" width="12.22" height="14.67" viewBox="11.9 14.75 10 12" fill="none" overflow="visible" style="color:var(--btn1-arrow)"><path d="M12.3984 20.747H21.3984M17.8726 23.7109L21.3984 20.747L17.8726 17.7832" stroke="currentColor" stroke-width="1.2" vector-effect="non-scaling-stroke"></path></svg>
       </div>
-      <div class="menu" data-comp="icon-button/menu"><span></span><span></span></div>
+      <div class="menu" data-comp="icon-button/menu"><svg class="menu-ring" viewBox="0 0 48 48" aria-hidden="true"><rect x=".6" y=".6" width="46.8" height="46.8" rx="11.4"/></svg><span></span><span></span></div>
     </div>
   </header>
 
