@@ -451,6 +451,12 @@ a:hover{color:var(--lime400)}
 .btn .al{left:11.9px}
 .btn .ar{left:113.5px;opacity:0}
 .btn .btn-label{position:absolute;left:50%;top:0;height:41.5px;line-height:41.5px;white-space:nowrap;font-family:var(--mono);font-size:13px;letter-spacing:.002em;transform:translateX(-50%) translateX(16.5px);transition:transform 368ms cubic-bezier(.35,.9,.25,1),color .25s ease-out}
+/* botones del header y footer a 48 px de alto (geometria en JS via data-h) */
+.btn.nav-btn,.btn.foot-btn{height:48px;width:158px}
+.btn.nav-btn .btn-arr,.btn.foot-btn .btn-arr{top:16.67px}
+.btn.nav-btn .al,.btn.foot-btn .al{left:13.45px}
+.btn.nav-btn .ar,.btn.foot-btn .ar{left:120.14px}
+.btn.nav-btn .btn-label,.btn.foot-btn .btn-label{height:48px;line-height:48px;transform:translateX(-50%) translateX(18.51px)}
 /* hero */
 .hero{position:relative;padding-top:61px}
 .hero-lines{display:flex;flex-direction:column;gap:5.03px}
@@ -477,7 +483,7 @@ a:hover{color:var(--lime400)}
 }
 @media (prefers-reduced-motion:reduce){.hero-l3 .h1.accent{animation:none}}
 .capsule{display:flex;align-items:center;gap:12px;flex:0 0 auto;margin-inline:auto}
-.capsule img{width:9px;height:52px;flex:none}
+.capsule .cap-arc{width:9px;height:52px;flex:none;display:block;overflow:visible}
 .capsule p{width:214px;min-height:51px;font-size:14px;line-height:25.5px;color:var(--capsule-text);flex:none}
 .capsule-line{opacity:1;transition:opacity .85s ease}
 .cap-caret{display:inline-block;width:1px;height:1em;margin-left:2px;vertical-align:-.15em;background:var(--border);animation:cap-blink 1.06s step-end infinite}
@@ -520,7 +526,7 @@ a:hover{color:var(--lime400)}
   .hero-anim{top:-9px;left:-10px;width:1.5251em;height:.6306em}
   .capsule{gap:20px;margin-top:10.8px;--cap-shift:125px}
   .hint{margin-top:145px}
-  .capsule img{width:11.357px;height:60.811px}
+  .capsule .cap-arc{width:11.357px;height:60.811px}
   .capsule p{width:229.9px;min-height:51px;font-size:15px;line-height:1.7}
 }
 @container (min-width:978px) and (max-width:1075.9px){
@@ -543,9 +549,9 @@ a:hover{color:var(--lime400)}
 .dots{display:flex;align-items:center;gap:4px}
 @media (min-width:768px){.sec-head .dots{position:relative;top:2px}}
 .chips{display:flex;align-items:center;gap:9px}
-.chip{height:36px;border-radius:999px;background:var(--chip-fill);border:1px solid var(--chip-bd-off);display:flex;align-items:center;justify-content:center;padding-inline:14px;font-family:var(--mono);font-size:13px;line-height:16px;color:var(--chip-tx-off);white-space:nowrap}
+.chip{height:36px;border-radius:999px;background:var(--chip-fill);border:1.2px solid var(--chip-bd-off);display:flex;align-items:center;justify-content:center;padding-inline:14px;font-family:var(--mono);font-size:13px;line-height:16px;color:var(--chip-tx-off);white-space:nowrap}
 .chip{transition:border-color .5s ease}
-.chip.on{border-color:var(--chip-bd-on);color:var(--chip-tx-on);box-shadow:inset 0 0 0 .2px var(--chip-bd-on)}
+.chip.on{border-color:var(--chip-bd-on);color:var(--chip-tx-on)}
 .chip:not(.on):hover{border-color:#87918b}
 @media (min-width:768px){
   .sec-head{margin-top:83.2px;flex-direction:row;justify-content:space-between;align-items:flex-end}
@@ -895,7 +901,7 @@ a:hover{color:var(--lime400)}
 .hero .gA{animation:fx-glow 1.1s ease .3s both}
 .hero .gB{animation:fx-glow 1.1s ease .5s both}
 .capsule .arc-l{animation:cap-arc-l .96s cubic-bezier(.22,.75,.25,1) .8s both}
-.capsule img:not(.arc-l){animation:cap-arc-r .96s cubic-bezier(.22,.75,.25,1) .8s both}
+.capsule .cap-arc:not(.arc-l){animation:cap-arc-r .96s cubic-bezier(.22,.75,.25,1) .8s both}
 .capsule-line{animation:fx-in .7s ease 1.71s both}
 @keyframes hint-bob{0%,100%{transform:translateY(-2px)}50%{transform:translateY(3px)}}
 @keyframes mq-right{from{transform:translateX(-50%)}to{transform:translateX(0)}}
@@ -1315,9 +1321,30 @@ a:hover{color:var(--lime400)}
     }
     return d;
   }
-  function morphPath(t){
-    var pl_x=lerp(52.75,20.75,t), bx=lerp(17,20.75,t), rx=lerp(17,20.75,t), ry=R;
-    var a_top=lerp(200,270,t), a_bot=lerp(159.2,90,t), b_top=lerp(340,270,t), b_bot=lerp(20.7,90,t);
+  /* geometria por alto del boton; sin data-h = 41.5, la original */
+  function geom(h,pad,shift){
+    pad=pad||0; shift=shift||0;          /* shift: separa la pildora del circulo (px) */
+    var r=h/2, k=r/R, w=147+pad+shift, prx=w-r, pl0=52.75*k-pad+shift, b0=17*k;
+    var g={R:r, CY:r, PRX:prx, pl0:pl0, b0:b0, at:200, ab:159.2, bt:340, bb:20.7};
+    if(pad||shift){
+      /* la pildora se abrio hacia el circulo: nueva union = interseccion pildora/circulo */
+      var lo=270, hi=360, m, x, y;
+      for(var i=0;i<40;i++){
+        m=(lo+hi)/2; x=b0+b0*Math.cos(m*D2R); y=r+r*Math.sin(m*D2R);
+        if(Math.sqrt((x-pl0)*(x-pl0)+(y-r)*(y-r))>r)lo=m; else hi=m;
+      }
+      g.bt=m; g.bb=360-m;
+      g.at=Math.atan2(y-r,x-pl0)/D2R+360; g.ab=360-g.at;
+    }
+    g.lr=(pl0-r+w)/2-w/2+.5;           /* texto centrado en la pildora (+.5 del original) */
+    g.lh=(prx-7.75-52.5)-w/2;          /* en hover, misma distancia a la flecha derecha */
+    return g;
+  }
+  var G0=geom(41.5);
+  function morphPath(t,g){
+    g=g||G0; var R=g.R, CY=g.CY, PRX=g.PRX;
+    var pl_x=lerp(g.pl0,R,t), bx=lerp(g.b0,R,t), rx=lerp(g.b0,R,t), ry=R;
+    var a_top=lerp(g.at,270,t), a_bot=lerp(g.ab,90,t), b_top=lerp(g.bt,270,t), b_bot=lerp(g.bb,90,t);
     var start=pt(pl_x,CY,R,R,a_top), blob_start=pt(bx,CY,rx,ry,b_bot);
     return 'M'+f(start[0])+' '+f(start[1])+arc(pl_x,CY,R,R,a_top,270)+'L'+PRX+' '+f(CY-R)+
       arc(PRX,CY,R,R,270,450)+'L'+f(pl_x)+' '+f(CY+R)+arc(pl_x,CY,R,R,90,a_bot)+
@@ -1351,6 +1378,7 @@ a:hover{color:var(--lime400)}
         al=b.querySelector('.al'), ar=b.querySelector('.ar');
     if(!path||!label||!al||!ar)return null;
     st={path:path, clip:b.querySelector('.bclip path'), label:label, al:al, ar:ar,
+        g:b.dataset.h?geom(+b.dataset.h,+b.dataset.pad||0,+b.dataset.shift||0):G0,
         dot:b.querySelector('.btn-dot'), t:0, raf:0, hover:false,
         rest:{fill:path.getAttribute('fill'),stroke:path.getAttribute('stroke'),
               text:label.style.color||'',arrow:al.style.color||''}};
@@ -1360,9 +1388,9 @@ a:hover{color:var(--lime400)}
     return st;
   }
   function draw(st){
-    var d=morphPath(st.t);
+    var d=morphPath(st.t,st.g);
     st.path.setAttribute('d',d); if(st.clip)st.clip.setAttribute('d',d);
-    st.label.style.transform='translateX(-50%) translateX('+f(lerp(16.5,-7.5,st.t))+'px)';
+    st.label.style.transform='translateX(-50%) translateX('+f(lerp(st.g.lr,st.g.lh,st.t))+'px)';
   }
   function tween(st,h){
     if(st.raf)cancelAnimationFrame(st.raf);
@@ -1819,11 +1847,11 @@ a:hover{color:var(--lime400)}
         <span class="nav-link" data-scroll=".team">About</span>
         <span class="nav-link" data-scroll=".about" data-scroll-up="40">Services</span>
       </div>
-      <div class="btn" data-comp="button/dark" role="button" tabindex="0">
-        <div class="btn-fluid"><svg class="btn-shape" width="147" height="41.5" viewBox="0 0 147 41.5" fill="none"><clipPath class="bclip" id="bclip1"><path d="M33.25 13.65C36.23 5.46 44.03 0 52.75 0L126.25 0C137.71 0 147 9.29 147 20.75C147 32.21 137.71 41.5 126.25 41.5L52.75 41.5C44.13 41.5 36.41 36.17 33.35 28.12L32.9 28.08C29.99 37.48 21.99 42.99 13.89 41.15C5.8 39.32 -0.05 30.67 0 20.62C0.05 10.58 5.99 2.02 14.1 0.3C22.21 -1.41 30.16 4.21 32.97 13.65Z"></path></clipPath><path class="bpath" d="M33.25 13.65C36.23 5.46 44.03 0 52.75 0L126.25 0C137.71 0 147 9.29 147 20.75C147 32.21 137.71 41.5 126.25 41.5L52.75 41.5C44.13 41.5 36.41 36.17 33.35 28.12L32.9 28.08C29.99 37.48 21.99 42.99 13.89 41.15C5.8 39.32 -0.05 30.67 0 20.62C0.05 10.58 5.99 2.02 14.1 0.3C22.21 -1.41 30.16 4.21 32.97 13.65Z" fill="var(--btn1-fill)" stroke="var(--btn1-stroke)" stroke-width="1.4" clip-path="url(#bclip1)"></path></svg><i class="btn-dot"></i></div>
+      <div class="btn nav-btn" data-h="48" data-pad="6" data-shift="5" data-comp="button/dark" role="button" tabindex="0">
+        <div class="btn-fluid"><svg class="btn-shape" width="158" height="48" viewBox="0 0 158 48" fill="none"><clipPath class="bclip" id="bclip1"><path d="M37.83 14.83C41.54 5.85 50.3 0 60.01 0L134 0C147.25 0 158 10.75 158 24C158 37.25 147.25 48 134 48L60.01 48C50.3 48 41.54 42.15 37.83 33.17L37.83 33.17C34.25 43.75 25.04 49.77 15.83 47.54C6.63 45.31 0 35.45 0 24C0 12.55 6.63 2.69 15.83 0.46C25.04 -1.77 34.25 4.25 37.83 14.83Z"></path></clipPath><path class="bpath" d="M37.83 14.83C41.54 5.85 50.3 0 60.01 0L134 0C147.25 0 158 10.75 158 24C158 37.25 147.25 48 134 48L60.01 48C50.3 48 41.54 42.15 37.83 33.17L37.83 33.17C34.25 43.75 25.04 49.77 15.83 47.54C6.63 45.31 0 35.45 0 24C0 12.55 6.63 2.69 15.83 0.46C25.04 -1.77 34.25 4.25 37.83 14.83Z" fill="var(--btn1-fill)" stroke="var(--btn1-stroke)" stroke-width="2.4" clip-path="url(#bclip1)"></path></svg><i class="btn-dot"></i></div>
         <span class="btn-label" style="color:var(--btn1-label)">Let's Talk</span>
-        <svg class="btn-arr al" width="10" height="12" viewBox="11.9 14.75 10 12" fill="none" style="color:var(--btn1-arrow)"><path d="M12.3984 20.747H21.3984M17.8726 23.7109L21.3984 20.747L17.8726 17.7832" stroke="currentColor"></path></svg>
-        <svg class="btn-arr ar" width="10" height="12" viewBox="11.9 14.75 10 12" fill="none" style="color:var(--btn1-arrow)"><path d="M12.3984 20.747H21.3984M17.8726 23.7109L21.3984 20.747L17.8726 17.7832" stroke="currentColor"></path></svg>
+        <svg class="btn-arr al" width="12.22" height="14.67" viewBox="11.9 14.75 10 12" fill="none" overflow="visible" style="color:var(--btn1-arrow)"><path d="M12.3984 20.747H21.3984M17.8726 23.7109L21.3984 20.747L17.8726 17.7832" stroke="currentColor" stroke-width="1.2" vector-effect="non-scaling-stroke"></path></svg>
+        <svg class="btn-arr ar" width="12.22" height="14.67" viewBox="11.9 14.75 10 12" fill="none" overflow="visible" style="color:var(--btn1-arrow)"><path d="M12.3984 20.747H21.3984M17.8726 23.7109L21.3984 20.747L17.8726 17.7832" stroke="currentColor" stroke-width="1.2" vector-effect="non-scaling-stroke"></path></svg>
       </div>
       <div class="menu" data-comp="icon-button/menu"><span></span><span></span></div>
     </div>
@@ -1840,9 +1868,9 @@ a:hover{color:var(--lime400)}
       <div class="hero-l3">
         <span class="h1 accent">ambitious teams<span class="hero-anim"><dc-import name="hero-icon-sequence" hint-size="100%,100%"></dc-import></span></span>
         <div class="capsule" data-comp="paragraph-capsule">
-          <img class="arc-l" src="./assets/capsule-arc-side-12x62.svg" alt="" />
+          <svg class="cap-arc arc-l" viewBox="0 0 12.403 61.6109" preserveAspectRatio="none" overflow="visible" fill="none" aria-hidden="true"><path d="M0.449501 61.2123L0.8079 60.809C4.42861 56.7357 7.16881 52.1379 9.0247 47.0229C10.8789 41.9125 11.803 36.4934 11.803 30.7739C11.803 25.0115 10.8786 19.5905 9.02274 14.5209C7.16644 9.40635 4.42656 4.82936 0.803994 0.799263L0.445595 0.401802" stroke="#414B45" stroke-width="1.6" vector-effect="non-scaling-stroke"/></svg>
           <p class="capsule-line">A team of passionate humans, happy to connect with yours.<span class="cap-caret"></span></p>
-          <img src="./assets/capsule-arc-side-12x62.svg" alt="" />
+          <svg class="cap-arc" viewBox="0 0 12.403 61.6109" preserveAspectRatio="none" overflow="visible" fill="none" aria-hidden="true"><path d="M0.449501 61.2123L0.8079 60.809C4.42861 56.7357 7.16881 52.1379 9.0247 47.0229C10.8789 41.9125 11.803 36.4934 11.803 30.7739C11.803 25.0115 10.8786 19.5905 9.02274 14.5209C7.16644 9.40635 4.42656 4.82936 0.803994 0.799263L0.445595 0.401802" stroke="#414B45" stroke-width="1.6" vector-effect="non-scaling-stroke"/></svg>
         </div>
       </div>
     </div>
@@ -2001,11 +2029,11 @@ Then we set the base for launch and growth, with clear files, clean rules and <b
 
   <footer class="foot wrap" data-comp="footer">
     <h2 class="h7">Let us make something <i style="color:var(--lime400)">together</i></h2>
-    <div class="btn foot-btn" data-comp="button/footer" role="button" tabindex="0">
-      <div class="btn-fluid"><svg class="btn-shape" width="147" height="41.5" viewBox="0 0 147 41.5" fill="none"><clipPath class="bclip" id="bclip3"><path d="M33.25 13.65C36.23 5.46 44.03 0 52.75 0L126.25 0C137.71 0 147 9.29 147 20.75C147 32.21 137.71 41.5 126.25 41.5L52.75 41.5C44.13 41.5 36.41 36.17 33.35 28.12L32.9 28.08C29.99 37.48 21.99 42.99 13.89 41.15C5.8 39.32 -0.05 30.67 0 20.62C0.05 10.58 5.99 2.02 14.1 0.3C22.21 -1.41 30.16 4.21 32.97 13.65Z"></path></clipPath><path class="bpath" d="M33.25 13.65C36.23 5.46 44.03 0 52.75 0L126.25 0C137.71 0 147 9.29 147 20.75C147 32.21 137.71 41.5 126.25 41.5L52.75 41.5C44.13 41.5 36.41 36.17 33.35 28.12L32.9 28.08C29.99 37.48 21.99 42.99 13.89 41.15C5.8 39.32 -0.05 30.67 0 20.62C0.05 10.58 5.99 2.02 14.1 0.3C22.21 -1.41 30.16 4.21 32.97 13.65Z" fill="var(--btn3-fill)" stroke="var(--btn3-stroke)" stroke-width="1" clip-path="url(#bclip3)"></path></svg><i class="btn-dot"></i></div>
+    <div class="btn foot-btn" data-h="48" data-pad="6" data-shift="5" data-comp="button/footer" role="button" tabindex="0">
+      <div class="btn-fluid"><svg class="btn-shape" width="158" height="48" viewBox="0 0 158 48" fill="none"><clipPath class="bclip" id="bclip3"><path d="M37.83 14.83C41.54 5.85 50.3 0 60.01 0L134 0C147.25 0 158 10.75 158 24C158 37.25 147.25 48 134 48L60.01 48C50.3 48 41.54 42.15 37.83 33.17L37.83 33.17C34.25 43.75 25.04 49.77 15.83 47.54C6.63 45.31 0 35.45 0 24C0 12.55 6.63 2.69 15.83 0.46C25.04 -1.77 34.25 4.25 37.83 14.83Z"></path></clipPath><path class="bpath" d="M37.83 14.83C41.54 5.85 50.3 0 60.01 0L134 0C147.25 0 158 10.75 158 24C158 37.25 147.25 48 134 48L60.01 48C50.3 48 41.54 42.15 37.83 33.17L37.83 33.17C34.25 43.75 25.04 49.77 15.83 47.54C6.63 45.31 0 35.45 0 24C0 12.55 6.63 2.69 15.83 0.46C25.04 -1.77 34.25 4.25 37.83 14.83Z" fill="var(--btn3-fill)" stroke="var(--btn3-stroke)" stroke-width="2.4" clip-path="url(#bclip3)"></path></svg><i class="btn-dot"></i></div>
       <span class="btn-label" style="color:var(--btn3-label)">Let's Talk</span>
-      <svg class="btn-arr al" width="10" height="12" viewBox="11.9 14.75 10 12" fill="none" style="color:var(--btn3-arrow)"><path d="M12.3984 20.747H21.3984M17.8726 23.7109L21.3984 20.747L17.8726 17.7832" stroke="currentColor"></path></svg>
-      <svg class="btn-arr ar" width="10" height="12" viewBox="11.9 14.75 10 12" fill="none" style="color:var(--btn3-arrow)"><path d="M12.3984 20.747H21.3984M17.8726 23.7109L21.3984 20.747L17.8726 17.7832" stroke="currentColor"></path></svg>
+      <svg class="btn-arr al" width="12.22" height="14.67" viewBox="11.9 14.75 10 12" fill="none" overflow="visible" style="color:var(--btn3-arrow)"><path d="M12.3984 20.747H21.3984M17.8726 23.7109L21.3984 20.747L17.8726 17.7832" stroke="currentColor" stroke-width="1.2" vector-effect="non-scaling-stroke"></path></svg>
+      <svg class="btn-arr ar" width="12.22" height="14.67" viewBox="11.9 14.75 10 12" fill="none" overflow="visible" style="color:var(--btn3-arrow)"><path d="M12.3984 20.747H21.3984M17.8726 23.7109L21.3984 20.747L17.8726 17.7832" stroke="currentColor" stroke-width="1.2" vector-effect="non-scaling-stroke"></path></svg>
     </div>
     <div class="socials" data-comp="social-icons">
       <div class="ico"><i style="left:.73px;top:1.5px;width:16.0295px;height:14.4892px;-webkit-mask-image:url(./assets/social-x-16x14.svg);mask-image:url(./assets/social-x-16x14.svg)"></i></div>
@@ -2094,5 +2122,14 @@ class Component extends DCLogic {
   new MutationObserver(function(){ if(q)return; q=requestAnimationFrame(function(){ q=0; arm(); }); }).observe(document.documentElement,{childList:true,subtree:true});
 })();
 </script>
+<!-- GRAIN-OVERLAY:START — 2a capa de grano sobre el .grain original. Ajuste aprobado 2026-09-20 -->
+<div class="grain-overlay" aria-hidden="true"></div>
+<style>
+  .grain-overlay{position:fixed;inset:0;pointer-events:none;z-index:2147483000;
+    background-image:url('./assets/texture-grain.png');background-repeat:repeat;
+    background-size:281.6px 281.6px;   /* grano en pantalla 1.1 px */
+    opacity:.42;mix-blend-mode:overlay;will-change:transform}
+</style>
+<!-- GRAIN-OVERLAY:END -->
 </body>
 </html>
