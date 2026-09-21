@@ -301,6 +301,12 @@ a:hover{color:var(--lime400)}
   .bgfade{display:block;position:absolute;inset:0;background:var(--bg);pointer-events:none}
   .team,.more,.cta,.foot{--fade-p:1;background:var(--bg)}
   .about{isolation:isolate}
+  /* .cluster-wrap sube con margen negativo (-189px y mas segun el ancho) y su
+     ::after pinta var(--bg) solido para desvanecer los blobs: como .about va
+     despues en el DOM, esa capa tapaba el final del ultimo item de Selected
+     Work. z-index:1 pone .work por encima de .about sin mover nada de layout;
+     la mascara, los blobs y el desvanecido de .about quedan intactos. */
+  .work{z-index:1}
   .foot{position:relative}
   html.luz,html.luz body{background:var(--bg-l)}
 }
