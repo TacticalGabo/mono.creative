@@ -428,6 +428,7 @@ class Component extends DCLogic {
       if (this.activeGen !== gen) return;
       for (const b of this.blobs) {
         const on = b.id === id;
+        if (b.shape.style.fill !== (on ? 'var(--wb-accent,#B8FF00)' : b.base.fill)) this.fade(b);
         b.shape.style.fill = on ? 'var(--wb-accent,#B8FF00)' : b.base.fill;
         (b.strokeP || b.shape).style.stroke = on ? 'var(--wb-accent,#B8FF00)' : b.base.stroke;
         b.labelPaths.forEach(p => { p.style.fill = on ? 'var(--wb-label-on-accent,#101913)' : b.base.label; });
@@ -441,6 +442,17 @@ class Component extends DCLogic {
       this.raise(hit);
       requestAnimationFrame(paint);
     } else paint();
+  }
+
+  // Fundido breve del cambio de color. La transición se pone solo en el blob
+  // que cambia (el que se enciende y el que se apaga) y se quita al terminar,
+  // para no dejar ~40 nodos SVG con transiciones vivas durante el scroll.
+  fade(b) {
+    const T = 'fill 220ms ease-out, stroke 220ms ease-out';
+    const els = [b.shape, b.strokeP || b.shape].concat(b.labelPaths);
+    els.forEach(el => { el.style.transition = T; });
+    clearTimeout(b.fadeT);
+    b.fadeT = setTimeout(() => els.forEach(el => { el.style.transition = ''; }), 260);
   }
 
   raise(b) {
