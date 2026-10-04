@@ -2,7 +2,7 @@
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<script>/* tema elegido en el toggle (home o entry); sin elección = light */try{var t=localStorage.getItem('mc-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<script>/* .js síncrono (antes lo ponía case-study.js, diferido: según qué llegaba antes, el hero se veía, se ocultaba y reaparecía) + tema elegido en el toggle (home o entry); sin elección = light */document.documentElement.classList.add('js');try{var t=localStorage.getItem('mc-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
 <link rel="icon" type="image/svg+xml" href="./assets/logo-favicon-48x29.svg?v=3">
 <title>Jupiter DTF — Case study · mono.creative</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -155,6 +155,19 @@ html.js main[data-case="jupiter"] [data-reveal="wipe"] .media.ir-in:not(.ba__img
   animation:ir-wipe .9s cubic-bezier(.76,0,.24,1) calc(var(--ir-d,0s) + .3s) both,
             ir-round .7s cubic-bezier(.33,1,.68,1) calc(var(--ir-d,0s) + .8s) both}
 html.js main[data-case="jupiter"] [data-reveal="wipe"] .media.ir-done:not(.ba__img){clip-path:none;animation:none}
+/* PRIMER PANTALLAZO (5.1 hero) SOLO CON CSS: arranca en el mismo instante que el header
+   (al montar), sin esperar al IntersectionObserver de case-study.js ni al de este bloque.
+   Con el hilo ocupado tras el montaje (React, componentes, curva de constraints), esos
+   avisos llegaban hasta ~2 s tarde y el hero se quedaba en blanco con el header ya visible. */
+html.js main[data-case="jupiter"] .cs-hero.fx{animation:fx-in-b .7s ease .1s both}
+html.js main[data-case="jupiter"] .cs-hero .fx-line{animation:fx-in-b .7s ease both;animation-delay:calc(.1s + var(--i) * .3s)}
+html.js main[data-case="jupiter"] .cs-hero .cs-hero__col::before{animation:ln-draw 1.15s cubic-bezier(.7,-.12,.18,1) .3s both}
+html.js main[data-case="jupiter"] .cs-hero .cs-hero__col+.cs-hero__col::before{animation-delay:.45s}
+html.js main[data-case="jupiter"] .cs-hero .media{opacity:1;
+  animation:ir-fade 1.3s cubic-bezier(.33,0,.2,1) .1s both,
+            ir-pop 1.3s var(--ir-out) .1s both,
+            ir-round 1.2s var(--ir-snap) .55s both}
+html.js main[data-case="jupiter"] .cs-hero .media.ir-done{animation:none}
 @keyframes ir-wipe{from{clip-path:inset(0 0 100% 0)}}
 @keyframes ir-fade{from{opacity:0}to{opacity:1}}
 @keyframes ir-pop{from{scale:.955}to{scale:1}}
@@ -164,6 +177,8 @@ html.js main[data-case="jupiter"] [data-reveal="wipe"] .media.ir-done:not(.ba__i
   html.js main[data-case="jupiter"] .media:not(.ba__img) :is(.fb__screen,.csc__inner),
   html.js main[data-case="jupiter"] [data-reveal="wipe"] .media.ir-in:not(.ba__img),
   html.js main[data-case="jupiter"] [data-reveal="wipe"] .media.ir-in:not(.ba__img) :is(.fb__screen,.csc__inner){opacity:1;clip-path:none;animation:none}
+  html.js main[data-case="jupiter"] .cs-hero.fx,html.js main[data-case="jupiter"] .cs-hero .fx-line,html.js main[data-case="jupiter"] .cs-hero .media{opacity:1;animation:none}
+  html.js main[data-case="jupiter"] .cs-hero .cs-hero__col::before{transform:none;animation:none}
 }
 </style>
 <script>
@@ -175,7 +190,8 @@ html.js main[data-case="jupiter"] [data-reveal="wipe"] .media.ir-done:not(.ba__i
     /* esperar a la página montada por el runtime (fuera de <x-dc>), igual que case-study.js */
     var main=live('main[data-case="jupiter"]')[0];
     if(!main)return setTimeout(init,120);
-    var imgs=[].slice.call(main.querySelectorAll('.media:not(.ba__img)'));
+    var imgs=[].slice.call(main.querySelectorAll('.media:not(.ba__img)')).filter(function(el){return !el.closest('.cs-hero')});   /* el hero lo anima el CSS */
+    [].forEach.call(main.querySelectorAll('.cs-hero .media'),function(el){el.addEventListener('animationend',function(e){if(e.target===el&&e.animationName==='ir-round')el.classList.add('ir-done')})});
     var lazy=[].slice.call(main.querySelectorAll('[data-asset]:not([data-asset="hero"]):not(.avatar)'))
       .filter(function(el){return !el.parentElement.closest('[data-asset]')});   /* las internas cargan con su fondo */
     /* OJO runtime: en scripts del helmet, nada de nombres camelCase con espacio delante y = detrás (los reescribe y rompe el script): usar snake_case */
