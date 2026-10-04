@@ -334,7 +334,7 @@ html .page,html .page *{cursor:none}
 /* button */
 .btn{position:relative;width:147px;height:42px;flex:none;cursor:pointer;outline:none}
 .btn .btn-fluid{position:absolute;left:0;top:0;width:100%;height:100%}
-.btn .btn-dot{position:absolute;left:0;top:0;width:24px;height:24px;border-radius:50%;background:var(--accent);transform:translate(-50%,-50%);opacity:0;will-change:transform}
+.btn .btn-dot{position:absolute;left:0;top:0;width:24px;height:24px;border-radius:50%;background:var(--accent);transform:translate(-50%,-50%);opacity:0;will-change:transform;pointer-events:none}
 @media (hover:hover) and (pointer:fine){
   .btn.goo .btn-fluid{filter:url(#goo)}
 }
