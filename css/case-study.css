@@ -425,6 +425,13 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
   .legal-r{grid-row:1;grid-column:3;justify-self:end}
 }
 /* /SHARED:CSS-CTA-FOOT */
+/* (2026-10-04) placeholder del runtime invisible: mientras se descarga un componente
+   (logo del header, burbuja del CTA, marcas del footer) el runtime pinta una caja con
+   borde que parecía una imagen rota. Conserva su tamaño (no mueve nada); el componente
+   aparece en su sitio al cargar. Gana a BASE_CSS de support.js por especificidad. */
+html .page .sc-placeholder{background:none;border-color:transparent}
+html .page .sc-placeholder::before{display:none}
+
 @keyframes fx-in{from{opacity:0}to{opacity:1}}
 .nav,.cta,.foot{animation:fx-in .7s ease .1s both}
 
