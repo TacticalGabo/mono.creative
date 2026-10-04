@@ -18,9 +18,94 @@
 if(!r[u+'react@18.3.1/umd/react.production.min.js'])r[u+'react@18.3.1/umd/react.production.min.js']='./vendor/react.production.min.js';
 if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.1/umd/react-dom.production.min.js']='./vendor/react-dom.production.min.js';})();
 </script>
+<!-- (2026-10-04) CARGA: componentes que NO se ven al abrir la página no compiten
+     con el hero. Cada componente es un fetch del runtime + compilar su plantilla:
+     los dos de blobs pesan ~40 KB comprimidos y ~100 KB de plantilla CADA UNO, y
+     antes se bajaban y montaban los dos (el de desktop también en el móvil, donde
+     va con display:none) mientras el teléfono intentaba sacar el hero.
+     Ahora:
+       · la variante del otro ancho (blobs-cluster-desktop / header-logo-hover en
+         móvil, blobs-cluster-mobile en desktop) solo se pide si ese ancho llega a
+         aplicarse (giro, resize) — ni se ve ni se descarga;
+       · los de más abajo (blobs, cta-bubble) se piden al terminar la carga
+         (tras 'mc:arranca' + load + 1,2 s en tiempo libre) o al primer scroll/
+         toque, lo que llegue antes. Su caja la fija el CSS (contain:size /
+         aspect-ratio / ancho fijo), así que el layout no se mueve al montarlos.
+     Mientras, su placeholder del runtime va oculto (antes salía un recuadro). -->
+<style>.cluster-m .sc-placeholder,.cluster-d .sc-placeholder,.cta-bubble .sc-placeholder{visibility:hidden}</style>
+<script>
+(function(){
+  var F=window.fetch; if(!F||!window.Promise||!window.matchMedia)return;
+  var ANCHO='(min-width:768px)';
+  // nombre -> [ancho en el que se ve: 'd' desktop, 'm' móvil, null ambos, ¿espera al fin de la carga?]
+  var REGLAS={
+    'header-logo-hover':['d',0],
+    'blobs-cluster-desktop':['d',1],
+    'blobs-cluster-mobile':['m',1],
+    'cta-bubble':[null,1]
+  };
+  var libre=0, cola=[];
+  function soltar(){ if(libre)return; libre=1; var c=cola; cola=[]; for(var i=0;i<c.length;i++)c[i](); }
+  function se_ve(q){ if(!q)return true; var d=matchMedia(ANCHO).matches; return q==='d'?d:!d; }
+  window.fetch=function(u){
+    var m=typeof u==='string'&&/(?:^|\/)components\/([a-z0-9-]+)\.dc\.html$/.exec(u);
+    var r=m&&REGLAS[m[1]];
+    if(!r)return F.apply(this,arguments);
+    var yo=this, args=arguments;
+    return new Promise(function(ok,ko){
+      function pide(){ F.apply(yo,args).then(ok,ko); }
+      function por_ancho(){
+        if(se_ve(r[0]))return pide();
+        var mq=matchMedia(ANCHO);
+        function cambio(){
+          if(!se_ve(r[0]))return;
+          if(mq.removeEventListener)mq.removeEventListener('change',cambio); else mq.removeListener(cambio);
+          pide();
+        }
+        if(mq.addEventListener)mq.addEventListener('change',cambio); else mq.addListener(cambio);
+      }
+      if(!r[1]||libre)por_ancho(); else cola.push(por_ancho);
+    });
+  };
+  function tras_load(){
+    setTimeout(function(){
+      if(window.requestIdleCallback)requestIdleCallback(soltar,{timeout:2000}); else soltar();
+    },1200);
+  }
+  function arrancada(){
+    if(document.readyState==='complete')tras_load(); else addEventListener('load',tras_load,{once:true});
+    ['scroll','touchstart','wheel','keydown','pointerdown'].forEach(function(e){ addEventListener(e,soltar,{once:true,passive:true}); });
+  }
+  if(window.__mcArrancado)arrancada(); else addEventListener('mc:arranca',arrancada,{once:true});
+  setTimeout(soltar,16000);   // red de seguridad, pase lo que pase
+})();
+</script>
+<!-- (2026-10-04) CARGA: la pantalla de carga se pinta desde el primer byte. La de
+     verdad (#boot) vive dentro de la plantilla y no existe hasta que el runtime
+     baja React, compila la página y la monta: hasta entonces el móvil enseñaba
+     una pantalla oscura vacía. #boot0 es una copia exacta (mismo CSS, barra a 0)
+     que se quita en cuanto aparece #boot, así que solo adelanta lo que ya se veía. -->
+<style>
+#boot0{position:fixed;inset:0;z-index:99999;background:#101913;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+#boot0 .b0bar{width:180px;height:2px;background:#2a352d;border-radius:2px;overflow:hidden}
+#boot0 .b0msg{font-family:'Space Mono',ui-monospace,monospace;font-size:11px;line-height:1;letter-spacing:.02em;color:#87918b}
+</style>
 <script src="./vendor/support.js"></script>
 </head>
 <body>
+<script>
+(function(){
+  var b=document.createElement('div');
+  b.id='boot0'; b.setAttribute('aria-hidden','true');
+  b.innerHTML='<div class="b0bar"></div><div class="b0msg">Preparing…</div>';
+  document.body.appendChild(b);
+  var t0=Date.now();
+  (function vigila(){
+    if(document.getElementById('boot')||Date.now()-t0>16000){ if(b.parentNode)b.parentNode.removeChild(b); return; }
+    setTimeout(vigila,16);
+  })();
+})();
+</script>
 <x-dc>
 <helmet>
 <script>
@@ -68,9 +153,36 @@ window.MC_GEOM = G;
 window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEOM); else setTimeout(p, 30); })(); };
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;1,600&amp;family=Space+Mono&amp;display=swap" rel="stylesheet" />
+<!-- FONTS-LOCAL:START (2026-10-04) CARGA: fuentes servidas desde el propio dominio en vez
+     de Google Fonts. Es el CSS EXACTO que devolvia la API CSS de Google para esta pagina
+     (mismos pesos 400/500/600 + 600 italica, mismos subsets y unicode-range) y los MISMOS
+     woff2 del CDN de Google (Plus Jakarta Sans v12, Space Mono v17), guardados en
+     ./fonts/google/. Se ve identico y quita 2 conexiones externas (DNS+TLS) del arranque.
+     No usar los de ./fonts/<familia>/webfont aqui: son otra compilacion (bytes distintos) y
+     con rango 200-800 cambiarian el peso de <b> y de las cursivas.
+     build-standalone.py sustituye este bloque por sus fuentes incrustadas. -->
+<style>
+@font-face{font-family:'Plus Jakarta Sans';font-style:italic;font-weight:600;font-display:swap;src:url(./fonts/google/plusjakartasans-v12-LDIZaomQNQcsA88c7O9yZ4KMCoOg4KozySKCdSNG9OcqYQ37Di_aOKyKRN2l0Fs.woff2) format('woff2');unicode-range:U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F}
+@font-face{font-family:'Plus Jakarta Sans';font-style:italic;font-weight:600;font-display:swap;src:url(./fonts/google/plusjakartasans-v12-LDIZaomQNQcsA88c7O9yZ4KMCoOg4KozySKCdSNG9OcqYQ37Di_YOKyKRN2l0Fs.woff2) format('woff2');unicode-range:U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB}
+@font-face{font-family:'Plus Jakarta Sans';font-style:italic;font-weight:600;font-display:swap;src:url(./fonts/google/plusjakartasans-v12-LDIZaomQNQcsA88c7O9yZ4KMCoOg4KozySKCdSNG9OcqYQ37Di_ZOKyKRN2l0Fs.woff2) format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF}
+@font-face{font-family:'Plus Jakarta Sans';font-style:italic;font-weight:600;font-display:swap;src:url(./fonts/google/plusjakartasans-v12-LDIZaomQNQcsA88c7O9yZ4KMCoOg4KozySKCdSNG9OcqYQ37Di_XOKyKRN2l.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:400;font-display:swap;src:url(./fonts/google/plusjakartasans-v12-LDIoaomQNQcsA88c7O9yZ4KMCoOg4Ko70yygg_vbd-E.woff2) format('woff2');unicode-range:U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F}
+@font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:400;font-display:swap;src:url(./fonts/google/plusjakartasans-v12-LDIoaomQNQcsA88c7O9yZ4KMCoOg4Ko50yygg_vbd-E.woff2) format('woff2');unicode-range:U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB}
+@font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:400;font-display:swap;src:url(./fonts/google/plusjakartasans-v12-LDIoaomQNQcsA88c7O9yZ4KMCoOg4Ko40yygg_vbd-E.woff2) format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF}
+@font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:400;font-display:swap;src:url(./fonts/google/plusjakartasans-v12-LDIoaomQNQcsA88c7O9yZ4KMCoOg4Ko20yygg_vb.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:500;font-display:swap;src:url(./fonts/google/plusjakartasans-v12-LDIoaomQNQcsA88c7O9yZ4KMCoOg4Ko70yygg_vbd-E.woff2) format('woff2');unicode-range:U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F}
+@font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:500;font-display:swap;src:url(./fonts/google/plusjakartasans-v12-LDIoaomQNQcsA88c7O9yZ4KMCoOg4Ko50yygg_vbd-E.woff2) format('woff2');unicode-range:U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB}
+@font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:500;font-display:swap;src:url(./fonts/google/plusjakartasans-v12-LDIoaomQNQcsA88c7O9yZ4KMCoOg4Ko40yygg_vbd-E.woff2) format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF}
+@font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:500;font-display:swap;src:url(./fonts/google/plusjakartasans-v12-LDIoaomQNQcsA88c7O9yZ4KMCoOg4Ko20yygg_vb.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:600;font-display:swap;src:url(./fonts/google/plusjakartasans-v12-LDIoaomQNQcsA88c7O9yZ4KMCoOg4Ko70yygg_vbd-E.woff2) format('woff2');unicode-range:U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F}
+@font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:600;font-display:swap;src:url(./fonts/google/plusjakartasans-v12-LDIoaomQNQcsA88c7O9yZ4KMCoOg4Ko50yygg_vbd-E.woff2) format('woff2');unicode-range:U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB}
+@font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:600;font-display:swap;src:url(./fonts/google/plusjakartasans-v12-LDIoaomQNQcsA88c7O9yZ4KMCoOg4Ko40yygg_vbd-E.woff2) format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF}
+@font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:600;font-display:swap;src:url(./fonts/google/plusjakartasans-v12-LDIoaomQNQcsA88c7O9yZ4KMCoOg4Ko20yygg_vb.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Space Mono';font-style:normal;font-weight:400;font-display:swap;src:url(./fonts/google/spacemono-v17-i7dPIFZifjKcF5UAWdDRYE58RXi4EwSsbg.woff2) format('woff2');unicode-range:U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB}
+@font-face{font-family:'Space Mono';font-style:normal;font-weight:400;font-display:swap;src:url(./fonts/google/spacemono-v17-i7dPIFZifjKcF5UAWdDRYE98RXi4EwSsbg.woff2) format('woff2');unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF}
+@font-face{font-family:'Space Mono';font-style:normal;font-weight:400;font-display:swap;src:url(./fonts/google/spacemono-v17-i7dPIFZifjKcF5UAWdDRYEF8RXi4EwQ.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+</style>
+<!-- FONTS-LOCAL:END -->
 <style>
 :root{
   --sans:'Plus Jakarta Sans',sans-serif; --mono:'Space Mono',monospace;
@@ -1038,7 +1150,7 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
   var ANCHOR='.about', OFF_START=0, OFF_END=420;
   function init(){
     var page=document.querySelector('.page');
-    if(!page)return setTimeout(init,120);
+    if(!page||document.querySelector('x-dc'))return setTimeout(init,120);
     var tick=0, last_p=-1, base=null;
     // Suavizado del cruce. El scroll ya no pinta: fija p_target, y un seguidor
     // exponencial en rAF lo persigue. TODO el cruce sale de UNA sola escritura
@@ -1228,7 +1340,8 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
   if(window.__mcChips)return; window.__mcChips=1;
   function init(){
     var chips=document.querySelectorAll('.chip');
-    if(!chips.length)return setTimeout(init,120);
+    // (2026-10-04) '|| x-dc': mientras exista <x-dc> lo que hay en el DOM es la plantilla CRUDA (oculta) que el runtime va a tirar al montar; si el script se engancha a esos nodos, sus cambios se pierden. Antes lo tapaba por casualidad el CSS de Google Fonts, que retenía estos scripts. Igual en todos los init que sondean.
+    if(!chips.length||document.querySelector('x-dc'))return setTimeout(init,120);
     // cada pestaña arranca el mosaico en un estado distinto del ciclo de 14 s
     var OFFSET=[0,3.5,7], names=null, metas=null;
     // cada pestaña muestra otro conjunto de imágenes, como si fueran otros proyectos
@@ -1345,7 +1458,7 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
   var CYCLE=14000, HOLDS=[[0,2500],[3500,6000],[7000,9500],[10500,13000]];
   function init(){
     var g=document.querySelector('.grid2');
-    if(!g)return setTimeout(init,120);
+    if(!g||document.querySelector('x-dc'))return setTimeout(init,120);
     var kid=g.querySelector('.f-gvrn'),timer=null;
     function pos(){
       var an=kid&&kid.getAnimations?kid.getAnimations()[0]:null;
@@ -1375,7 +1488,7 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
   if(window.__mcCursor)return; window.__mcCursor=1;
   function init(){
     var page=document.querySelector('.page');
-    if(!page)return setTimeout(init,120);
+    if(!page||document.querySelector('x-dc'))return setTimeout(init,120);
     // El punto verde solo existe en desktop con ratón. En un teléfono el toque
     // genera un mousemove sintético y el punto aparecía y se quedaba puesto,
     // estorbando. Aquí ni siquiera se crea el elemento.
@@ -1535,7 +1648,7 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
     }
   }
   function init(){
-    if(!document.querySelector('.btn'))return setTimeout(init,120);
+    if(!document.querySelector('.btn')||document.querySelector('x-dc'))return setTimeout(init,120);
     var ZONE=40, tick=0, ev=null, focused=null;
     function frame(){
       tick=0;
@@ -1629,7 +1742,7 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
   if(window.__mcGlowIO)return; window.__mcGlowIO=1;
   function init(){
     var hero=document.querySelector('.hero');
-    if(!hero)return setTimeout(init,120);
+    if(!hero||document.querySelector('x-dc'))return setTimeout(init,120);
     if(!('IntersectionObserver' in window))return;
     var io=new IntersectionObserver(function(es){
       for(var i=0;es.length>i;i++)es[i].target.classList.toggle('idle',!es[i].isIntersecting);
@@ -1679,7 +1792,7 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
     return t;
   }
   function init(){
-    if(!document.querySelector('.capsule-line'))return setTimeout(init,120);
+    if(!document.querySelector('.capsule-line')||document.querySelector('x-dc'))return setTimeout(init,120);
     var i=0, busy=false;
     function paint(el, txt){
       el.textContent = txt;
@@ -1854,6 +1967,23 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
     arranca();
     setP(1);   // paint() se encarga del .done y de quitarlo 600 ms después
   }
+  // (2026-10-04) CARGA: la pantalla solo espera las imágenes que se ven al
+  // quitarla. Antes esperaba TODAS las de las hojas de estilo (avatares del
+  // equipo, portadas de más abajo...): en red lenta, cientos de KB que nadie ve
+  // hasta hacer scroll. Esas siguen bajando igual (el navegador pide el fondo
+  // de todo lo que pinta); solo dejan de retener la página. Ante la duda
+  // (un selector que no se puede evaluar) se espera, como antes.
+  function en_vista(el){
+    var r=el.getBoundingClientRect(), vh=window.innerHeight||document.documentElement.clientHeight;
+    return r.width>0&&r.height>0&&r.bottom>0&&r.top<vh;
+  }
+  function regla_en_vista(rule){
+    var sel=rule.selectorText.replace(/::?(before|after|first-line|first-letter|placeholder|selection|marker|backdrop|-webkit-[a-z-]+)/gi,'');
+    var list;
+    try{ list=document.querySelectorAll(sel); }catch(e){ return true; }
+    for(var k=0;k<list.length;k++)if(en_vista(list[k]))return true;
+    return false;
+  }
   // Las imágenes: en el archivo único están en variables CSS (MC_ASSET_VARS lo
   // deja el generador); servido por HTTP hay que barrer las hojas de estilo.
   function urls(){
@@ -1871,21 +2001,28 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
       }
     } else {
       var sh=document.styleSheets;
-      for(i=0;i<sh.length;i++){
-        var rs=null;
-        try{ rs=sh[i].cssRules; }catch(e){ continue; }
-        for(j=0;rs&&j<rs.length;j++){
+      var barre=function(rs){
+        for(var j=0;rs&&j<rs.length;j++){
+          var r=rs[j];
           // (2026-10-04) las reglas de un @media que no aplica (las imágenes solo
           // de desktop en un móvil y al revés) no se descargan aquí: no se ven
-          if(rs[j].media&&rs[j].media.mediaText&&!matchMedia(rs[j].media.mediaText).matches)continue;
-          var t=rs[j].cssText||'';
+          if(r.media&&r.media.mediaText&&!matchMedia(r.media.mediaText).matches)continue;
+          var t=r.cssText||'';
           if(t.indexOf('url(')<0)continue;
+          // @media / @supports que sí aplican: se mira regla por regla
+          if(r.cssRules&&r.selectorText===undefined){ barre(r.cssRules); continue; }
+          if(r.selectorText!==undefined&&!regla_en_vista(r))continue;
           var re=/url\((['"]?)([^)'"]+)\1\)/g;
           while((m=re.exec(t)))add(m[2]);
         }
+      };
+      for(i=0;i<sh.length;i++){
+        var rs=null;
+        try{ rs=sh[i].cssRules; }catch(e){ continue; }
+        barre(rs);
       }
     }
-    for(i=0;i<document.images.length;i++)add(document.images[i].currentSrc||document.images[i].src);
+    for(i=0;i<document.images.length;i++)if(en_vista(document.images[i]))add(document.images[i].currentSrc||document.images[i].src);
     return out;
   }
   function decode(list,done){
@@ -2003,7 +2140,7 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
   }
   function init(){
     var marca=document.getElementById('mc-mark-start');
-    if(window.__mcSwapY==null||!boton()||!marca)return setTimeout(init,150);
+    if(window.__mcSwapY==null||!boton()||!marca||document.querySelector('x-dc'))return setTimeout(init,150);
     if('IntersectionObserver' in window){
       new IntersectionObserver(function(es){
         var e=es[es.length-1];
@@ -2035,7 +2172,7 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
     if(hecho)return;
     var links=document.querySelectorAll('.page .nav-link'), el=null;
     for(var i=0;i<links.length;i++)if(links[i].textContent.trim()===objetivo)el=links[i];
-    if(!el)return setTimeout(ir,150);
+    if(!el||document.querySelector('x-dc'))return setTimeout(ir,150);
     hecho=1;
     // un respiro para que el overlay termine de irse y el layout se asiente
     setTimeout(function(){ el.click(); },450);
