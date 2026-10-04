@@ -288,7 +288,7 @@ html .page,html .page *{cursor:none}
 }
 .logo-mark{display:none !important;width:53.998px;height:22.909px}
 .logo-word{display:none !important;width:148.269px;height:16.981px}
-.nav-right{display:flex;align-items:center;gap:8px}
+.nav-right{display:flex;align-items:center;gap:12px}   /* mobile: 12 entre botón, toggle y menú (mono.case_mobile.html) */
 .nav-links{display:none;gap:40px}
 .nav-link{font-family:var(--mono);font-size:13px;line-height:24px;letter-spacing:.2px;color:var(--nav-link);white-space:nowrap}
 .nav-link{position:relative}
@@ -297,10 +297,13 @@ html .page,html .page *{cursor:none}
 .nav-link:hover{color:var(--accent)}
 .nav-link:hover::after,.nav-link.on::after{transform:scaleX(1)}
 .nav-link.on{color:var(--nav-link-on)}
-.menu{position:relative;width:48px;height:48px;border-radius:12px;display:flex;flex-direction:column;gap:7.39px;justify-content:center;align-items:center}
-.menu span{width:19px;height:1.69px;background:var(--nav-link)}
+/* hamburguesa (2026-10-04): sin contorno, medidas del header mobile del case study:
+   caja 29x42, dos líneas de 20 a x3, separadas 7 (centro a centro), 1.6 de grosor.
+   Color: forest-600 en light, neutral-200 en dark. */
+.menu{position:relative;width:29px;height:42px;flex:none;display:flex;flex-direction:column;gap:5.4px;justify-content:center;align-items:flex-start;padding-left:3px;cursor:pointer}
+.menu span{width:20px;height:1.6px;background:color-mix(in oklab,#2c513a calc(var(--fade-p,0) * 100%),#bec8c2)}
 /* contorno en SVG: un border CSS de 1.2px Chrome lo redondea a 1px; el trazo SVG no (igual que el CTA) */
-.menu-ring{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.menu-ring{display:none}   /* contorno retirado 2026-10-04 (antes: SVG 48x48 r11.4, trazo --btn1-stroke) */
 .menu-ring rect{fill:none;stroke:var(--btn1-stroke);stroke-width:1.2px}
 @media (min-width:768px){
   .nav-anim-m{display:none}
