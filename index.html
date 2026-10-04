@@ -250,6 +250,8 @@ a:hover{color:var(--lime400)}
 #bar b{display:block;height:100%;width:0;background:#b8ff00;transition:width .18s ease}
 #bootmsg{font-family:'Space Mono',ui-monospace,monospace;font-size:11px;line-height:1;letter-spacing:.02em;color:#87918b}
 .page{container-type:inline-size;position:relative;max-width:1920px;margin:0 auto;overflow:clip;background:var(--bg)}
+/* al pulsar una entry: fundido inmediato al fondo mientras carga (ver __mcCase) */
+html.mc-leaving .page{opacity:0;transition:opacity .28s ease-out}
 .fade-mark{position:absolute;left:0;right:0;height:0;border-top:1px dashed #ff0000;z-index:9998;pointer-events:none}
 .fade-mark b{position:absolute;left:8px;top:-16px;font-family:var(--mono);font-size:11px;color:#ff0000;background:rgba(0,0,0,.35);padding:1px 4px}
 .wrap{padding-inline:var(--m)}
@@ -2046,35 +2048,45 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
 /* tarjetas de Selected Work con case study: data-case="./casestudy_X.html" abre su página */
 (function(){
   if(window.__mcCase)return; window.__mcCase=1;
-  /* (2026-10-04) en el móvil el toque "no abría": el navegador deja el home a la vista
-     hasta que la entry pinta, y la entry no pinta nada hasta montar (segundos en móvil).
-     1) Al apoyar el dedo / pasar el ratón se prepara la entry: prerender en Chrome
-        (speculation rules: al pulsar se activa al instante), prefetch en el resto.
-     Sin fundido al pulsar: se percibía como un retraso. */
-  var warmed={};
+  /* (2026-10-04) en el móvil (Android de gama baja) el home se quedaba 1-2 s congelado
+     al tocar una entry: se navegaba en el acto, el navegador dejaba congelada la última
+     imagen del home (sin fundir: con el hilo ocupado el fundido no llegaba a empezar)
+     hasta que la entry pintaba tras montar React.
+     1) Al pulsar: primero el fundido al fondo (.28 s, por compositor) y la navegación al
+        terminar; lo que se ve mientras carga la entry es el fondo, nunca el home congelado.
+     2) Al apoyar el dedo / pasar el ratón: prefetch del HTML de la entry (solo descarga,
+        no ejecuta nada). NO prerender: arrancar la entry entera en segundo plano le roba
+        CPU al home justo en el toque en un teléfono modesto. */
+  var warmed={}, leaving=0;
   function warm(e){
     var f=e.target.closest&&e.target.closest('[data-case]'); if(!f)return;
     var u=new URL(f.getAttribute('data-case'),location.href).href; if(warmed[u])return; warmed[u]=1;
     var sp=window.HTMLScriptElement&&HTMLScriptElement.supports&&HTMLScriptElement.supports('speculationrules');
     var el=document.createElement(sp?'script':'link');
-    if(sp){el.type='speculationrules';el.textContent=JSON.stringify({prerender:[{source:'list',urls:[u]}]})}
+    if(sp){el.type='speculationrules';el.textContent=JSON.stringify({prefetch:[{source:'list',urls:[u]}]})}
     else{el.rel='prefetch';el.href=u}
     document.head.appendChild(el);
+  }
+  function open_case(f){
+    if(leaving)return; leaving=1;
+    var u=f.getAttribute('data-case');
+    document.documentElement.classList.add('mc-leaving');
+    setTimeout(function(){window.location.href=u},300);   /* = duración del fundido */
   }
   document.addEventListener('pointerdown',warm,{passive:true});
   document.addEventListener('touchstart',warm,{passive:true});
   document.addEventListener('mouseover',warm,{passive:true});
   document.addEventListener('click',function(e){
     var f=e.target.closest&&e.target.closest('[data-case]');
-    if(!f)return;
-    window.location.href=f.getAttribute('data-case');
+    if(f)open_case(f);
   });
-
+  /* al volver con "atrás" (bfcache) la página no debe seguir fundida */
+  addEventListener('pageshow',function(){leaving=0;document.documentElement.classList.remove('mc-leaving')});
   /* teclado: Enter sobre la tarjeta (role=link, tabindex=0) */
   document.addEventListener('keydown',function(e){
     if(e.key!=='Enter')return;
     var f=e.target.closest&&e.target.closest('[data-case]');
-    if(f)window.location.href=f.getAttribute('data-case');
+    if(f)open_case(f);
   });
 })();
 </script>
