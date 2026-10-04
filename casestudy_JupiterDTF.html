@@ -159,7 +159,19 @@ html.js main[data-case="jupiter"] [data-reveal="wipe"] .media.ir-done:not(.ba__i
    (al montar), sin esperar al IntersectionObserver de case-study.js ni al de este bloque.
    Con el hilo ocupado tras el montaje (React, componentes, curva de constraints), esos
    avisos llegaban hasta ~2 s tarde y el hero se quedaba en blanco con el header ya visible. */
-html.js main[data-case="jupiter"] .cs-hero.fx{animation:fx-in-b .7s ease .1s both}
+@media (min-width:768px){html.js main[data-case="jupiter"] .cs-hero.fx{animation:fx-in-b .7s ease .1s both}}
+/* MOBILE: el hero entra por partes. Imagen, título y meta (siempre en el primer
+   pantallazo del teléfono) al montar; lead, intro y columnas Objective/Outcome cuando
+   entran en pantalla (las visibles al cargar, en el acto; el resto con el scroll).
+   La sección en sí no se funde (si no, lo de abajo se animaría sin verse). */
+@media (max-width:767.98px){
+  html.js main[data-case="jupiter"] .cs-hero.fx{opacity:1;animation:none}
+  html.js main[data-case="jupiter"] .cs-hero .cs-hero__meta{animation:fx-in-b .7s ease .5s both}
+}
+@media (max-width:767.98px) and (prefers-reduced-motion:no-preference){
+  html.js main[data-case="jupiter"] .cs-hero :is(.cs-hero__lead,.cs-hero__intro,.cs-hero__col){opacity:0}
+  html.js main[data-case="jupiter"] .cs-hero :is(.cs-hero__lead,.cs-hero__intro,.cs-hero__col).hr-in{opacity:1;animation:fx-in-b .7s ease var(--hr-d,0s) both}
+}
 html.js main[data-case="jupiter"] .cs-hero .fx-line{animation:fx-in-b .7s ease both;animation-delay:calc(.1s + var(--i) * .3s)}
 /* líneas Objective / Outcome: al montar SOLO en desktop (≥ 768, están en el primer pantallazo).
    En mobile quedan bajo el pliegue: siguen la regla común (.ln-in al llegar con el scroll). */
@@ -184,7 +196,7 @@ html.js main[data-case="jupiter"] .cs-hero .media{opacity:1;
   html.js main[data-case="jupiter"] .media:not(.ba__img) :is(.fb__screen,.csc__inner),
   html.js main[data-case="jupiter"] [data-reveal="wipe"] .media.ir-in:not(.ba__img),
   html.js main[data-case="jupiter"] [data-reveal="wipe"] .media.ir-in:not(.ba__img) :is(.fb__screen,.csc__inner){opacity:1;clip-path:none;animation:none}
-  html.js main[data-case="jupiter"] .cs-hero.fx,html.js main[data-case="jupiter"] .cs-hero .fx-line,html.js main[data-case="jupiter"] .cs-hero .media{opacity:1;animation:none}
+  html.js main[data-case="jupiter"] .cs-hero.fx,html.js main[data-case="jupiter"] .cs-hero .fx-line,html.js main[data-case="jupiter"] .cs-hero .media,html.js main[data-case="jupiter"] .cs-hero .cs-hero__meta{opacity:1;animation:none}
   html.js main[data-case="jupiter"] .cs-hero .cs-hero__col::before{transform:none;animation:none}
 }
 </style>
@@ -198,6 +210,17 @@ html.js main[data-case="jupiter"] .cs-hero .media{opacity:1;
     var main=live('main[data-case="jupiter"]')[0];
     if(!main)return setTimeout(init,120);
     var imgs=[].slice.call(main.querySelectorAll('.media:not(.ba__img)')).filter(function(el){return !el.closest('.cs-hero')});   /* el hero lo anima el CSS */
+    /* hero mobile por partes: lo visible al iniciar entra en el acto (sin esperar al
+       observer); el resto al entrar en pantalla. Se marca en todos los anchos para que
+       un cambio de ancho a mobile no deje nada oculto. */
+    var hr_els=[].slice.call(main.querySelectorAll('.cs-hero .cs-hero__lead,.cs-hero .cs-hero__intro,.cs-hero .cs-hero__col'));
+    var hr_k=0, vh=window.innerHeight||800;
+    function hr_show(el){if(!el.classList.contains('hr-in')){el.style.setProperty('--hr-d',(hr_k++*.12)+'s');el.classList.add('hr-in')}}
+    if('IntersectionObserver' in window){
+      var hro=new IntersectionObserver(function(es){hr_k=0;es.forEach(function(e){if(e.isIntersecting){hr_show(e.target);hro.unobserve(e.target)}})},{threshold:.15});
+      hr_els.forEach(function(el){if(el.getBoundingClientRect().top<vh*.92)hr_show(el);else hro.observe(el)});
+    } else hr_els.forEach(hr_show);
+    hr_k=0;
     /* hero: el fade va por CSS al montar; el radio arranca cuando la página queda libre
        (mín. 550 ms), para que se vea animado y no salte de golpe con el hilo ocupado */
     var hero_img=main.querySelector('.cs-hero .media'), fired=0, t_min=Date.now()+550;
