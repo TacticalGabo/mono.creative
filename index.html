@@ -13,7 +13,7 @@
      .dc.html. Medido en 4G y 4G lento: compiten con el HTML y retrasan la
      primera pintura (la pantalla de carga) 0,3-0,4 s, y en red lenta además
      el final de la carga 0,5-1,4 s. No volver a ponerlos sin medir. -->
-<script>/* (2026-10-04) tema elegido a mano con el toggle (aquí o en un entry): se aplica antes de pintar y manda sobre el swap por scroll. Sin elección = dark + swap. */try{var t=localStorage.getItem('mc-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<script>/* (2026-10-04) tema elegido a mano con el toggle (aquí o en un entry): se aplica antes de pintar y manda sobre el swap por scroll. Sin elección = dark + swap. */try{localStorage.removeItem('mc-theme');var t=sessionStorage.getItem('mc-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
 <script>
 (function(){var r=window.__resources=window.__resources||{},u='https://unpkg.com/';
 if(!r[u+'react@18.3.1/umd/react.production.min.js'])r[u+'react@18.3.1/umd/react.production.min.js']='./vendor/react.production.min.js';
@@ -2124,9 +2124,10 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
     var dark=h.getAttribute('data-theme')==='light', ts=t.querySelector('svg'), next=dark?'dark':'light';
     h.setAttribute('data-theme',next);
     sync();
-    // solo la elección de la persona (no el b.click() del punto swap) se recuerda:
-    // los case studies abren con ella; sin elección abren en light (ver su <head>)
-    if(e.isTrusted){try{localStorage.setItem('mc-theme',next)}catch(_){}}
+    // solo la elección de la persona (no el b.click() del punto swap) se recuerda,
+    // y solo durante la visita (sessionStorage; cerrar la pestaña = sin elección).
+    // Con ella abren home y entries; sin elección: home dark + swap, entries light
+    if(e.isTrusted){try{sessionStorage.setItem('mc-theme',next)}catch(_){}}
     ts.classList.remove('tt-breathe'); void ts.getBoundingClientRect(); ts.classList.add('tt-breathe');
     t.classList.add('tt-glow'); clearTimeout(t._g); t._g=setTimeout(function(){t.classList.remove('tt-glow')},1000);
   });
@@ -2137,7 +2138,7 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
   // la elección pudo cambiar en un entry -> reaplicar la guardada
   addEventListener('pageshow',function(e){
     if(!e.persisted)return;
-    try{var m=localStorage.getItem('mc-theme');if(m==='dark'||m==='light'){h.setAttribute('data-theme',m);sync();}}catch(_){}
+    try{var m=sessionStorage.getItem('mc-theme');if(m==='dark'||m==='light'){h.setAttribute('data-theme',m);sync();}}catch(_){}
   });
   // el header lo monta el runtime después: sincronizar el estado inicial al aparecer
   (function wait(n){ var t=document.querySelector('.page .theme-toggle'); if(t)sync(); else if(n<100)setTimeout(function(){wait(n+1)},120); })(0);
@@ -2147,7 +2148,7 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
 /* SWAP (2026-10-03): al cruzar el punto 'swap' con el scroll se acciona el
    toggle de tema (misma animación que pulsarlo). Bajando lo cruza una vez y
    cambia; subiendo lo vuelve a cruzar y deshace. SOLO actúa si la persona aún
-   no ha pulsado el toggle (ni en esta visita ni antes: localStorage 'mc-theme');
+   no ha pulsado el toggle (en esta visita: sessionStorage 'mc-theme');
    si ya lo pulsó, el swap queda anulado y manda su elección.
    El punto lo calcula el componente de marcas (fadeAnchor + fadeStart, con sus
    ajustes por ancho) y lo deja en window.__mcSwapY (y absoluta del documento).
@@ -2176,9 +2177,10 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
   // propio ciclo, sin forzar nada. El margen inferior enorme hace que "estar
   // dentro" signifique "por debajo del borde superior de la pantalla": así
   // cualquier cruce de ese borde dispara, también un salto brusco de scroll.
-  // Elección guardada (localStorage 'mc-theme', solo la escribe un click real
-  // en el toggle, aquí o en un entry): el swap no actúa nunca en esa visita.
-  function elegido(){ try{ var m=localStorage.getItem('mc-theme'); return m==='dark'||m==='light'; }catch(_){ return false; } }
+  // Elección de la visita (sessionStorage 'mc-theme': dura mientras la pestaña
+  // esté abierta; solo la escribe un click real en el toggle, aquí o en un
+  // entry): si existe, el swap no actúa.
+  function elegido(){ try{ var m=sessionStorage.getItem('mc-theme'); return m==='dark'||m==='light'; }catch(_){ return false; } }
   function aplica(abajo){
     if(apagado||elegido())return;
     if(lado===null){ lado=abajo; if(!abajo)return; }   // carga ya pasada del punto: aplicar

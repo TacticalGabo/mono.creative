@@ -2,7 +2,7 @@
 <html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
-<script>/* .js síncrono (antes lo ponía case-study.js, diferido: según qué llegaba antes, el hero se veía, se ocultaba y reaparecía) + tema elegido en el toggle (home o entry); sin elección = light */document.documentElement.classList.add('js');try{var t=localStorage.getItem('mc-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<script>/* .js síncrono (antes lo ponía case-study.js, diferido: según qué llegaba antes, el hero se veía, se ocultaba y reaparecía) + tema elegido en el toggle (home o entry); sin elección = light */document.documentElement.classList.add('js');try{localStorage.removeItem('mc-theme');var t=sessionStorage.getItem('mc-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
 <link rel="icon" type="image/svg+xml" href="./assets/logo-favicon-48x29.svg?v=3">
 <title>Enjin 3D Art — Case study · mono.creative</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -412,9 +412,10 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
     var dark=h.getAttribute('data-theme')==='light', ts=t.querySelector('svg'), next=dark?'dark':'light';
     h.setAttribute('data-theme',next);
     sync();
-    // solo la elección de la persona (no el b.click() del punto swap) se recuerda:
-    // los case studies abren con ella; sin elección abren en light (ver su <head>)
-    if(e.isTrusted){try{localStorage.setItem('mc-theme',next)}catch(_){}}
+    // solo la elección de la persona (no el b.click() del punto swap) se recuerda,
+    // y solo durante la visita (sessionStorage; cerrar la pestaña = sin elección).
+    // Con ella abren home y entries; sin elección: home dark + swap, entries light
+    if(e.isTrusted){try{sessionStorage.setItem('mc-theme',next)}catch(_){}}
     ts.classList.remove('tt-breathe'); void ts.getBoundingClientRect(); ts.classList.add('tt-breathe');
     t.classList.add('tt-glow'); clearTimeout(t._g); t._g=setTimeout(function(){t.classList.remove('tt-glow')},1000);
   });
@@ -425,7 +426,7 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
   // la elección pudo cambiar en un entry -> reaplicar la guardada
   addEventListener('pageshow',function(e){
     if(!e.persisted)return;
-    try{var m=localStorage.getItem('mc-theme');if(m==='dark'||m==='light'){h.setAttribute('data-theme',m);sync();}}catch(_){}
+    try{var m=sessionStorage.getItem('mc-theme');if(m==='dark'||m==='light'){h.setAttribute('data-theme',m);sync();}}catch(_){}
   });
   // el header lo monta el runtime después: sincronizar el estado inicial al aparecer
   (function wait(n){ var t=document.querySelector('.page .theme-toggle'); if(t)sync(); else if(n<100)setTimeout(function(){wait(n+1)},120); })(0);
