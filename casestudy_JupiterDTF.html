@@ -163,11 +163,14 @@ html.js main[data-case="jupiter"] .cs-hero.fx{animation:fx-in-b .7s ease .1s bot
 html.js main[data-case="jupiter"] .cs-hero .fx-line{animation:fx-in-b .7s ease both;animation-delay:calc(.1s + var(--i) * .3s)}
 html.js main[data-case="jupiter"] .cs-hero .cs-hero__col::before{animation:ln-draw 1.15s cubic-bezier(.7,-.12,.18,1) .3s both}
 html.js main[data-case="jupiter"] .cs-hero .cs-hero__col+.cs-hero__col::before{animation-delay:.45s}
+/* imagen del hero: fade + escala al montar (van por compositor: nunca se traban). El radio
+   se calcula en el hilo principal, que justo tras montar está ocupado: si arrancara aquí,
+   no recibiría frames y saltaría de golpe al final. Por eso se queda a 0 (cuadrada) hasta
+   que el JS ve la página libre y entonces lo anima (clase .ir-r + Web Animations). */
 html.js main[data-case="jupiter"] .cs-hero .media{opacity:1;
   animation:ir-fade 1.3s cubic-bezier(.33,0,.2,1) .1s both,
-            ir-pop 1.3s var(--ir-out) .1s both,
-            ir-round 1.2s var(--ir-snap) .55s both}
-html.js main[data-case="jupiter"] .cs-hero .media.ir-done{animation:none}
+            ir-pop 1.3s var(--ir-out) .1s both}
+@media (prefers-reduced-motion:no-preference){html.js main[data-case="jupiter"] .cs-hero .media:not(.ir-r){border-radius:0}}
 @keyframes ir-wipe{from{clip-path:inset(0 0 100% 0)}}
 @keyframes ir-fade{from{opacity:0}to{opacity:1}}
 @keyframes ir-pop{from{scale:.955}to{scale:1}}
@@ -191,7 +194,21 @@ html.js main[data-case="jupiter"] .cs-hero .media.ir-done{animation:none}
     var main=live('main[data-case="jupiter"]')[0];
     if(!main)return setTimeout(init,120);
     var imgs=[].slice.call(main.querySelectorAll('.media:not(.ba__img)')).filter(function(el){return !el.closest('.cs-hero')});   /* el hero lo anima el CSS */
-    [].forEach.call(main.querySelectorAll('.cs-hero .media'),function(el){el.addEventListener('animationend',function(e){if(e.target===el&&e.animationName==='ir-round')el.classList.add('ir-done')})});
+    /* hero: el fade va por CSS al montar; el radio arranca cuando la página queda libre
+       (mín. 550 ms), para que se vea animado y no salte de golpe con el hilo ocupado */
+    var hero_img=main.querySelector('.cs-hero .media'), fired=0, t_min=Date.now()+550;
+    function go_round(){
+      if(fired||!hero_img)return; fired=1;
+      hero_img.classList.add('ir-r');   /* quita el radio 0: el destino es el radio de diseño */
+      if(hero_img.animate&&!matchMedia('(prefers-reduced-motion: reduce)').matches)
+        hero_img.animate([{borderRadius:'0px'},{}],{duration:1200,easing:'cubic-bezier(.8,0,.1,1)'});
+    }
+    function when_idle(){
+      var w=t_min-Date.now(); if(w>0)return setTimeout(when_idle,w);
+      if(window.requestIdleCallback)requestIdleCallback(go_round,{timeout:1500});
+      else requestAnimationFrame(function(){requestAnimationFrame(go_round)});
+    }
+    if(hero_img){when_idle();setTimeout(go_round,4000);}   /* 4 s: red de seguridad */
     var lazy=[].slice.call(main.querySelectorAll('[data-asset]:not([data-asset="hero"]):not(.avatar)'))
       .filter(function(el){return !el.parentElement.closest('[data-asset]')});   /* las internas cargan con su fondo */
     /* OJO runtime: en scripts del helmet, nada de nombres camelCase con espacio delante y = detrás (los reescribe y rompe el script): usar snake_case */

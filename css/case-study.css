@@ -320,7 +320,9 @@ html .page,html .page *{cursor:none}
 .theme-toggle svg{display:block;width:18px;height:18px;overflow:visible;filter:drop-shadow(0 0 6px rgba(184,255,0,0));transition:filter 1.8s cubic-bezier(.4,0,.2,1)}
 .theme-toggle .tt-half{transform-box:view-box;transform-origin:8.75px 8.75px;transform:rotate(0deg);transition:transform var(--tt-dur) var(--tt-ease)}
 .theme-toggle.tt-glow svg{filter:drop-shadow(0 0 6px rgba(184,255,0,0.45));transition:filter .3s ease-out}
-.theme-toggle[aria-pressed="true"] .tt-half{transform:rotate(180deg)}
+/* el giro sigue al tema de <html> (fijado en el <head> antes de pintar), no a aria-pressed:
+   así no gira solo al cargar mientras el script corrige aria-pressed. Solo gira al pulsar. */
+html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
 .theme-toggle svg.tt-breathe{animation:tt-breathe var(--tt-dur) var(--tt-ease)}
 @keyframes tt-breathe{0%,100%{transform:scale(1)}50%{transform:scale(0.92)}}
 @media (prefers-reduced-motion:reduce){.theme-toggle .tt-half{transition:none}.theme-toggle svg.tt-breathe{animation:none}}
