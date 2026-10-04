@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html data-theme="dark">
 <head>
 <meta charset="utf-8">
 <link rel="icon" type="image/svg+xml" href="./assets/logo-favicon-48x29.svg?v=3">
@@ -209,6 +209,15 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
    .page que ya no se mueve. --mnav no forma parte de este tope, sigue su curva propia. */
 @media (min-width:1800px){:root{--m:calc(212.3px + (100vw - var(--sbw) - 1800px)*.5)}}
 @media (min-width:1920px){:root{--m:272.3px;--mnav:84px}}
+/* TEMA (2026-10-03): ya no hay cruce dark→light con el scroll. El tema es fijo
+   y lo cambia el toggle del header (data-theme en <html>): dark = --fade-p 0,
+   light = --fade-p 1. Todos los tokens derivados cuelgan de --fade-p, así que
+   la interpolación sigue viviendo en UN solo sitio: @property registra
+   --fade-p como número y el cambio de tema lo anima el propio CSS. */
+@property --fade-p{syntax:'<number>';inherits:true;initial-value:0}
+:root[data-theme="light"]{--fade-p:1}
+:root{transition:--fade-p .45s ease}
+@media (prefers-reduced-motion:reduce){:root{transition:none}}
 
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{background:var(--bg);scrollbar-width:none;-ms-overflow-style:none}
@@ -299,7 +308,7 @@ a:hover{color:var(--lime400)}
 .bgfade{display:none}
 @media (max-width:767.98px){
   .bgfade{display:block;position:absolute;inset:0;background:var(--bg);pointer-events:none}
-  .team,.more,.cta,.foot{--fade-p:1;background:var(--bg)}
+  .team,.more,.cta,.foot{background:var(--bg)}   /* antes --fade-p:1 fijo (cruce por ámbitos); ahora heredan el tema */
   .about{isolation:isolate}
   /* .cluster-wrap sube con margen negativo (-189px y mas segun el ancho) y su
      ::after pinta var(--bg) solido para desvanecer los blobs: como .about va
@@ -447,6 +456,22 @@ a:hover{color:var(--lime400)}
   .menu{display:none}
 }
 
+/* toggle de tema (header): sol que gira, "respira" al pulsar y brilla 1 s */
+.theme-toggle{--tt-dur:420ms;--tt-ease:cubic-bezier(0.65,0,0.35,1);flex:none;width:18px;height:20px;padding:0;border:0;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:color-mix(in oklab,#2c513a calc(var(--fade-p,0) * 100%),#9bd700);-webkit-tap-highlight-color:transparent;order:2}
+.theme-toggle svg{display:block;width:18px;height:18px;overflow:visible;filter:drop-shadow(0 0 6px rgba(184,255,0,0));transition:filter 1.8s cubic-bezier(.4,0,.2,1)}
+.theme-toggle .tt-half{transform-box:view-box;transform-origin:8.75px 8.75px;transform:rotate(0deg);transition:transform var(--tt-dur) var(--tt-ease)}
+.theme-toggle.tt-glow svg{filter:drop-shadow(0 0 6px rgba(184,255,0,0.45));transition:filter .3s ease-out}
+.theme-toggle[aria-pressed="true"] .tt-half{transform:rotate(180deg)}
+.theme-toggle svg.tt-breathe{animation:tt-breathe var(--tt-dur) var(--tt-ease)}
+@keyframes tt-breathe{0%,100%{transform:scale(1)}50%{transform:scale(0.92)}}
+@media (prefers-reduced-motion:reduce){.theme-toggle .tt-half{transition:none}.theme-toggle svg.tt-breathe{animation:none}}
+/* mobile: botón → toggle → menú · desktop: links → toggle → botón */
+.nav-right .nav-btn{order:1}.nav-right .menu{order:3}
+@media (min-width:768px){
+  .theme-toggle{height:42px}
+  .nav-right .nav-btn,.theme-toggle{order:0}
+}
+
 /* button */
 .btn{position:relative;width:147px;height:42px;flex:none;cursor:pointer;outline:none}
 .btn .btn-fluid{position:absolute;left:0;top:0;width:100%;height:100%}
@@ -476,7 +501,9 @@ a:hover{color:var(--lime400)}
 .hero-l3{display:flex;flex-wrap:wrap;align-items:flex-start;column-gap:8px;row-gap:44px}
 .hero-lines{position:relative}
 .hero-l3 .h1{flex:1 1 auto}
-.hero-l3 .h1.accent{background-color:var(--accent);background-image:radial-gradient(38% 62% at 20% 40%,rgba(229,255,161,.7) 0%,rgba(229,255,161,0) 62%),radial-gradient(30% 55% at 62% 72%,rgba(229,255,161,.7) 0%,rgba(229,255,161,0) 64%),radial-gradient(26% 50% at 86% 24%,rgba(229,255,161,.7) 0%,rgba(229,255,161,0) 66%);background-repeat:no-repeat;background-size:120% 170%,105% 155%,95% 145%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:fx-line .85s cubic-bezier(.22,.7,.2,1) .85s both,acc-blobs 3.4s ease-in-out infinite}
+/* brillo de la 3.ª línea: .7 en dark, 0 en light (en light la ref. es #9bd700 plano) */
+.hero-l3 .h1.accent{--acc-hl:rgba(229,255,161,calc(.7 * (1 - var(--fade-p,0))))}
+.hero-l3 .h1.accent{background-color:var(--accent);background-image:radial-gradient(38% 62% at 20% 40%,var(--acc-hl) 0%,rgba(229,255,161,0) 62%),radial-gradient(30% 55% at 62% 72%,var(--acc-hl) 0%,rgba(229,255,161,0) 64%),radial-gradient(26% 50% at 86% 24%,var(--acc-hl) 0%,rgba(229,255,161,0) 66%);background-repeat:no-repeat;background-size:120% 170%,105% 155%,95% 145%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:fx-line .85s cubic-bezier(.22,.7,.2,1) .85s both,acc-blobs 3.4s ease-in-out infinite}
 /* OJO: la entrada de la tercera línea va AQUÍ, en la misma declaración que
    acc-blobs, y no en .hero-l3>.h1. Esta regla tiene tres clases y gana; como
    'animation' es un shorthand, si solo declara acc-blobs BORRA el fx-line de la
@@ -493,6 +520,7 @@ a:hover{color:var(--lime400)}
 @media (prefers-reduced-motion:reduce){.hero-l3 .h1.accent{animation:none}}
 .capsule{display:flex;align-items:center;gap:12px;flex:0 0 auto;margin-inline:auto}
 .capsule .cap-arc{width:9px;height:52px;flex:none;display:block;overflow:visible}
+.capsule .cap-arc path{stroke:var(--border)}   /* antes #414B45 fijo en el SVG: en light debe ser #bec8c2 (ref. light_desktop) */
 .capsule p{width:214px;min-height:51px;font-size:14px;line-height:25.5px;color:var(--capsule-text);flex:none}
 .capsule-line{opacity:1;transition:opacity .85s ease}
 .cap-caret{display:inline-block;width:1px;height:1em;margin-left:2px;vertical-align:-.15em;background:var(--border);animation:cap-blink 1.06s step-end infinite}
@@ -963,6 +991,11 @@ a:hover{color:var(--lime400)}
 <script>
 (function(){
   if(window.__mcFade)return; window.__mcFade=1;
+  // DESACTIVADO 2026-10-03: el color ya no cruza con el scroll; el tema lo
+  // pone el toggle del header (data-theme). El código se conserva por si se
+  // recupera. Las marcas rojas de inicio/final las sigue dibujando el
+  // componente data-dc-script del final (fadeAnchor/fadeStart/fadeEnd).
+  return;
   var ANCHOR='.about', OFF_START=0, OFF_END=420;
   function init(){
     var page=document.querySelector('.page');
@@ -1840,6 +1873,116 @@ a:hover{color:var(--lime400)}
   else go();
 })();
 </script>
+<script>
+/* toggle de tema del header: cambia data-theme (dark/light) en <html>.
+   aria-pressed="true" = dark (medio sol girado). Gira, respira y brilla 1 s. */
+(function(){
+  if(window.__mcTheme)return; window.__mcTheme=1;
+  var h=document.documentElement;
+  function sync(){
+    var t=document.querySelectorAll('.theme-toggle'), dark=h.getAttribute('data-theme')!=='light';
+    for(var i=0;i<t.length;i++)t[i].setAttribute('aria-pressed',String(dark));
+  }
+  document.addEventListener('click',function(e){
+    var t=e.target.closest&&e.target.closest('.theme-toggle');
+    if(!t)return;
+    var dark=h.getAttribute('data-theme')==='light', ts=t.querySelector('svg'), next=dark?'dark':'light';
+    h.setAttribute('data-theme',next);
+    sync();
+    // solo la elección de la persona (no el b.click() del punto swap) se recuerda:
+    // los case studies abren con ella; sin elección abren en light (ver su <head>)
+    if(e.isTrusted){try{localStorage.setItem('mc-theme',next)}catch(_){}}
+    ts.classList.remove('tt-breathe'); void ts.getBoundingClientRect(); ts.classList.add('tt-breathe');
+    t.classList.add('tt-glow'); clearTimeout(t._g); t._g=setTimeout(function(){t.classList.remove('tt-glow')},1000);
+  });
+  document.addEventListener('animationend',function(e){
+    if(e.target.classList&&e.target.classList.contains('tt-breathe'))e.target.classList.remove('tt-breathe');
+  });
+  // el header lo monta el runtime después: sincronizar el estado inicial al aparecer
+  (function wait(n){ var t=document.querySelector('.page .theme-toggle'); if(t)sync(); else if(n<100)setTimeout(function(){wait(n+1)},120); })(0);
+})();
+</script>
+<script>
+/* SWAP (2026-10-03): al cruzar el punto 'swap' con el scroll se acciona el
+   toggle de tema (misma animación que pulsarlo). Bajando lo cruza una vez y
+   cambia; subiendo lo vuelve a cruzar y deshace. Respeta lo que el usuario haya
+   elegido a mano: cada cruce invierte el tema actual.
+   El punto lo calcula el componente de marcas (fadeAnchor + fadeStart, con sus
+   ajustes por ancho) y lo deja en window.__mcSwapY (y absoluta del documento).
+   Se compara con pageYOffset, igual que el antiguo cruce: cambia cuando la marca
+   llega al borde superior de la pantalla. */
+(function(){
+  if(window.__mcSwap)return; window.__mcSwap=1;
+  var lado=null, tick=0, apagado=false;
+  function boton(){ return document.querySelector('.page .theme-toggle'); }
+  // En cuanto la persona pulsa el toggle ELLA MISMA, el punto swap deja de
+  // actuar (el resto de la visita manda su elección). isTrusted distingue su
+  // click del b.click() que hace este script.
+  document.addEventListener('click',function(e){
+    if(e.isTrusted&&e.target.closest&&e.target.closest('.theme-toggle'))apagado=true;
+  },true);
+  function check(){
+    tick=0;
+    if(apagado)return;
+    var y=window.__mcSwapY; if(y==null)return;
+    var abajo=window.pageYOffset>=y;
+    if(lado===null){ lado=abajo; if(!abajo)return; }   // carga ya pasada del punto: aplicar
+    else if(abajo===lado)return;
+    lado=abajo;
+    var b=boton(); if(b)b.click();
+  }
+  function on(){ if(!tick)tick=requestAnimationFrame(check); }
+  function init(){
+    if(window.__mcSwapY==null||!boton())return setTimeout(init,150);
+    addEventListener('scroll',on,{passive:true});
+    addEventListener('resize',on,{passive:true});
+    check();
+  }
+  init();
+})();
+</script>
+<script>
+/* Llegada desde otra página (case study) con ./index.html#work | #about | #services:
+   al terminar la pantalla de carga se pulsa el link del menú equivalente, así el
+   scroll usa la misma animación y los mismos offsets que dentro del home
+   (data-scroll / data-scroll-up del script de navegación suave). */
+(function(){
+  if(window.__mcHash)return; window.__mcHash=1;
+  var mapa={work:'Work',about:'About',services:'Services'};
+  var objetivo=mapa[(location.hash||'').slice(1).toLowerCase()];
+  if(!objetivo)return;
+  // quitar el hash ya: que una recarga posterior no vuelva a saltar
+  try{ history.replaceState(null,'',location.pathname+location.search); }catch(e){}
+  var hecho=0;
+  function ir(){
+    if(hecho)return;
+    var links=document.querySelectorAll('.page .nav-link'), el=null;
+    for(var i=0;i<links.length;i++)if(links[i].textContent.trim()===objetivo)el=links[i];
+    if(!el)return setTimeout(ir,150);
+    hecho=1;
+    // un respiro para que el overlay termine de irse y el layout se asiente
+    setTimeout(function(){ el.click(); },450);
+  }
+  if(window.__mcArrancado)ir(); else window.addEventListener('mc:arranca',ir);
+  setTimeout(ir,15000);   // red de seguridad si el evento no llegara
+})();
+</script>
+<script>
+/* tarjetas de Selected Work con case study: data-case="./casestudy_X.html" abre su página */
+(function(){
+  if(window.__mcCase)return; window.__mcCase=1;
+  document.addEventListener('click',function(e){
+    var f=e.target.closest&&e.target.closest('[data-case]');
+    if(f)window.location.href=f.getAttribute('data-case');
+  });
+  /* teclado: Enter sobre la tarjeta (role=link, tabindex=0) */
+  document.addEventListener('keydown',function(e){
+    if(e.key!=='Enter')return;
+    var f=e.target.closest&&e.target.closest('[data-case]');
+    if(f)window.location.href=f.getAttribute('data-case');
+  });
+})();
+</script>
 <template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#101913"/><ellipse cx="36" cy="50" rx="14" ry="18" fill="#b8ff00"/><ellipse cx="58" cy="50" rx="14" ry="18" fill="#b8ff00"/><ellipse cx="76" cy="50" rx="8" ry="10" fill="#b8ff00"/></svg></template>
 </helmet>
 <div id="boot"><div id="bar"><b></b></div><div id="bootmsg">Preparing…</div></div>
@@ -1862,6 +2005,7 @@ a:hover{color:var(--lime400)}
         <span class="nav-link" data-scroll=".team">About</span>
         <span class="nav-link" data-scroll=".about" data-scroll-up="40">Services</span>
       </div>
+      <button class="theme-toggle" type="button" aria-label="Toggle theme" aria-pressed="true"><svg width="18" height="18" viewBox="-0.25 -0.25 18 18" fill="none" aria-hidden="true"><path class="tt-half" d="M8.75 0.75C10.8717 0.75 12.9066 1.59285 14.4069 3.09315C15.9071 4.59344 16.75 6.62827 16.75 8.75C16.75 10.8717 15.9071 12.9066 14.4069 14.4069C12.9066 15.9071 10.8717 16.75 8.75 16.75V0.75Z" fill="currentColor"/><path d="M8.75 16.75C13.1683 16.75 16.75 13.1683 16.75 8.75C16.75 4.33172 13.1683 0.75 8.75 0.75C4.33172 0.75 0.75 4.33172 0.75 8.75C0.75 13.1683 4.33172 16.75 8.75 16.75Z" stroke="currentColor" stroke-width="1.5"/></svg></button>
       <div class="btn nav-btn" data-h="48" data-pad="6" data-shift="5" data-comp="button/dark" role="button" tabindex="0">
         <div class="btn-fluid"><svg class="btn-shape" width="158" height="48" viewBox="0 0 158 48" fill="none"><clipPath class="bclip" id="bclip1"><path d="M37.83 14.83C41.54 5.85 50.3 0 60.01 0L134 0C147.25 0 158 10.75 158 24C158 37.25 147.25 48 134 48L60.01 48C50.3 48 41.54 42.15 37.83 33.17L37.83 33.17C34.25 43.75 25.04 49.77 15.83 47.54C6.63 45.31 0 35.45 0 24C0 12.55 6.63 2.69 15.83 0.46C25.04 -1.77 34.25 4.25 37.83 14.83Z"></path></clipPath><path class="bpath" d="M37.83 14.83C41.54 5.85 50.3 0 60.01 0L134 0C147.25 0 158 10.75 158 24C158 37.25 147.25 48 134 48L60.01 48C50.3 48 41.54 42.15 37.83 33.17L37.83 33.17C34.25 43.75 25.04 49.77 15.83 47.54C6.63 45.31 0 35.45 0 24C0 12.55 6.63 2.69 15.83 0.46C25.04 -1.77 34.25 4.25 37.83 14.83Z" fill="var(--btn1-fill)" stroke="var(--btn1-stroke)" stroke-width="2.4" clip-path="url(#bclip1)"></path></svg><i class="btn-dot"></i></div>
         <span class="btn-label" style="color:var(--btn1-label)">Let's Talk</span>
@@ -1904,12 +2048,12 @@ a:hover{color:var(--lime400)}
     </div>
     <div class="grid2">
       <div class="col">
-        <figure class="fig f-gvrn" data-project="enjin-darkmode"><div class="shot" style="aspect-ratio:1.7267;background-image:url(./assets/work-enjin-darkmode.webp)"></div><figcaption class="cap"><b>Enjin darkmode</b> · ux/ui Design · 2023</figcaption></figure>
-        <figure class="fig f-beam" data-project="jupiter-dtf"><div class="shot" style="aspect-ratio:1.2047;background-image:url(./assets/work-jupiter-dtf-v3.webp)"></div><figcaption class="cap"><b>Jupiter</b> · JUP DTF · 2025</figcaption></figure>
+        <figure class="fig f-gvrn" data-project="enjin-darkmode" data-case="./casestudy_EnjinDarkMode.html" role="link" tabindex="0"><div class="shot" style="aspect-ratio:1.7267;background-image:url(./assets/work-enjin-darkmode.webp)"></div><figcaption class="cap"><b>Enjin darkmode</b> · ux/ui Design · 2023</figcaption></figure>
+        <figure class="fig f-beam" data-project="jupiter-dtf" data-case="./casestudy_JupiterDTF.html" role="link" tabindex="0"><div class="shot" style="aspect-ratio:1.2047;background-image:url(./assets/work-jupiter-dtf-v3.webp)"></div><figcaption class="cap"><b>Jupiter</b> · JUP DTF · 2025</figcaption></figure>
       </div>
       <div class="col">
-        <figure class="fig f-bedrock" data-project="bedrock"><div class="shot" style="aspect-ratio:1.2163;background-image:url(./assets/work-bedrock-web.webp)"></div><figcaption class="cap"><b>Bedrock</b> · ux/ui Design · 2025</figcaption></figure>
-        <figure class="fig f-jupiter" data-project="enjin-beam"><div class="shot" style="aspect-ratio:1.7433;background-image:url(./assets/work-enjin-beam.webp);background-position:center min(calc(50% + 40px),0px)"></div><figcaption class="cap"><b>Enjin beam</b> · ux/ui Design · 2024</figcaption></figure>
+        <figure class="fig f-bedrock" data-project="bedrock" data-case="./casestudy_Bedrock.html" role="link" tabindex="0"><div class="shot" style="aspect-ratio:1.2163;background-image:url(./assets/work-bedrock-web.webp)"></div><figcaption class="cap"><b>Bedrock</b> · ux/ui Design · 2025</figcaption></figure>
+        <figure class="fig f-jupiter" data-project="enjin-beam" data-case="./casestudy_EnjinBeam.html" role="link" tabindex="0"><div class="shot" style="aspect-ratio:1.7433;background-image:url(./assets/work-enjin-beam.webp);background-position:center min(calc(50% + 40px),0px)"></div><figcaption class="cap"><b>Enjin beam</b> · ux/ui Design · 2024</figcaption></figure>
       </div>
     </div>
   </section>
@@ -2018,7 +2162,7 @@ Then we set the base for launch and growth, with clear files, clean rules and <b
       <figure class="fig banner b-2" data-project="panama-convention-center"><div class="shot"></div><figcaption class="cap"><em>Panama Convention Center</em> · ux/ui Design · 2025</figcaption></figure>
     </div>
     <div class="grid3">
-      <figure class="fig" data-project="mascota-manyada"><div class="shot" style="background-image:url(./assets/work-mascota-manyada.webp)"></div><figcaption class="cap"><em>Mascota Manyada</em> · illustration · 2025</figcaption></figure>
+      <figure class="fig" data-project="mascota-manyada" data-case="./casestudy_MascotaManyada.html" role="link" tabindex="0"><div class="shot" style="background-image:url(./assets/work-mascota-manyada.webp)"></div><figcaption class="cap"><em>Mascota Manyada</em> · illustration · 2025</figcaption></figure>
       <figure class="fig" data-project="enjin-nfts"><div class="shot" style="background-image:url(./assets/work-enjin-nfts.webp)"></div><figcaption class="cap"><em>enjin</em> · nfts &amp; animations · 2025</figcaption></figure>
       <figure class="fig" data-project="various-brands-ecommerce"><div class="shot" style="background-image:url(./assets/work-various-ecommerce-v2.webp)"></div><figcaption class="cap"><em>various brands</em> · ecommerce · 2025</figcaption></figure>
     </div>
@@ -2065,7 +2209,7 @@ Then we set the base for launch and growth, with clear files, clean rules and <b
   </footer>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script="" data-props="{&quot;fadeAnchor&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;.about&quot;,&quot;options&quot;:[&quot;.work&quot;,&quot;.about&quot;,&quot;.team&quot;,&quot;.more&quot;,&quot;.cta&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Cruce dark → light&quot;},&quot;fadeStart&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:-130,&quot;min&quot;:-1200,&quot;max&quot;:1200,&quot;step&quot;:10,&quot;unit&quot;:&quot;px&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Cruce dark → light&quot;},&quot;fadeEnd&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:-10,&quot;min&quot;:-1200,&quot;max&quot;:2400,&quot;step&quot;:10,&quot;unit&quot;:&quot;px&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Cruce dark → light&quot;}}">
+<script type="text/x-dc" data-dc-script="" data-props="{&quot;fadeAnchor&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;.about&quot;,&quot;options&quot;:[&quot;.work&quot;,&quot;.about&quot;,&quot;.team&quot;,&quot;.more&quot;,&quot;.cta&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Cruce dark → light&quot;},&quot;fadeStart&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:270,&quot;min&quot;:-1200,&quot;max&quot;:1200,&quot;step&quot;:10,&quot;unit&quot;:&quot;px&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Cruce dark → light&quot;},&quot;fadeEnd&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:-10,&quot;min&quot;:-1200,&quot;max&quot;:2400,&quot;step&quot;:10,&quot;unit&quot;:&quot;px&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Cruce dark → light&quot;}}">
 class Component extends DCLogic {
   componentDidMount(){ this.apply(); this._r = () => this.apply(); addEventListener('resize', this._r); }
   componentWillUnmount(){ removeEventListener('resize', this._r); }
@@ -2097,13 +2241,17 @@ class Component extends DCLogic {
         el.style.top = (top - pageTop) + 'px';
         el.querySelector('b').textContent = label + ' ' + Math.round(top);
       };
-      mk('mc-mark-start', base + fs, 'inicio');
-      mk('mc-mark-end', base + fe, 'final');
+      // (2026-10-03) un solo punto: 'swap'. Al cruzarlo con el scroll el tema
+      // cambia (script __mcSwap). El punto final se retiró.
+      mk('mc-mark-start', base + fs, 'swap');
+      var old_end = document.getElementById('mc-mark-end'); if (old_end) old_end.remove();
+      window.__mcSwapY = base + fs;
     };
     window.__mcFadeMarks = draw;
     draw();
-    window.__mcFadeReset = 1;
-    window.dispatchEvent(new Event('resize'));
+    // (2026-10-03) quitado: window.dispatchEvent(new Event('resize')). Avisaba al
+    // cruce (ya desactivado) y además se re-llamaba a sí mismo vía this._r en bucle
+    // infinito (RangeError en consola). Las marcas se siguen dibujando con draw().
   }
   renderVals(){ return {}; }
 }
