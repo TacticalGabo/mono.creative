@@ -161,8 +161,12 @@ html.js main[data-case="jupiter"] [data-reveal="wipe"] .media.ir-done:not(.ba__i
    avisos llegaban hasta ~2 s tarde y el hero se quedaba en blanco con el header ya visible. */
 html.js main[data-case="jupiter"] .cs-hero.fx{animation:fx-in-b .7s ease .1s both}
 html.js main[data-case="jupiter"] .cs-hero .fx-line{animation:fx-in-b .7s ease both;animation-delay:calc(.1s + var(--i) * .3s)}
-html.js main[data-case="jupiter"] .cs-hero .cs-hero__col::before{animation:ln-draw 1.15s cubic-bezier(.7,-.12,.18,1) .3s both}
-html.js main[data-case="jupiter"] .cs-hero .cs-hero__col+.cs-hero__col::before{animation-delay:.45s}
+/* líneas Objective / Outcome: al montar SOLO en desktop (≥ 768, están en el primer pantallazo).
+   En mobile quedan bajo el pliegue: siguen la regla común (.ln-in al llegar con el scroll). */
+@media (min-width:768px){
+  html.js main[data-case="jupiter"] .cs-hero .cs-hero__col::before{animation:ln-draw 1.15s cubic-bezier(.7,-.12,.18,1) .3s both}
+  html.js main[data-case="jupiter"] .cs-hero .cs-hero__col+.cs-hero__col::before{animation-delay:.45s}
+}
 /* imagen del hero: fade + escala al montar (van por compositor: nunca se traban). El radio
    se calcula en el hilo principal, que justo tras montar está ocupado: si arrancara aquí,
    no recibiría frames y saltaría de golpe al final. Por eso se queda a 0 (cuadrada) hasta
