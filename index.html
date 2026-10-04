@@ -268,13 +268,18 @@ a:hover{color:var(--lime400)}
      imágenes grandes en cada frame.
    Antes solo se pausaban .hero y .work, así que al llegar a los blobs seguían
    corriendo las manchas de .more y .cta y las ocho animaciones del mosaico. */
-.idle .glow,.idle .fig,.idle .shot,.idle .team-row,.idle .h1.accent{animation-play-state:paused!important}
+.idle .glow,.idle .fig,.idle .shot,.idle .team-row{animation-play-state:paused!important}
+/* (2026-10-04) .h1.accent lleva DOS animaciones: fx-line (entrada) y acc-blobs.
+   Solo se pausa la segunda (la lista va en el mismo orden). Pausar las dos
+   congelaba la entrada si se bajaba antes de que terminase: la tercera línea
+   se quedaba a opacidad 0 y al subir el hero salía incompleto. */
+.idle .h1.accent,.cruzando .h1.accent{animation-play-state:running,paused!important}
 /* Durante el cruce dark->light el hilo principal paga recálculo de todo el
    árbol MÁS repintado del viewport entero. Ese puñado de frames coincide con
    la caída de los blobs. Se congelan las animaciones que compiten (manchas
    desenfocadas y demás) solo mientras dura el cruce. No se toca will-change:
    crear y destruir capas mientras se scrollea cuesta más que dejarlas. */
-.cruzando .glow,.cruzando .fig,.cruzando .shot,.cruzando .team-row,.cruzando .h1.accent{animation-play-state:paused!important}
+.cruzando .glow,.cruzando .fig,.cruzando .shot,.cruzando .team-row{animation-play-state:paused!important}
 /* El cruce ocurre en .about, y aun así cada escritura de --fade-p recalcula el
    estilo de TODO el documento: .team y el pie están a miles de píxeles del
    viewport y se recalculan igual. Son 116 de los 277 nodos estáticos, un 42 %.
@@ -519,7 +524,12 @@ a:hover{color:var(--lime400)}
 .hero-l3 .h1{flex:1 1 auto}
 /* brillo de la 3.ª línea: .7 en dark, 0 en light (en light la ref. es #9bd700 plano) */
 .hero-l3 .h1.accent{--acc-hl:rgba(229,255,161,calc(.7 * (1 - var(--fade-p,0))))}
-.hero-l3 .h1.accent{background-color:var(--accent);background-image:radial-gradient(38% 62% at 20% 40%,var(--acc-hl) 0%,rgba(229,255,161,0) 62%),radial-gradient(30% 55% at 62% 72%,var(--acc-hl) 0%,rgba(229,255,161,0) 64%),radial-gradient(26% 50% at 86% 24%,var(--acc-hl) 0%,rgba(229,255,161,0) 66%);background-repeat:no-repeat;background-size:120% 170%,105% 155%,95% 145%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:fx-line .85s cubic-bezier(.22,.7,.2,1) .85s both,acc-blobs 3.4s ease-in-out infinite}
+.hero-l3 .h1.accent{background-color:var(--accent);background-image:radial-gradient(38% 62% at 20% 40%,var(--acc-hl) 0%,rgba(229,255,161,0) 62%),radial-gradient(30% 55% at 62% 72%,var(--acc-hl) 0%,rgba(229,255,161,0) 64%),radial-gradient(26% 50% at 86% 24%,var(--acc-hl) 0%,rgba(229,255,161,0) 66%);background-repeat:no-repeat;background-size:120% 170%,105% 155%,95% 145%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:fx-line .85s cubic-bezier(.22,.7,.2,1) .85s backwards,acc-blobs 3.4s ease-in-out infinite}
+/* fx-line en 'backwards', no 'both' (2026-10-04): con 'both' la animación
+   terminada seguía aplicando filter:blur(0)+transform para siempre, y un texto
+   con background-clip:text en capa propia a veces no se repinta al volver por
+   scroll (Chrome con GPU): desaparecían la línea, su icono y la cápsula. El
+   estado final del keyframe es idéntico al estilo base, así que no cambia nada. */
 /* OJO: la entrada de la tercera línea va AQUÍ, en la misma declaración que
    acc-blobs, y no en .hero-l3>.h1. Esta regla tiene tres clases y gana; como
    'animation' es un shorthand, si solo declara acc-blobs BORRA el fx-line de la
