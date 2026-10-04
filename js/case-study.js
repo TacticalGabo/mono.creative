@@ -1,15 +1,9 @@
 /* mono.creative — JS común de los case studies (casestudy_*.html). Se carga con defer.
    Cada init espera a la página montada por el runtime (fuera de <x-dc>). */
 
-/* case study: clase .js, tema, entrada por bloques y líneas de acento */
+/* case study: entrada por bloques y barras de acento de Before / After.
+   (La clase .js la pone cada página en su <head>, síncrona, antes de pintar.) */
 (function(){
-  document.documentElement.classList.add('js');
-  /* prerender (el home prepara la entry al tocarla): sin esto las animaciones de entrada
-     correrían ocultas y al abrir se vería el estado final. Pausadas hasta activarse. */
-  if(document.prerendering){
-    document.documentElement.classList.add('pre');
-    document.addEventListener('prerenderingchange',function(){document.documentElement.classList.remove('pre')},{once:true});
-  }
   if(window.__csBase)return; window.__csBase=1;
   function init(){
     /* el runtime corre este script primero sobre la plantilla cruda (oculta dentro de
@@ -22,13 +16,12 @@
       var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('is-in');io.unobserve(e.target)}})},{threshold:.1});
       blocks.forEach(function(b){io.observe(b)});
     } else blocks.forEach(function(b){b.classList.add('is-in')});
-    /* líneas de acento: la de la derecha con 150 ms de relevo; en mobile las barras B09 entran de dos en dos */
+    /* barras de acento B09: la de la derecha con 150 ms de relevo; en mobile entran de dos en dos.
+       (Las líneas del hero van con su columna: ver "hero por partes" más abajo.) */
     function live(q){return [].filter.call(document.querySelectorAll(q),function(el){return !el.closest('x-dc')})}
-    var els=live('.cs-hero__col,.ba__bar');
-    var bars=live('.ba__bar');
-    els.forEach(function(el){
-      var row=el.classList.contains('ba__bar')?el.closest('.ba'):el;
-      var i=[].indexOf.call(row.parentElement.children,row);
+    var bars=live('.ba__bar'), els=bars;
+    bars.forEach(function(el){
+      var row=el.closest('.ba'), i=[].indexOf.call(row.parentElement.children,row);
       el.style.setProperty('--ld',(.2+(i%2)*.15)+'s');
     });
     if(!('IntersectionObserver' in window)||reduce){els.forEach(function(e){e.classList.add('ln-in')});return}
@@ -161,6 +154,117 @@
     addEventListener('load',pick);
     if(document.fonts&&document.fonts.ready)document.fonts.ready.then(pick);
     pick();
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+
+/* header: html.logo-ok cuando el logo (path dibujado por JS en el slot visible: .nav-anim
+   desktop / .nav-anim-m mobile) ya tiene trazo, con tope de 1,2 s desde que aparece el header
+   MONTADO (no el de la plantilla cruda dentro de <x-dc>); html.logo-drawn solo con trazo
+   (fade propio del logo). Ver el CSS "ENTRADA DE IMÁGENES … LOGO DEL HEADER". */
+(function(){
+  if(window.__csLogo)return; window.__csLogo=1;
+  var h=document.documentElement, t_nav=0;
+  function drawn(){
+    var slots=document.querySelectorAll('.page .nav .nav-anim, .page .nav .nav-anim-m');
+    for(var i=0;i<slots.length;i++){
+      if(!slots[i].offsetWidth)continue;   /* slot oculto en este ancho */
+      /* trazo fuera de <defs>: header-logo-hover lo tiene suelto, brandmark-fusion dentro de un <g> */
+      var ps=slots[i].querySelectorAll('svg path');
+      for(var k=0;k<ps.length;k++){if(!ps[k].closest('defs')&&ps[k].getAttribute('d'))return true}
+      return false;
+    }
+    return false;
+  }
+  (function chk(){
+    if(!t_nav&&[].some.call(document.querySelectorAll('.page .nav'),function(n){return !n.closest('x-dc')}))t_nav=Date.now();
+    if(t_nav){
+      var is_drawn=drawn(), late=Date.now()-t_nav;
+      if(is_drawn||late>1200)h.classList.add('logo-ok');                 /* header: entra (tope 1,2 s) */
+      if(is_drawn||late>15000){h.classList.add('logo-drawn');return}     /* logo: fade propio al tener trazo */
+    }
+    setTimeout(chk,40);
+  })();
+})();
+
+/* imágenes: carga diferida + entrada, y hero por partes. Ver el CSS del mismo nombre. */
+(function(){
+  if(window.__csImg)return; window.__csImg=1;
+  var WAIT=350;   /* ms máx. esperando la decodificación antes de animar igualmente */
+  function live(q){return [].filter.call(document.querySelectorAll(q),function(el){return !el.closest('x-dc')})}
+  function init(){
+    var main=live('main[data-case]')[0];
+    if(!main)return setTimeout(init,120);
+    var io_ok='IntersectionObserver' in window;
+    var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* ---- hero por partes: lo visible al iniciar entra en el acto (sin esperar al observer);
+       el resto al entrar en pantalla con el scroll ---- */
+    var hr_els=[].slice.call(main.querySelectorAll('.cs-hero .cs-hero__meta,.cs-hero .cs-hero__lead,.cs-hero .cs-hero__intro,.cs-hero .cs-hero__col'));
+    var hr_k=0, vh=window.innerHeight||800;
+    function hr_show(el){if(!el.classList.contains('hr-in')){el.style.setProperty('--hr-d',(hr_k++*.12)+'s');el.classList.add('hr-in')}}
+    if(io_ok){
+      var hro=new IntersectionObserver(function(es){hr_k=0;es.forEach(function(e){if(e.isIntersecting){hr_show(e.target);hro.unobserve(e.target)}})},{threshold:.15});
+      hr_els.forEach(function(el){if(el.getBoundingClientRect().top<vh*.95)hr_show(el);else hro.observe(el)});
+    } else hr_els.forEach(hr_show);
+    hr_k=0;
+
+    /* ---- radio de la imagen del hero: arranca cuando la página queda libre (mín. 550 ms),
+       para que se vea animado y no salte de golpe con el hilo ocupado tras montar ---- */
+    var hero_img=main.querySelector('.cs-hero .media'), fired=0;
+    function go_round(){
+      if(fired||!hero_img)return; fired=1;
+      hero_img.classList.add('ir-r');   /* quita el radio 0: el destino es el radio de diseño */
+      if(hero_img.animate&&!reduce)hero_img.animate([{borderRadius:'0px'},{}],{duration:1200,easing:'cubic-bezier(.8,0,.1,1)'});
+    }
+    if(hero_img){
+      var t_min=Date.now()+550;
+      (function when_idle(){
+        var w=t_min-Date.now(); if(w>0)return setTimeout(when_idle,w);
+        if(window.requestIdleCallback)requestIdleCallback(go_round,{timeout:1500});
+        else requestAnimationFrame(function(){requestAnimationFrame(go_round)});
+      })();
+      setTimeout(go_round,4000);   /* red de seguridad */
+    }
+
+    /* ---- carga diferida: cada [data-asset] pide su archivo a ~1,2 pantallas (.ld); las
+       internas (pantallas dentro de un fondo) cargan con su fondo; hero y avatares, ya ---- */
+    var lazy=[].slice.call(main.querySelectorAll('[data-asset]:not([data-asset="hero"]):not(.avatar)'))
+      .filter(function(el){return !el.parentElement.closest('[data-asset]')});
+    function urls(el){
+      var out=[];[el].concat([].slice.call(el.querySelectorAll('[data-asset]'))).forEach(function(n){
+        var m=/url\(["']?([^"')]+)["']?\)/.exec(getComputedStyle(n).backgroundImage||'');if(m)out.push(m[1])});
+      return out;
+    }
+    function load(el){
+      if(el.__ready)return el.__ready;
+      el.classList.add('ld');[].forEach.call(el.querySelectorAll('[data-asset]'),function(n){n.classList.add('ld')});
+      el.__ready=Promise.all(urls(el).map(function(u){var i=new Image();i.src=u;
+        return (i.decode?i.decode():new Promise(function(r){i.onload=i.onerror=r})).catch(function(){})}));
+      return el.__ready;
+    }
+    if(io_ok){
+      var lo=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){load(e.target);lo.unobserve(e.target)}})},{rootMargin:'120% 0px'});
+      lazy.forEach(function(el){lo.observe(el)});
+    } else lazy.forEach(load);
+
+    /* ---- entrada de imágenes (menos Before / After y la del hero, que va por CSS) ---- */
+    var imgs=[].slice.call(main.querySelectorAll('.media:not(.ba__img)')).filter(function(el){return !el.closest('.cs-hero')});
+    function done(el){el.classList.add('ir-done')}
+    if(!io_ok||reduce){imgs.forEach(done);return}
+    imgs.forEach(function(el){el.addEventListener('animationend',function(e){if(e.target===el&&e.animationName==='ir-round')done(el)})});
+    function start(el,d){
+      var go=function(){if(go){go=null;el.style.setProperty('--ir-d',d+'s');el.classList.add('ir-in')}};
+      load(el).then(function(){go&&go()}); setTimeout(function(){go&&go()},WAIT);
+    }
+    /* las que entran a la vez se escalonan arriba→abajo, izq→der (e.boundingClientRect:
+       ya calculado por el observer, no fuerza layout) */
+    var io=new IntersectionObserver(function(es){
+      es.filter(function(e){return e.isIntersecting})
+        .sort(function(a,b){var d=a.boundingClientRect.top-b.boundingClientRect.top;return Math.abs(d)>40?d:a.boundingClientRect.left-b.boundingClientRect.left})
+        .forEach(function(e,i){io.unobserve(e.target);start(e.target,i*.15)});
+    },{threshold:.12,rootMargin:'0px 0px -6% 0px'});
+    imgs.forEach(function(el){io.observe(el)});
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();

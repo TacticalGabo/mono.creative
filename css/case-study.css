@@ -446,8 +446,6 @@ html .page .sc-placeholder::before{display:none}
    ========================================================================== */
 /* entrada por bloques */
 @keyframes fx-in-b{from{opacity:0}to{opacity:1}}
-/* página abierta por prerender: animaciones en pausa hasta que se ve (ver js/case-study.js) */
-html.pre *,html.pre *::before,html.pre *::after{animation-play-state:paused !important}
 .js .fx{opacity:0}
 .js .fx.is-in{animation:fx-in-b .7s ease .1s both}
 .js .fx-line{opacity:0}
@@ -563,9 +561,81 @@ html.pre *,html.pre *::before,html.pre *::after{animation-play-state:paused !imp
 
 /* líneas de acento (hero Objective/Outcome y barras B09): entrada única izq → der */
 .js .cs-hero__col::before,.js .ba__bar{transform:scaleX(0);transform-origin:0 50%}
-.js .ln-in.cs-hero__col::before,.js .ba__bar.ln-in{animation:ln-draw 1.15s cubic-bezier(.7,-.12,.18,1) var(--ld,0s) both}
+.js .ba__bar.ln-in{animation:ln-draw 1.15s cubic-bezier(.7,-.12,.18,1) var(--ld,0s) both}
+/* hero: la línea de cada columna se dibuja cuando aparece su columna (.hr-in, ver "HERO POR PARTES") */
+.js .cs-hero__col.hr-in::before{animation:ln-draw 1.15s cubic-bezier(.7,-.12,.18,1) calc(var(--hr-d,0s) + .25s) both}
 @keyframes ln-draw{from{transform:scaleX(0)}to{transform:scaleX(1)}}
-@media (prefers-reduced-motion:reduce){html.js .cs-hero__col::before,html.js .cs-hero__col.ln-in::before,html.js .ba__bar,html.js .ba__bar.ln-in{transform:none;animation:none}}
+@media (prefers-reduced-motion:reduce){html.js .cs-hero__col::before,html.js .cs-hero__col.hr-in::before,html.js .ba__bar,html.js .ba__bar.ln-in{transform:none;animation:none}}
+
+/* ==========================================================================
+   ENTRADA DE IMÁGENES, CARGA DIFERIDA, HERO POR PARTES Y LOGO DEL HEADER (2026-10-04)
+   Lo activa js/case-study.js. Receta y motivos: xlogClaude/PROMPT-optimizacion-y-animaciones-entries.md
+   ========================================================================== */
+:root{
+  /* curvas con los puntos de control en y ∈ [0,1] → nunca se pasan del final (sin rebote) */
+  --ir-snap:cubic-bezier(.8,0,.1,1);   /* radio: aguanta, arranca de golpe y frena largo */
+  --ir-out:cubic-bezier(.12,.9,.2,1);  /* escala: salida rápida y asiento largo */
+}
+/* carga diferida: sin .ld no hay background-image (gana a [data-asset="x"] por especificidad).
+   Hero y avatares cargan en el acto. Sin JS (sin html.js) todo carga normal. */
+html.js main [data-asset]:not(.ld):not([data-asset="hero"]):not(.avatar){background-image:none}
+/* entrada de imágenes (todas menos Before / After): fade con esquinas a 0 + escala leve;
+   luego el radio crece hasta el del diseño (ir-round solo tiene 'from': llega al radio de
+   cada breakpoint). Oculta con opacity, NO con clip-path: un clip-path propio deja el área
+   de intersección en 0 y el IntersectionObserver nunca dispara. */
+html.js main .media:not(.ba__img){opacity:0}
+html.js main .media.ir-in:not(.ba__img){opacity:1;
+  animation:ir-fade 1.3s cubic-bezier(.33,0,.2,1) var(--ir-d,0s) both,
+            ir-pop 1.3s var(--ir-out) var(--ir-d,0s) both,
+            ir-round 1.2s var(--ir-snap) calc(var(--ir-d,0s) + .45s) both}
+html.js main .media.ir-in:not(.ba__img) :is(.fb__screen,.csc__inner){
+  animation:ir-fade 1.1s cubic-bezier(.33,0,.2,1) calc(var(--ir-d,0s) + .35s) both,
+            ir-pop 1.2s var(--ir-out) calc(var(--ir-d,0s) + .35s) both,
+            ir-round 1.1s var(--ir-snap) calc(var(--ir-d,0s) + .8s) both}
+html.js main .media.ir-done:not(.ba__img){animation:none}
+/* cortina de arriba abajo: opt-in por sección con data-reveal="wipe" (hoy solo Jupiter 5.4 y 5.5) */
+html.js main [data-reveal="wipe"] .media.ir-in:not(.ba__img){clip-path:inset(0);
+  animation:ir-wipe 1.1s cubic-bezier(.76,0,.24,1) var(--ir-d,0s) both,
+            ir-round .9s cubic-bezier(.33,1,.68,1) calc(var(--ir-d,0s) + .55s) both}
+html.js main [data-reveal="wipe"] .media.ir-in:not(.ba__img) :is(.fb__screen,.csc__inner){clip-path:inset(0);
+  animation:ir-wipe .9s cubic-bezier(.76,0,.24,1) calc(var(--ir-d,0s) + .3s) both,
+            ir-round .7s cubic-bezier(.33,1,.68,1) calc(var(--ir-d,0s) + .8s) both}
+html.js main [data-reveal="wipe"] .media.ir-done:not(.ba__img){clip-path:none;animation:none}
+/* HERO POR PARTES (la sección .cs-hero NO es .fx: no se funde entera, lo de bajo el pliegue se
+   animaría sin verse). Imagen y título al montar, solo CSS, a la vez que el header (un
+   observer, con el hilo ocupado tras montar, llegaba hasta ~2 s tarde). Meta, lead, intro y
+   columnas al estar en pantalla (.hr-in: las visibles al iniciar en el acto, el resto con el
+   scroll). */
+html.js main .cs-hero .fx-line{animation:fx-in-b .7s ease both;animation-delay:calc(.1s + var(--i) * .3s)}
+@media (prefers-reduced-motion:no-preference){
+  html.js main .cs-hero :is(.cs-hero__meta,.cs-hero__lead,.cs-hero__intro,.cs-hero__col){opacity:0}
+  html.js main .cs-hero :is(.cs-hero__meta,.cs-hero__lead,.cs-hero__intro,.cs-hero__col).hr-in{opacity:1;animation:fx-in-b .7s ease var(--hr-d,0s) both}
+}
+/* imagen del hero: fade + escala al montar (compositor: nunca se traban). El radio se calcula
+   en el hilo principal, ocupado justo tras montar: se queda a 0 (cuadrada) hasta que el JS ve
+   la página libre y lo anima (clase .ir-r + Web Animations); si no, saltaría de golpe. */
+html.js main .cs-hero .media{opacity:1;
+  animation:ir-fade 1.3s cubic-bezier(.33,0,.2,1) .1s both,
+            ir-pop 1.3s var(--ir-out) .1s both}
+@media (prefers-reduced-motion:no-preference){html.js main .cs-hero .media:not(.ir-r){border-radius:0}}
+/* header: su fade de entrada espera, en pausa e invisible, a que el logo (lo dibuja un
+   componente por JS) tenga trazo: html.logo-ok (o tope de 1,2 s). El logo además tiene su
+   propio fade (html.logo-drawn): si llega tarde, entra suave y no de golpe. */
+html.js:not(.logo-ok) .page .nav{animation-play-state:paused}
+html.js .page .nav :is(.nav-anim,.nav-anim-m){opacity:0;transition:opacity .6s ease}
+html.js.logo-drawn .page .nav :is(.nav-anim,.nav-anim-m){opacity:1}
+@keyframes ir-wipe{from{clip-path:inset(0 0 100% 0)}}
+@keyframes ir-fade{from{opacity:0}to{opacity:1}}
+@keyframes ir-pop{from{scale:.955}to{scale:1}}
+@keyframes ir-round{from{border-radius:0}}
+@media (prefers-reduced-motion:reduce){
+  html.js main .media:not(.ba__img),
+  html.js main .media:not(.ba__img) :is(.fb__screen,.csc__inner),
+  html.js main [data-reveal="wipe"] .media.ir-in:not(.ba__img),
+  html.js main [data-reveal="wipe"] .media.ir-in:not(.ba__img) :is(.fb__screen,.csc__inner),
+  html.js main .cs-hero .fx-line{opacity:1;clip-path:none;animation:none}
+  html.js .page .nav :is(.nav-anim,.nav-anim-m){transition:none}
+}
 
 /* ---- Tradeoffs (B04 list) ---- */
 .cs-list-numbered{padding:56px 0}
