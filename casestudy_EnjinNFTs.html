@@ -268,7 +268,7 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
     }
   }
   function init(){
-    if(!document.querySelector('.btn'))return setTimeout(init,120);
+    if(!document.querySelector('.btn')||document.querySelector('x-dc'))return setTimeout(init,120);
     var ZONE=40, tick=0, ev=null, focused=null;
     function frame(){
       tick=0;
@@ -364,7 +364,7 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
   if(window.__mcCursor)return; window.__mcCursor=1;
   function init(){
     var page=document.querySelector('.page');
-    if(!page)return setTimeout(init,120);
+    if(!page||document.querySelector('x-dc'))return setTimeout(init,120);
     // El punto verde solo existe en desktop con ratón. En un teléfono el toque
     // genera un mousemove sintético y el punto aparecía y se quedaba puesto,
     // estorbando. Aquí ni siquiera se crea el elemento.
@@ -416,6 +416,12 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
   });
   document.addEventListener('animationend',function(e){
     if(e.target.classList&&e.target.classList.contains('tt-breathe'))e.target.classList.remove('tt-breathe');
+  });
+  // vuelta con atrás/adelante (bfcache): la página vuelve tal cual la dejamos, pero
+  // la elección pudo cambiar en un entry -> reaplicar la guardada
+  addEventListener('pageshow',function(e){
+    if(!e.persisted)return;
+    try{var m=localStorage.getItem('mc-theme');if(m==='dark'||m==='light'){h.setAttribute('data-theme',m);sync();}}catch(_){}
   });
   // el header lo monta el runtime después: sincronizar el estado inicial al aparecer
   (function wait(n){ var t=document.querySelector('.page .theme-toggle'); if(t)sync(); else if(n<100)setTimeout(function(){wait(n+1)},120); })(0);
