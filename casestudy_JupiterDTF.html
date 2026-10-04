@@ -181,6 +181,10 @@ html.js main[data-case="jupiter"] .cs-hero .media{opacity:1;
    (lo dibuja un componente por JS) tenga trazo; nunca se ve el header con el hueco vacío.
    El JS de abajo pone html.logo-ok al verlo dibujado, o a los 1,2 s como tope. */
 html.js:not(.logo-ok) .page .nav{animation-play-state:paused}
+/* el logo tiene su propio fade: si llega después del tope (componente lento), entra suave
+   en vez de aparecer de golpe. html.logo-drawn lo pone el JS solo cuando hay trazo. */
+html.js .page .nav :is(.nav-anim,.nav-anim-m){opacity:0;transition:opacity .6s ease}
+html.js.logo-drawn .page .nav :is(.nav-anim,.nav-anim-m){opacity:1}
 @keyframes ir-wipe{from{clip-path:inset(0 0 100% 0)}}
 @keyframes ir-fade{from{opacity:0}to{opacity:1}}
 @keyframes ir-pop{from{scale:.955}to{scale:1}}
@@ -214,7 +218,11 @@ html.js:not(.logo-ok) .page .nav{animation-play-state:paused}
   }
   (function chk(){
     if(!t_nav&&[].some.call(document.querySelectorAll('.page .nav'),function(n){return !n.closest('x-dc')}))t_nav=Date.now();
-    if(t_nav&&(drawn()||Date.now()-t_nav>1200)){h.classList.add('logo-ok');return}
+    if(t_nav){
+      var is_drawn=drawn(), late=Date.now()-t_nav;
+      if(is_drawn||late>1200)h.classList.add('logo-ok');   /* header: entra (tope 1,2 s) */
+      if(is_drawn||late>15000){h.classList.add('logo-drawn');return}   /* logo: fade propio al tener trazo */
+    }
     setTimeout(chk,40);
   })();
 })();

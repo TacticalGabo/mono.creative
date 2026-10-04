@@ -250,8 +250,6 @@ a:hover{color:var(--lime400)}
 #bar b{display:block;height:100%;width:0;background:#b8ff00;transition:width .18s ease}
 #bootmsg{font-family:'Space Mono',ui-monospace,monospace;font-size:11px;line-height:1;letter-spacing:.02em;color:#87918b}
 .page{container-type:inline-size;position:relative;max-width:1920px;margin:0 auto;overflow:clip;background:var(--bg)}
-/* al pulsar una entry: fundido inmediato al fondo mientras carga (ver __mcCase) */
-html.mc-leaving .page{opacity:0;transition:opacity .28s ease-out}
 .fade-mark{position:absolute;left:0;right:0;height:0;border-top:1px dashed #ff0000;z-index:9998;pointer-events:none}
 .fade-mark b{position:absolute;left:8px;top:-16px;font-family:var(--mono);font-size:11px;color:#ff0000;background:rgba(0,0,0,.35);padding:1px 4px}
 .wrap{padding-inline:var(--m)}
@@ -2052,7 +2050,7 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
      hasta que la entry pinta, y la entry no pinta nada hasta montar (segundos en móvil).
      1) Al apoyar el dedo / pasar el ratón se prepara la entry: prerender en Chrome
         (speculation rules: al pulsar se activa al instante), prefetch en el resto.
-     2) Al pulsar, la página se funde al fondo en el acto: el toque siempre se nota. */
+     Sin fundido al pulsar: se percibía como un retraso. */
   var warmed={};
   function warm(e){
     var f=e.target.closest&&e.target.closest('[data-case]'); if(!f)return;
@@ -2069,11 +2067,9 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
   document.addEventListener('click',function(e){
     var f=e.target.closest&&e.target.closest('[data-case]');
     if(!f)return;
-    document.documentElement.classList.add('mc-leaving');
     window.location.href=f.getAttribute('data-case');
   });
-  /* al volver con "atrás" (bfcache) la página no debe seguir fundida */
-  addEventListener('pageshow',function(){document.documentElement.classList.remove('mc-leaving')});
+
   /* teclado: Enter sobre la tarjeta (role=link, tabindex=0) */
   document.addEventListener('keydown',function(e){
     if(e.key!=='Enter')return;
