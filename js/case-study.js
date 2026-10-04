@@ -4,6 +4,12 @@
 /* case study: clase .js, tema, entrada por bloques y líneas de acento */
 (function(){
   document.documentElement.classList.add('js');
+  /* prerender (el home prepara la entry al tocarla): sin esto las animaciones de entrada
+     correrían ocultas y al abrir se vería el estado final. Pausadas hasta activarse. */
+  if(document.prerendering){
+    document.documentElement.classList.add('pre');
+    document.addEventListener('prerenderingchange',function(){document.documentElement.classList.remove('pre')},{once:true});
+  }
   if(window.__csBase)return; window.__csBase=1;
   function init(){
     /* el runtime corre este script primero sobre la plantilla cruda (oculta dentro de

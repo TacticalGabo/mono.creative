@@ -208,7 +208,11 @@ html.js main[data-case="jupiter"] .cs-hero .media{opacity:1;
       if(window.requestIdleCallback)requestIdleCallback(go_round,{timeout:1500});
       else requestAnimationFrame(function(){requestAnimationFrame(go_round)});
     }
-    if(hero_img){when_idle();setTimeout(go_round,4000);}   /* 4 s: red de seguridad */
+    function arm(){t_min=Date.now()+550;when_idle();setTimeout(go_round,4000)}   /* 4 s: red de seguridad */
+    if(hero_img){
+      if(document.prerendering)document.addEventListener('prerenderingchange',arm,{once:true});   /* abierta por prerender: contar desde que se ve */
+      else arm();
+    }
     var lazy=[].slice.call(main.querySelectorAll('[data-asset]:not([data-asset="hero"]):not(.avatar)'))
       .filter(function(el){return !el.parentElement.closest('[data-asset]')});   /* las internas cargan con su fondo */
     /* OJO runtime: en scripts del helmet, nada de nombres camelCase con espacio delante y = detrás (los reescribe y rompe el script): usar snake_case */

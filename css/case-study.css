@@ -439,6 +439,8 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
    ========================================================================== */
 /* entrada por bloques */
 @keyframes fx-in-b{from{opacity:0}to{opacity:1}}
+/* página abierta por prerender: animaciones en pausa hasta que se ve (ver js/case-study.js) */
+html.pre *,html.pre *::before,html.pre *::after{animation-play-state:paused !important}
 .js .fx{opacity:0}
 .js .fx.is-in{animation:fx-in-b .7s ease .1s both}
 .js .fx-line{opacity:0}
