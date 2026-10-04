@@ -647,30 +647,11 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
     background-size:281.6px 281.6px;   /* grano en pantalla 1.1 px */
     opacity:.42;mix-blend-mode:overlay;will-change:transform}
   /* light: overlay sobre fondo claro devuelve el mismo fondo y el grano
-     desaparece. hard-light es overlay con las capas invertidas: el grano manda
-     y se ve en cualquier fondo, al mismo coste. Opacidades calibradas para el
-     mismo contraste (ΔL*) que en dark sin agrisar el fondo (~1 L*). */
-  :root[data-theme="light"] .grain{mix-blend-mode:hard-light;opacity:.04}
-  :root[data-theme="light"] .grain-overlay{mix-blend-mode:hard-light;opacity:.1}
+     desaparece; multiply lo oscurece en cualquier fondo, al mismo coste.
+     Opacidades calibradas para el mismo contraste (ΔL*) que en dark. */
+  :root[data-theme="light"] .grain{mix-blend-mode:multiply;opacity:.04}
+  :root[data-theme="light"] .grain-overlay{mix-blend-mode:multiply;opacity:.1}
 </style>
-<!-- GRAIN-TEST (TEMPORAL): botón para probar modos de fusión del grano en light. Borrar entero al decidir. -->
-<button id="grain-test" type="button" style="position:fixed;left:12px;bottom:12px;z-index:2147483001;font:600 12px/1 monospace;padding:8px 10px;border-radius:6px;border:1px solid #888;background:#fff;color:#111;cursor:pointer"></button>
-<script>
-(function(){
-  var M=['hard-light','soft-light','overlay','multiply','darken','color-burn','luminosity','exclusion'];
-  var b=document.getElementById('grain-test'), s=document.createElement('style'), i=0;
-  try{i=Math.max(0,M.indexOf(sessionStorage.getItem('mc-grain-test')))}catch(_){}
-  document.head.appendChild(s);
-  function set(){
-    s.textContent=':root[data-theme="light"] .grain,:root[data-theme="light"] .grain-overlay{mix-blend-mode:'+M[i]+'!important}';
-    b.textContent='grano light: '+M[i]+' ('+(i+1)+'/'+M.length+')';
-    try{sessionStorage.setItem('mc-grain-test',M[i])}catch(_){}
-  }
-  b.addEventListener('click',function(){i=(i+1)%M.length;set()});
-  set();
-})();
-</script>
-<!-- /GRAIN-TEST -->
 <!-- GRAIN-OVERLAY:END -->
 <!-- /SHARED:GRAIN -->
 </body>
