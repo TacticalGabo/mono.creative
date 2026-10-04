@@ -5,6 +5,24 @@
 <link rel="icon" type="image/svg+xml" href="./assets/logo-favicon-48x29.svg?v=3">
 <title>mono.creative</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- (2026-10-04) CARGA INICIAL: React se sirve desde el propio dominio (misma
+     conexión HTTP/2 que la página, sin DNS+TLS a unpkg). support.js lo admite:
+     cdnScriptFor() usa window.__resources[url] si existe. Son los MISMOS bytes
+     (sha384 idéntico al SRI de support.js). Los preload arrancan los
+     componentes en el instante 0 en vez de esperar a que el runtime los pida.
+     React NO se precarga: medido, retrasaba ~300 ms la primera pintura (la
+     pantalla de carga) sin adelantar el final. -->
+<script>
+(function(){var r=window.__resources=window.__resources||{},u='https://unpkg.com/';
+if(!r[u+'react@18.3.1/umd/react.production.min.js'])r[u+'react@18.3.1/umd/react.production.min.js']='./vendor/react.production.min.js';
+if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.1/umd/react-dom.production.min.js']='./vendor/react-dom.production.min.js';})();
+</script>
+<link rel="preload" href="./components/hero-icon-sequence.dc.html" as="fetch" crossorigin>
+<link rel="preload" href="./components/header-logo-hover.dc.html" as="fetch" crossorigin>
+<link rel="preload" href="./components/brandmark-fusion.dc.html" as="fetch" crossorigin>
+<link rel="preload" href="./components/cta-bubble.dc.html" as="fetch" crossorigin>
+<link rel="preload" href="./components/blobs-cluster-mobile.dc.html" as="fetch" crossorigin>
+<link rel="preload" href="./components/blobs-cluster-desktop.dc.html" as="fetch" crossorigin>
 <script src="./vendor/support.js"></script>
 </head>
 <body>
@@ -1846,6 +1864,9 @@ a:hover{color:var(--lime400)}
         var rs=null;
         try{ rs=sh[i].cssRules; }catch(e){ continue; }
         for(j=0;rs&&j<rs.length;j++){
+          // (2026-10-04) las reglas de un @media que no aplica (las imágenes solo
+          // de desktop en un móvil y al revés) no se descargan aquí: no se ven
+          if(rs[j].media&&rs[j].media.mediaText&&!matchMedia(rs[j].media.mediaText).matches)continue;
           var t=rs[j].cssText||'';
           if(t.indexOf('url(')<0)continue;
           var re=/url\((['"]?)([^)'"]+)\1\)/g;
@@ -2197,8 +2218,8 @@ Then we set the base for launch and growth, with clear files, clean rules and <b
     </div>
     <div class="showcase" data-comp="showcase" data-project="gvrn-ai" data-case="./casestudy_GVRN.html" role="link" tabindex="0" aria-label="GVRN Web case study">
       <div class="sc-card">
-        <div class="phone"><video data-src="./assets/gvrn1" src="./assets/gvrn1-352.mp4" autoplay muted loop playsinline preload="metadata" aria-hidden="true"></video></div>
-        <div class="phone"><video data-src="./assets/gvrn2" src="./assets/gvrn2-352.mp4" autoplay muted loop playsinline preload="metadata" aria-hidden="true"></video></div>
+        <div class="phone"><video data-src="./assets/gvrn1" muted loop playsinline preload="none" aria-hidden="true"></video></div>
+        <div class="phone"><video data-src="./assets/gvrn2" muted loop playsinline preload="none" aria-hidden="true"></video></div>
       </div>
       <p class="cap sc-cap" data-project="gvrn-ai"><em>gvrn.ai</em> · ux/ui Design · 2026</p>
     </div>
@@ -2306,22 +2327,43 @@ class Component extends DCLogic {
 // propiedad muted, así que Chrome bloquea el autoplay. Se fuerza mute + play, y
 // se pausan fuera de pantalla para no gastar CPU.
 (function(){
+// (2026-10-04) CARGA DIFERIDA: antes llevaban src+autoplay en el marcado y el
+// navegador bajaba 2,9-5,8 MB de vídeo desde el primer milisegundo, compitiendo
+// con React, los componentes y las imágenes de la pantalla de carga (y arm()
+// cambiaba luego a otra variante, que se volvía a pedir). Ahora la src se pone
+// UNA vez: al acercarse a la pantalla, o en segundo plano cuando la carga ya
+// terminó, así que al llegar a la sección siguen listos como antes.
+  function carga(v){
+    var base=v.getAttribute('data-src'); if(!base)return;
+    // variante pre-escalada al tamaño real en píxeles de pantalla: el navegador
+    // casi no reescala y las líneas de 1px no se borran
+    // oculto (en móvil el segundo teléfono va con display:none): no se baja.
+    // Antes se descargaban sus 2,9 MB en cada visita sin verse nunca. Si luego
+    // se muestra (giro a desktop), el observador de reproducción lo carga.
+    var r=v.getBoundingClientRect().width;
+    if(!(r>0))return false;
+    var need=r*(window.devicePixelRatio||1), w=468;
+    [234,352,468].some(function(s){ if(s>=need*0.95){ w=s; return true; } });
+    var url=base+'-'+w+'.mp4';
+    if(v.getAttribute('src')===url)return;
+    v.preload='auto'; v.setAttribute('src',url);
+  }
+  var cerca='IntersectionObserver' in window ? new IntersectionObserver(function(es){
+    es.forEach(function(e){ if(e.isIntersecting&&carga(e.target)!==false)cerca.unobserve(e.target); });
+  },{rootMargin:'1200px 0px'}) : null;
   var io='IntersectionObserver' in window ? new IntersectionObserver(function(es){
-    es.forEach(function(e){ var v=e.target; if(e.isIntersecting){ var p=v.play(); if(p&&p.catch)p.catch(function(){}); } else v.pause(); });
+    es.forEach(function(e){ var v=e.target; if(e.isIntersecting){ carga(v); var p=v.play(); if(p&&p.catch)p.catch(function(){}); } else v.pause(); });
   }) : null;
+  var listos=0;
+  function todos(){ listos=1; document.querySelectorAll('.phone video').forEach(carga); }
+  function luego(){ setTimeout(function(){ if('requestIdleCallback' in window)requestIdleCallback(todos,{timeout:3000}); else todos(); },1500); }
+  function tras(){ if(document.readyState==='complete')luego(); else addEventListener('load',luego,{once:true}); }
+  if(window.__mcArrancado)tras(); else addEventListener('mc:arranca',tras,{once:true});
   function arm(){
     document.querySelectorAll('.phone video').forEach(function(v){
       if(v.__mc)return; v.__mc=1;
       v.muted=true; v.defaultMuted=true; v.playsInline=true; v.loop=true;
-      // variante pre-escalada al tamaño real en píxeles de pantalla: el navegador
-      // casi no reescala y las líneas de 1px no se borran
-      var base=v.getAttribute('data-src');
-      if(base&&v.getBoundingClientRect().width>0){
-        var need=v.getBoundingClientRect().width*(window.devicePixelRatio||1), w=468;
-        [234,352,468].some(function(s){ if(s>=need*0.95){ w=s; return true; } });
-        var url=base+'-'+w+'.mp4';
-        if(v.getAttribute('src')!==url)v.setAttribute('src',url);
-      }
+      if(listos||!cerca)carga(v); else cerca.observe(v);
       if(io)io.observe(v); else { var p=v.play(); if(p&&p.catch)p.catch(function(){}); }
     });
   }
