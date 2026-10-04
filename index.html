@@ -31,14 +31,28 @@ if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.
          (tras 'mc:arranca' + load + 1,2 s en tiempo libre) o al primer scroll/
          toque, lo que llegue antes. Su caja la fija el CSS (contain:size /
          aspect-ratio / ancho fijo), así que el layout no se mueve al montarlos.
-     Mientras, su placeholder del runtime va oculto (antes salía un recuadro). -->
-<style>.cluster-m .sc-placeholder,.cluster-d .sc-placeholder,.cta-bubble .sc-placeholder{visibility:hidden}</style>
+     Mientras, su placeholder del runtime va oculto (antes salía un recuadro).
+     (2026-10-04, 2ª) Además:
+       · en desktop brandmark-fusion solo se ve en el footer (el del header es
+         .nav-anim-m, display:none ≥768): pasa a diferido ahí. En móvil es el
+         logo del header y sigue siendo inmediato;
+       · lo que SÍ se ve al abrir (hero-icon-sequence + el logo del header de ese
+         ancho) y la fuente del hero se piden en DOMContentLoaded, ANTES de que el
+         runtime compile y monte la página. Antes se pedían DESPUÉS del montaje:
+         un viaje de red más con el teléfono parado justo antes de quitar la
+         pantalla de carga. No es un preload en <head> (eso se midió y compite con
+         el HTML y React): al llegar DOMContentLoaded el HTML ya bajó entero, y
+         van con prioridad baja para no frenar lo que quede de React. Se usa la
+         MISMA respuesta que luego pide el runtime: no hay descarga doble. -->
+<style>.cluster-m .sc-placeholder,.cluster-d .sc-placeholder,.cta-bubble .sc-placeholder,.foot-anim .sc-placeholder,.nav-anim-m .sc-placeholder{visibility:hidden}</style>
 <script>
 (function(){
   var F=window.fetch; if(!F||!window.Promise||!window.matchMedia)return;
   var ANCHO='(min-width:768px)';
-  // nombre -> [ancho en el que se ve: 'd' desktop, 'm' móvil, null ambos, ¿espera al fin de la carga?]
+  // nombre -> [ancho en el que se ve: 'd' desktop, 'm' móvil, null ambos,
+  //           ¿espera al fin de la carga? 1 sí, 0 no, 'd' solo en desktop]
   var REGLAS={
+    'brandmark-fusion':[null,'d'],
     'header-logo-hover':['d',0],
     'blobs-cluster-desktop':['d',1],
     'blobs-cluster-mobile':['m',1],
@@ -47,8 +61,10 @@ if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.
   var libre=0, cola=[];
   function soltar(){ if(libre)return; libre=1; var c=cola; cola=[]; for(var i=0;i<c.length;i++)c[i](); }
   function se_ve(q){ if(!q)return true; var d=matchMedia(ANCHO).matches; return q==='d'?d:!d; }
+  var temprano={};
   window.fetch=function(u){
     var m=typeof u==='string'&&/(?:^|\/)components\/([a-z0-9-]+)\.dc\.html$/.exec(u);
+    if(m&&temprano[m[1]]){ var t=temprano[m[1]]; delete temprano[m[1]]; return t; }
     var r=m&&REGLAS[m[1]];
     if(!r)return F.apply(this,arguments);
     var yo=this, args=arguments;
@@ -64,7 +80,8 @@ if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.
         }
         if(mq.addEventListener)mq.addEventListener('change',cambio); else mq.addListener(cambio);
       }
-      if(!r[1]||libre)por_ancho(); else cola.push(por_ancho);
+      var tarde=r[1]==='d'?se_ve('d'):r[1];
+      if(!tarde||libre)por_ancho(); else cola.push(por_ancho);
     });
   };
   function tras_load(){
@@ -78,6 +95,23 @@ if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.
   }
   if(window.__mcArrancado)arrancada(); else addEventListener('mc:arranca',arrancada,{once:true});
   setTimeout(soltar,16000);   // red de seguridad, pase lo que pase
+  // Lo del primer pantallazo, en cuanto el HTML está entero (este listener va
+  // antes que el del runtime: este script corre antes que support.js).
+  document.addEventListener('DOMContentLoaded',function(){
+    var d=se_ve('d');
+    ['hero-icon-sequence',d?'header-logo-hover':'brandmark-fusion'].forEach(function(n){
+      var p;
+      try{ p=F('./components/'+n+'.dc.html',{priority:'low'}); }catch(e){ return; }
+      // si falla, el runtime lo vuelve a pedir por su cuenta
+      temprano[n]=p.then(function(res){ return res; },function(){ return F('./components/'+n+'.dc.html'); });
+    });
+    // fuente del hero (Plus Jakarta Sans normal, latin: 400/500/600 son el mismo archivo)
+    var l=document.createElement('link');
+    l.rel='preload'; l.as='font'; l.type='font/woff2'; l.crossOrigin='anonymous';
+    l.href='./fonts/google/plusjakartasans-v12-LDIoaomQNQcsA88c7O9yZ4KMCoOg4Ko20yygg_vb.woff2';
+    l.setAttribute('fetchpriority','low');
+    document.head.appendChild(l);
+  },{once:true});
 })();
 </script>
 <!-- (2026-10-04) CARGA: la pantalla de carga se pinta desde el primer byte. La de
@@ -101,7 +135,10 @@ if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.
   document.body.appendChild(b);
   var t0=Date.now();
   (function vigila(){
-    if(document.getElementById('boot')||Date.now()-t0>16000){ if(b.parentNode)b.parentNode.removeChild(b); return; }
+    // el #boot que cuenta es el montado por React: el de la plantilla cruda
+    // (<x-dc>, oculta) también existe un rato y no se ve
+    var r=document.getElementById('boot');
+    if((r&&!document.querySelector('x-dc'))||Date.now()-t0>16000){ if(b.parentNode)b.parentNode.removeChild(b); return; }
     setTimeout(vigila,16);
   })();
 })();
@@ -2044,7 +2081,10 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
     })();
   }
   function go(){
-    if(!el('boot'))return setTimeout(go,80);
+    // (2026-10-04) los sondeos miran cada 16 ms en vez de 80: el hero se detecta
+    // en cuanto está, no hasta 80 ms después. La barra avanza al mismo ritmo de
+    // antes (+0.004 cada 80 ms) y la pausa de 120 ms antes del fundido no cambia.
+    if(!el('boot')||document.querySelector('x-dc'))return setTimeout(go,16);
     setP(0.05);
     msg('Decoding images…');
     setTimeout(function(){
@@ -2052,10 +2092,11 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
         msg('Assembling the page…');
         setP(0.88);
         if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){ setP(0.94); });
+        var ultimo=Date.now();
         (function poll(){
           if(ready()||Date.now()-t0>MAXWAIT)return setTimeout(hide,120);
-          setP(p+0.004);
-          setTimeout(poll,80);
+          if(Date.now()-ultimo>=80){ ultimo=Date.now(); setP(p+0.004); }
+          setTimeout(poll,16);
         })();
       });
     },0);
