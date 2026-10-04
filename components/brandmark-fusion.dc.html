@@ -118,6 +118,7 @@ class Component extends DCLogic {
     this.visible = true;
     this.io = new IntersectionObserver((es) => {
       for (const e of es) this.visible = e.isIntersecting;
+      if (this.visible && !this.raf && !this.dead) this.raf = requestAnimationFrame(this.loop);
       // el SVG está en position:absolute con overflow:visible y sobresale mucho
       // de la caja observada (top:-34%): con 150 px se congelaba estando a la vista
     }, { rootMargin: '400px' });
@@ -260,8 +261,12 @@ class Component extends DCLogic {
   }
 
   loop(now) {
+    // Oculto: no se re-agenda. Antes pedía un frame en cada vsync aunque no
+    // dibujara nada, y eso mantenía vivo el ciclo de render de toda la página
+    // (en móvil le robaba presupuesto a la caída de los blobs). El observer lo
+    // despierta; el reloj (t0) no se toca, así que retoma donde le tocaba.
+    if (this.visible === false) { this.raf = 0; return; }
     this.raf = requestAnimationFrame(this.loop);
-    if (this.visible === false) return;
     if (this.t0 === null) this.t0 = now;
 
     const boilAmt = this.props.handDrawn ?? 0;

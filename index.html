@@ -528,6 +528,10 @@ a:hover{color:var(--lime400)}
 .capsule-line{opacity:1;transition:opacity .85s ease}
 .cap-caret{display:inline-block;width:1px;height:1em;margin-left:2px;vertical-align:-.15em;background:var(--border);animation:cap-blink 1.06s step-end infinite}
 @keyframes cap-blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+/* fuera de pantalla (hero.idle) el cursor y el vaivén del hint no se animan:
+   seguían pidiendo un recálculo de estilo en cada frame de toda la visita */
+.idle .cap-caret{animation-play-state:paused}
+.idle .hint{animation-play-state:running,paused}
 .capsule{--cap-shift:113px}
 @keyframes cap-arc-l{from{opacity:0;transform:scaleX(-1) translateX(calc(-1 * var(--cap-shift)))}25%{opacity:1}to{opacity:1;transform:scaleX(-1) translateX(0)}}
 @keyframes cap-arc-r{from{opacity:0;transform:translateX(calc(-1 * var(--cap-shift)))}25%{opacity:1}to{opacity:1;transform:translateX(0)}}
@@ -687,6 +691,11 @@ a:hover{color:var(--lime400)}
 .cluster-m{position:absolute;left:0;top:0;width:100%;height:100%;margin-left:0;--wb-stage:transparent;--wb-bg:transparent;--wb-blob:var(--bg);--wb-ghost:transparent;--wb-ghost-opacity:0;--wb-stroke:var(--border);--wb-line:var(--border);--wb-label:var(--sticker);--wb-label-alt:var(--sticker);--wb-label-on-accent:var(--sticker-lime);--wb-accent:var(--accent)}
 .cluster-m>*{display:block;width:100%;height:100%}
 .cluster-m svg{overflow:visible !important}
+/* (2026-10-04) Frontera de layout: cada frame de la caída cambia la 'd' de los
+   blobs, y sin esto Blink re-maquetaba el DOCUMENTO ENTERO (partialLayout:false,
+   422 objetos) en cada frame. Con size+layout el layout queda dentro del clúster.
+   Sin 'paint': no recorta nada (los trazos tocan el borde del viewBox). */
+.cluster-m{contain:size layout}
 .cluster-d{display:none}
 @media (min-width:768px){
   .about{margin-top:138px;display:grid;grid-template-columns:39.4% 28.9% 28.1%;column-gap:1.7%;align-items:start}
@@ -1683,6 +1692,11 @@ a:hover{color:var(--lime400)}
       if(el){ i=0; paint(el,LINES[0]); }
       setInterval(function(){
         if(busy)return;
+        // (2026-10-04) con el hero fuera de pantalla no se teclea: cada letra
+        // re-maquetaba el documento entero (~20 veces/s) y en móvil le quitaba
+        // frames a la caída de los blobs. Al volver, el relevo sigue solo.
+        var hero=document.querySelector('.hero');
+        if(hero&&hero.classList.contains('idle'))return;
         busy=true;
         var cur=LINES[i];
         i=(i+1)%LINES.length;
