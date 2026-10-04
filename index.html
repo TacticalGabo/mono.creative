@@ -8,21 +8,16 @@
 <!-- (2026-10-04) CARGA INICIAL: React se sirve desde el propio dominio (misma
      conexión HTTP/2 que la página, sin DNS+TLS a unpkg). support.js lo admite:
      cdnScriptFor() usa window.__resources[url] si existe. Son los MISMOS bytes
-     (sha384 idéntico al SRI de support.js). Los preload arrancan los
-     componentes en el instante 0 en vez de esperar a que el runtime los pida.
-     React NO se precarga: medido, retrasaba ~300 ms la primera pintura (la
-     pantalla de carga) sin adelantar el final. -->
+     (sha384 idéntico al SRI de support.js).
+     PROBADO Y DESCARTADO: <link rel=preload> de React y de los componentes
+     .dc.html. Medido en 4G y 4G lento: compiten con el HTML y retrasan la
+     primera pintura (la pantalla de carga) 0,3-0,4 s, y en red lenta además
+     el final de la carga 0,5-1,4 s. No volver a ponerlos sin medir. -->
 <script>
 (function(){var r=window.__resources=window.__resources||{},u='https://unpkg.com/';
 if(!r[u+'react@18.3.1/umd/react.production.min.js'])r[u+'react@18.3.1/umd/react.production.min.js']='./vendor/react.production.min.js';
 if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.1/umd/react-dom.production.min.js']='./vendor/react-dom.production.min.js';})();
 </script>
-<link rel="preload" href="./components/hero-icon-sequence.dc.html" as="fetch" crossorigin>
-<link rel="preload" href="./components/header-logo-hover.dc.html" as="fetch" crossorigin>
-<link rel="preload" href="./components/brandmark-fusion.dc.html" as="fetch" crossorigin>
-<link rel="preload" href="./components/cta-bubble.dc.html" as="fetch" crossorigin>
-<link rel="preload" href="./components/blobs-cluster-mobile.dc.html" as="fetch" crossorigin>
-<link rel="preload" href="./components/blobs-cluster-desktop.dc.html" as="fetch" crossorigin>
 <script src="./vendor/support.js"></script>
 </head>
 <body>
