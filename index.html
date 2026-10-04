@@ -1916,7 +1916,7 @@ a:hover{color:var(--lime400)}
    llega al borde superior de la pantalla. */
 (function(){
   if(window.__mcSwap)return; window.__mcSwap=1;
-  var lado=null, tick=0, apagado=false;
+  var lado=null, apagado=false;
   function boton(){ return document.querySelector('.page .theme-toggle'); }
   // En cuanto la persona pulsa el toggle ELLA MISMA, el punto swap deja de
   // actuar (el resto de la visita manda su elección). isTrusted distingue su
@@ -1924,22 +1924,43 @@ a:hover{color:var(--lime400)}
   document.addEventListener('click',function(e){
     if(e.isTrusted&&e.target.closest&&e.target.closest('.theme-toggle'))apagado=true;
   },true);
-  function check(){
-    tick=0;
+  // (2026-10-04) EL PUNTO SE VIGILA CON UN IntersectionObserver, NO LEYENDO EL
+  // SCROLL. Antes, en cada frame de scroll, se leía pageYOffset dentro de un
+  // rAF; esa lectura llegaba DESPUÉS de que el bucle de los blobs escribiera
+  // sus 'd' y transforms, así que forzaba un recálculo síncrono de estilo +
+  // layout de toda la página EN CADA FRAME (medido con CPU x6: 241 veces,
+  // 657 ms de hilo en 2,7 s). Era lo que tiraba el framerate al scrollear
+  // mientras caen las bolas. Leerlo en el evento de scroll tampoco sirve (el
+  // documento ya está sucio ahí: medido, 214 veces).
+  // El observador mira la marca 'swap' (#mc-mark-start, que el componente de
+  // marcas coloca justo en __mcSwapY) y el navegador calcula el cruce en su
+  // propio ciclo, sin forzar nada. El margen inferior enorme hace que "estar
+  // dentro" signifique "por debajo del borde superior de la pantalla": así
+  // cualquier cruce de ese borde dispara, también un salto brusco de scroll.
+  function aplica(abajo){
     if(apagado)return;
-    var y=window.__mcSwapY; if(y==null)return;
-    var abajo=window.pageYOffset>=y;
     if(lado===null){ lado=abajo; if(!abajo)return; }   // carga ya pasada del punto: aplicar
     else if(abajo===lado)return;
     lado=abajo;
     var b=boton(); if(b)b.click();
   }
-  function on(){ if(!tick)tick=requestAnimationFrame(check); }
+  function check(){
+    var y=window.__mcSwapY; if(y==null)return;
+    aplica(window.pageYOffset>=y);
+  }
   function init(){
-    if(window.__mcSwapY==null||!boton())return setTimeout(init,150);
-    addEventListener('scroll',on,{passive:true});
-    addEventListener('resize',on,{passive:true});
-    check();
+    var marca=document.getElementById('mc-mark-start');
+    if(window.__mcSwapY==null||!boton()||!marca)return setTimeout(init,150);
+    if('IntersectionObserver' in window){
+      new IntersectionObserver(function(es){
+        var e=es[es.length-1];
+        aplica(e.boundingClientRect.top<=0);
+      },{rootMargin:'0px 0px 1000000px 0px',threshold:0}).observe(marca);
+    } else {
+      addEventListener('scroll',check,{passive:true});
+      addEventListener('resize',check,{passive:true});
+      check();
+    }
   }
   init();
 })();
