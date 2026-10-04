@@ -656,6 +656,12 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
     background-image:url('./assets/texture-grain.png');background-repeat:repeat;
     background-size:281.6px 281.6px;   /* grano en pantalla 1.1 px */
     opacity:.42;mix-blend-mode:overlay;will-change:transform}
+  /* light: overlay sobre fondo claro devuelve el mismo fondo y el grano
+     desaparece. hard-light es overlay con las capas invertidas: el grano manda
+     y se ve en cualquier fondo, al mismo coste. Opacidades calibradas para el
+     mismo contraste (ΔL*) que en dark sin agrisar el fondo (~1 L*). */
+  :root[data-theme="light"] .grain{mix-blend-mode:hard-light;opacity:.04}
+  :root[data-theme="light"] .grain-overlay{mix-blend-mode:hard-light;opacity:.1}
 </style>
 <!-- GRAIN-OVERLAY:END -->
 <!-- /SHARED:GRAIN -->
