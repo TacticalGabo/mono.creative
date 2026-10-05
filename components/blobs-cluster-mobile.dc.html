@@ -1111,13 +1111,13 @@ class Component extends DCLogic {
       a[j++] = p.x; a[j++] = p.y; a[j++] = p.px; a[j++] = p.py;
     }
     pre.xy.push(a);
-    // ATERRIZAJE: pasado el choque, el primer paso en que ningún punto avanza
-    // más de LAND_V px. Medido: ~paso 125 (2,1 s). Desde ahí solo queda el
-    // asentado final (unos px a menos de medio px por frame, invisible), y el
-    // reposo "oficial" de atRest no llega hasta el ~356 (5,9 s): esperar a ese
-    // era la pausa que se notaba antes de poder tocar los blobs.
-    const LAND_V = 0.5;
-    if (!pre.live && sim.frames > 100 && sp < LAND_V * LAND_V) pre.live = sim.frames;
+    // ATERRIZAJE: pasado el choque (pico ~paso 50-60), el primer paso en que
+    // ningún punto avanza más de LAND_V px. Con 2,2 cae en el paso 89 (1,5 s):
+    // ya rebotaron y el imán los está metiendo en su sitio. Con 0,5 era el 126,
+    // y el responsable lo quería ~0,6 s antes. El reposo "oficial" de atRest no
+    // llega hasta el ~356 (5,9 s): esperar a ese era la pausa que se notaba.
+    const LAND_V = 2.2;
+    if (!pre.live && sim.frames > 60 && sp < LAND_V * LAND_V) pre.live = sim.frames;
     // 1800 pasos = 30 s: red de seguridad por si algo no llegara a posarse
     if ((sim.frames > 140 && sim.atRest()) || sim.frames >= 1800) {
       pre.done = true; pre.end = sim.frames;
