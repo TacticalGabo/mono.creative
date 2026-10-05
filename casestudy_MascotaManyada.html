@@ -236,9 +236,20 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
      el frame en que termina se salta de página. Si ya está en hover (desktop), salto inmediato. */
   function go(b){
     var href=b.getAttribute('data-href'), st=parts(b);
-    function nav(){ window.location.href=href; }
-    if(!st){ nav(); return; }
+    function jump(){ window.location.href=href; }
+    if(!st){ jump(); return; }
+    /* forma completa → esperar también a las transiciones de COLOR (relleno, borde, flechas,
+       texto) → pintar ese último frame (2 rAF) → saltar. Sin esperas fijas. */
+    function nav(){
+      var an=[], gone=0;
+      [st.path,st.label,st.al,st.ar].forEach(function(el){ if(el&&el.getAnimations)an=an.concat(el.getAnimations()); });
+      an=an.filter(function(x){ return typeof CSSTransition==='undefined'||x instanceof CSSTransition; });
+      function fire(){ if(gone)return; gone=1; requestAnimationFrame(function(){ requestAnimationFrame(jump); }); }
+      Promise.all(an.map(function(x){return x.finished.catch(function(){})})).then(fire);
+      setTimeout(fire,700);   /* tope por si una transición no terminara nunca */
+    }
     set(b,true);
+    colors(st,true);
     if(!st.raf&&st.t>=1){ nav(); return; }
     st.done=nav;
   }
