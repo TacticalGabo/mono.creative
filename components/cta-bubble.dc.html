@@ -54,6 +54,7 @@ class Component extends DCLogic {
     this.lastFrame = -1;
     this.ready = false;
     this.geomKey = null;   // clave de la última geometría de fusión dibujada
+    this.dCache = new Map();   // geometrías de fusión ya calculadas (ver fuseD)
     this.f = new Float32Array(W * H);
     this.g = new Float32Array(W * H);
   }
@@ -316,10 +317,72 @@ var self = this;
   segmentAt(sec) {
     let acc = 0;
     for (let i = 0; i < SEQ.length; i++) {
-      if (sec < acc + SEQ[i][1]) return { name: SEQ[i][0], p: (sec - acc) / SEQ[i][1] };
+      if (sec < acc + SEQ[i][1]) return { name: SEQ[i][0], p: (sec - acc) / SEQ[i][1], dur: SEQ[i][1] };
       acc += SEQ[i][1];
     }
-    return { name: SEQ[SEQ.length - 1][0], p: 1 };
+    return { name: SEQ[SEQ.length - 1][0], p: 1, dur: SEQ[SEQ.length - 1][1] };
+  }
+
+  // CACHÉ DE LA FUSIÓN. La geometría de 'merge'/'defuse' depende solo de
+  // (fase, fuse, detail), y el ciclo se repite para siempre: cada vuelta
+  // rehacía lo mismo (lienzo de 846x522, getImageData de 1,68 MB, dos
+  // desenfoques y marching squares) 24 veces por segundo. fuse se ajusta a la
+  // rejilla de fotogramas de su fase (medio fotograma de 24 fps como mucho,
+  // invisible), así que las claves se repiten de una vuelta a otra.
+  fuseD(name, fuse, detail) {
+    const key = name + '|' + fuse.toFixed(5) + '|' + detail;
+    const hit = this.dCache.get(key);
+    if (hit !== undefined) return hit;
+    let d = '';
+    // fase de fusión: las siluetas reales del logo, soldadas como geometría
+    const e = name === 'defuse' ? this.easeInOut(this.clamp01(fuse)) : this.spring(this.clamp01(fuse));
+    const ctx = this.ctx;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    ctx.setTransform(PX, 0, 0, PX, -VIEW.x * PX, -VIEW.y * PX);
+    ctx.fillStyle = '#fff';
+    for (let s = 0; s < 2; s++) {
+      const from = this.fuseFrom[s], to = this.fuseTo[s];
+      let path = '';
+      for (let i = 0; i < N; i++) {
+        path += (i === 0 ? 'M' : 'L') +
+          (from[i][0] + (to[i][0] - from[i][0]) * e).toFixed(2) + ' ' +
+          (from[i][1] + (to[i][1] - from[i][1]) * e).toFixed(2);
+      }
+      ctx.fill(new Path2D(path + 'Z'));
+    }
+    const img = ctx.getImageData(0, 0, W, H).data;
+    const f = this.f;
+    for (let i = 0, n = W * H; i < n; i++) f[i] = img[i * 4 + 3] / 255;
+    const r = Math.max(1, Math.round(K_WELD * PX * Math.pow(1 - this.clamp01(fuse), 1.4)));
+    if (r > 1) { this.boxBlur(f, this.g, r); this.boxBlur(f, this.g, r); }
+    for (const loop of this.contours(f, 0.5)) d += this.curvePath(this.resample(loop, detail));
+    this.dCache.set(key, d);
+    return d;
+  }
+
+  // Los ~46 fotogramas de fusión del ciclo se calculan en tiempo libre antes
+  // de que se vean. Solo en huecos largos (cada uno cuesta decenas de ms en
+  // un móvil lento); lo que no dé tiempo se calcula al verse, como antes, y
+  // queda en caché para las vueltas siguientes.
+  preFuse(fps, detail) {
+    const ric = window.requestIdleCallback;
+    if (!ric) return;
+    const jobs = [];
+    for (const s of SEQ) {
+      if (s[0] !== 'merge' && s[0] !== 'defuse') continue;
+      const n = s[1] * fps;
+      for (let k = 0; k <= Math.ceil(n); k++) {
+        const q = Math.min(1, k / n);
+        jobs.push([s[0], s[0] === 'defuse' ? 1 - q : q]);
+      }
+    }
+    const go = dl => {
+      if (this.dead) return;
+      while (jobs.length && dl.timeRemaining() > 30) { const j = jobs.shift(); this.fuseD(j[0], j[1], detail); }
+      if (jobs.length) ric(go);
+    };
+    ric(go);
   }
 
   loop(now) {
@@ -344,15 +407,18 @@ var self = this;
     const seg = this.segmentAt(bt % TOTAL);
     const p = this.clamp01(seg.p);
 
+    if (!this.preFused) { this.preFused = true; this.preFuse(fps, detail); }
+    // p de la fusión en la rejilla de fotogramas de su fase (ver fuseD)
+    const fn = seg.dur * fps, pq = this.clamp01(Math.round(p * fn) / fn);
     let fuse = 0, morph = 0;
     switch (seg.name) {
       case 'logo': break;
-      case 'merge': fuse = p; break;
+      case 'merge': fuse = pq; break;
       case 'blob': fuse = 1; break;
       case 'to-bubble': fuse = 1; morph = p; break;
       case 'wobble': fuse = 1; morph = 1; break;
       case 'from-bubble': fuse = 1; morph = 1 - p; break;
-      case 'defuse': fuse = 1 - p; break;
+      case 'defuse': fuse = 1 - pq; break;
     }
 
     // SALTO DE FASE. La rama de fusión (morph <= 0) no tiene ningún término
@@ -376,29 +442,7 @@ var self = this;
 
     let d = '';
     if (morph <= 0) {
-      // fase de fusión: las siluetas reales del logo, soldadas como geometría
-      const e = seg.name === 'defuse' ? this.easeInOut(this.clamp01(fuse)) : this.spring(this.clamp01(fuse));
-      const ctx = this.ctx;
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.clearRect(0, 0, W, H);
-      ctx.setTransform(PX, 0, 0, PX, -VIEW.x * PX, -VIEW.y * PX);
-      ctx.fillStyle = '#fff';
-      for (let s = 0; s < 2; s++) {
-        const from = this.fuseFrom[s], to = this.fuseTo[s];
-        let path = '';
-        for (let i = 0; i < N; i++) {
-          path += (i === 0 ? 'M' : 'L') +
-            (from[i][0] + (to[i][0] - from[i][0]) * e).toFixed(2) + ' ' +
-            (from[i][1] + (to[i][1] - from[i][1]) * e).toFixed(2);
-        }
-        ctx.fill(new Path2D(path + 'Z'));
-      }
-      const img = ctx.getImageData(0, 0, W, H).data;
-      const f = this.f;
-      for (let i = 0, n = W * H; i < n; i++) f[i] = img[i * 4 + 3] / 255;
-      const r = Math.max(1, Math.round(K_WELD * PX * Math.pow(1 - this.clamp01(fuse), 1.4)));
-      if (r > 1) { this.boxBlur(f, this.g, r); this.boxBlur(f, this.g, r); }
-      for (const loop of this.contours(f, 0.5)) d += this.curvePath(this.resample(loop, detail));
+      d = this.fuseD(seg.name, fuse, detail);
     } else {
       // morph al globo + wobble perpetuo, con onda de retardo periódica
       const mE = this.easeOut(morph);

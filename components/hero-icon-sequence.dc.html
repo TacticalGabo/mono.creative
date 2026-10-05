@@ -438,10 +438,13 @@ var self = this;
     const seg = this.segmentAt(bt % TOTAL);
     const p = this.clamp01(seg.p);
 
+    // fusión en la rejilla de fotogramas de su fase (medio fotograma como
+    // mucho): así su geometría se repite de un ciclo a otro y se cachea
+    const fn = seg.dur * fps, pq = this.clamp01(Math.round(p * fn) / fn);
     let fuseT = 0, morphT = 0, shape = null, beamT = 0, flickT = 0, fallTT = -1, settle = -1;
     switch (seg.name) {
       case 'hold-logo': case 'hold-logo-2': case 'hold-logo-3': settle = p * seg.dur; break;
-      case 'fuse': case 'fuse-2': fuseT = p; break;
+      case 'fuse': case 'fuse-2': fuseT = pq; break;
       case 'hold-blob': case 'hold-blob-2': fuseT = 1; break;
       case 'to-lamp': fuseT = 1; shape = 'lamp'; morphT = p; break;
       case 'hold-lamp': fuseT = 1; shape = 'lamp'; morphT = 1; break;
@@ -450,7 +453,7 @@ var self = this;
       case 'beam-out': fuseT = 1; shape = 'lamp'; morphT = 1; beamT = 1; flickT = p; break;
       case 'lamp-rest': fuseT = 1; shape = 'lamp'; morphT = 1; break;
       case 'from-lamp': fuseT = 1; shape = 'lamp'; morphT = 1 - p; break;
-      case 'defuse': case 'defuse-2': fuseT = 1 - p; break;
+      case 'defuse': case 'defuse-2': fuseT = 1 - pq; break;
       case 'to-flower': fuseT = 1; shape = 'flower'; morphT = p; fallTT = (p - FALL_LEAD) * seg.dur; break;
       case 'flower-fall': fuseT = 1; shape = 'flower'; morphT = 1; fallTT = (1 - FALL_LEAD) * 0.85 + p * seg.dur; break;
       case 'from-flower': fuseT = 1; shape = 'flower'; morphT = 1 - p; fallTT = 6; break;
@@ -481,6 +484,17 @@ var self = this;
     // `d` del blob ya está puesta y overshoot vale 0 (e === 0 en las tres masas).
     let overshoot = 0;
     if (!showPath && !(frozen && this.settled)) {
+      // CACHÉ: sin temblor (boil 0) la fusión depende solo de fuseT y detail,
+      // y el ciclo se repite para siempre. Cada vuelta rehacía campo +
+      // marching squares para los mismos valores.
+      const ck = boil === 0 ? fuseT.toFixed(5) + '|' + detail : null;
+      const fc = this.fCache || (this.fCache = new Map());
+      const hit = ck ? fc.get(ck) : undefined;
+      if (hit) {
+        overshoot = hit.o;
+        if (hit.d && hit.d !== this.blobD) { this.blob.setAttribute('d', hit.d); this.blobD = hit.d; }
+        this.settled = frozen;
+      } else {
       // posiciones de las tres masas y unión suave calculada como curva
       const ovals = [];
       for (let i = 0; i < BLOBS.length; i++) {
@@ -500,8 +514,10 @@ var self = this;
       this.buildField(ovals, K_BLEND * Math.pow(1 - avgE, 1.1));
       let d = '';
       for (const loop of this.contours()) d += this.curvePath(this.resample(loop, detail));
-      if (d) this.blob.setAttribute('d', d);
+      if (d) { this.blob.setAttribute('d', d); this.blobD = d; }
+      if (ck) fc.set(ck, { d: d, o: overshoot });
       this.settled = frozen;
+      }
     } else if (showPath) {
       let pts, hole = null;
       if (shape === 'lamp') {

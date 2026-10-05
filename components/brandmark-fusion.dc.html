@@ -72,8 +72,11 @@ class Component extends DCLogic {
       this.fine = fine;
       // se guardan las funciones que de verdad se registran: antes se quitaban
       // otras distintas, así que los listeners sobrevivían al desmontaje
-      this.hoverIn = () => { if (fine()) this.hovering = true; };
-      this.hoverOut = () => { if (fine()) this.hovering = false; };
+      // wake(): el bucle duerme cuando el logo está quieto (ver loop) y cada
+      // cambio de estado lo despierta
+      this.wake = () => { if (!this.raf && !this.dead && this.visible !== false) this.raf = requestAnimationFrame(this.loop); };
+      this.hoverIn = () => { if (fine()) { this.hovering = true; this.wake(); } };
+      this.hoverOut = () => { if (fine()) { this.hovering = false; this.wake(); } };
       host.addEventListener('mouseenter', this.hoverIn);
       host.addEventListener('mouseleave', this.hoverOut);
       // toque: cambia de estado, se mantiene 0,6 s y navega si hay enlace
@@ -82,8 +85,10 @@ class Component extends DCLogic {
         const link = host.getAttribute('data-href') || (host.parentElement && host.parentElement.getAttribute('data-href'));
         if (link) e.preventDefault();
         this.hovering = true;
+        this.wake();
         this.tapTimer = setTimeout(() => {
           this.hovering = false;
+          this.wake();
           this.tapTimer = null;
           if (link) window.location.href = link;
         }, IN_DUR * 1000 + 600);
@@ -285,7 +290,14 @@ class Component extends DCLogic {
     if (this.t < target) this.t = Math.min(target, this.t + step);
     else if (this.t > target) this.t = Math.max(target, this.t - step);
     const t = this.t;
-    if ((t === 0 || t === 1) && this.settled === t) return;
+    if ((t === 0 || t === 1) && this.settled === t) {
+      // Quieto y sin temblor (handDrawn 0): nada cambia hasta el próximo
+      // hover/toque. Antes seguía pidiendo un frame en cada vsync para
+      // siempre, y en móvil este es el logo del header, siempre a la vista:
+      // mantenía despierto el hilo principal durante TODO el scroll.
+      if (!boilAmt) { cancelAnimationFrame(this.raf); this.raf = 0; }
+      return;
+    }
     this.settled = (t === 0 || t === 1) ? t : -1;
 
     let overshoot = 0;
