@@ -293,6 +293,18 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
       var b=e.target.closest&&e.target.closest('.btn');
       if(b){if(focused===b)focused=null; set(b,false); schedule();}
     });
+    // ratón/trackpad: un .btn con data-href navega al hacer clic (en táctil lo
+    // hace el bloque de abajo, tras la animación del tap)
+    document.addEventListener('click',function(e){
+      if(!FINEnow())return;
+      var hb=e.target.closest&&e.target.closest('.btn[data-href]');
+      if(hb){ e.preventDefault(); window.location.href=hb.getAttribute('data-href'); }
+    });
+    document.addEventListener('keydown',function(e){
+      if(e.key!=='Enter'&&e.key!==' ')return;
+      var hb=e.target.closest&&e.target.closest('.btn[data-href]');
+      if(hb){ e.preventDefault(); window.location.href=hb.getAttribute('data-href'); }
+    });
     document.addEventListener('click',function(e){
       if(FINEnow())return;
       var link=e.target.closest&&e.target.closest('.slink');
