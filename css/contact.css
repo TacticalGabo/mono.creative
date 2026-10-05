@@ -413,3 +413,11 @@ body { margin: 0; }
   @media (prefers-reduced-motion:reduce){.contact-direct .avatar{animation:none}}
   .contact-intro{margin-top:24px}
 }
+
+/* (2026-10-05) < 420: "Not sure yet" siempre solo en la última fila (si sube junto a "3D Art"
+   choca con el CTA circular). El label ocupa la fila entera (fuerza el salto sin añadir
+   hueco); el chip visible conserva su ancho y solo él recibe el clic. */
+@media (max-width: 419.98px) {
+  .service-chips .choice-chip:has(input[value="Not sure yet"]) { flex: 0 0 100%; pointer-events: none; }
+  .service-chips .choice-chip:has(input[value="Not sure yet"]) > span { pointer-events: auto; }
+}
