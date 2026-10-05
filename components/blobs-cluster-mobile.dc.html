@@ -421,9 +421,9 @@ class Component extends DCLogic {
   }
 
   grab(b, e) {
-    // Mientras caen no se pueden tocar: el gesto sigue de largo y la página
-    // scrollea como si los blobs no estuvieran. Desde el aterrizaje sí, y si
-    // aún se estaban asentando, se pasa a la física viva en este paso.
+    // Al principio de la caída no se pueden tocar: el gesto sigue de largo y
+    // la página scrollea como si los blobs no estuvieran. Desde LIVE_AT sí, y
+    // si aún se estaban moviendo, se pasa a la física viva en este paso.
     if (!this.toSvg || !this.interactive) return;
     if (this.playing) this.handover();
     // El rect se vuelve a medir en cada gesto, y tiene que ser ANTES del toSvg
@@ -570,8 +570,8 @@ class Component extends DCLogic {
     }
   }
 
-  // Se llama al aterrizar: a partir de aquí el clúster responde al tacto con
-  // la física de siempre (arrastre con correa, tap para el verde).
+  // Se llama en LIVE_AT (ver advance): a partir de aquí el clúster responde al
+  // tacto con la física de siempre (arrastre con correa, tap para el verde).
   enableInteraction() {
     if (this.interactive || !this.blobs) return;
     this.interactive = true;
@@ -1073,8 +1073,8 @@ class Component extends DCLogic {
   }
 
   // ─── CAÍDA PRECALCULADA ─────────────────────────────────────
-  // La caída no depende de nada del usuario (hasta aterrizar no se puede
-  // tocar): con el mismo estado inicial y el mismo paso fijo, step() da
+  // La caída no depende de nada del usuario (hasta LIVE_AT no se puede
+  // tocar, y un toque después pasa a la física viva, ver handover): con el mismo estado inicial y el mismo paso fijo, step() da
   // SIEMPRE la misma secuencia. Así que se calcula antes, en el tiempo libre
   // del hilo y sobre una copia del estado, y durante la caída el bucle solo
   // copia posiciones y dibuja. En un móvil lento eran varios ms de física por
@@ -1096,7 +1096,7 @@ class Component extends DCLogic {
     }));
     sim.capPairs = (this.capPairs || []).map(pr => ({ A: byId[pr.A.id], B: byId[pr.B.id] }));
     sim.frames = 0; sim.drag = null; sim.restSnap = null; sim.restFrame = 0;
-    this.pre = { sim: sim, xy: [], done: false, end: 0, fin: null, live: 0 };
+    this.pre = { sim: sim, xy: [], done: false, end: 0, fin: null };
   }
 
   // Cada paso guarda x, y, px, py de los 96 puntos: con las velocidades se
@@ -1104,20 +1104,10 @@ class Component extends DCLogic {
   preStep() {
     const pre = this.pre, sim = pre.sim;
     sim.step(); sim.frames++;
-    const a = new Float64Array(sim.blobs.length * N * 4), q = pre.xy[pre.xy.length - 1];
-    let j = 0, sp = 0;
-    for (const b of sim.blobs) for (const p of b.P) {
-      if (q) { const dx = p.x - q[j], dy = p.y - q[j + 1], v = dx * dx + dy * dy; if (v > sp) sp = v; }
-      a[j++] = p.x; a[j++] = p.y; a[j++] = p.px; a[j++] = p.py;
-    }
+    const a = new Float64Array(sim.blobs.length * N * 4);
+    let j = 0;
+    for (const b of sim.blobs) for (const p of b.P) { a[j++] = p.x; a[j++] = p.y; a[j++] = p.px; a[j++] = p.py; }
     pre.xy.push(a);
-    // ATERRIZAJE: pasado el choque (pico ~paso 50-60), el primer paso en que
-    // ningún punto avanza más de LAND_V px. Con 2,2 cae en el paso 89 (1,5 s):
-    // ya rebotaron y el imán los está metiendo en su sitio. Con 0,5 era el 126,
-    // y el responsable lo quería ~0,6 s antes. El reposo "oficial" de atRest no
-    // llega hasta el ~356 (5,9 s): esperar a ese era la pausa que se notaba.
-    const LAND_V = 2.2;
-    if (!pre.live && sim.frames > 60 && sp < LAND_V * LAND_V) pre.live = sim.frames;
     // 1800 pasos = 30 s: red de seguridad por si algo no llegara a posarse
     if ((sim.frames > 140 && sim.atRest()) || sim.frames >= 1800) {
       pre.done = true; pre.end = sim.frames;
@@ -1154,8 +1144,14 @@ class Component extends DCLogic {
       for (const b of this.blobs) for (const p of b.P) { p.x = a[j]; p.y = a[j + 1]; j += 4; }
       this.frames++;
     }
-    // ya en su sitio: se pueden tocar aunque sigan asentándose
-    if (pre.live && this.frames >= pre.live) this.enableInteraction();
+    // INTERACTIVOS desde el paso LIVE_AT (0,78 s), aunque sigan cayendo y
+    // asentándose: un toque pasa a la física viva en ese mismo paso (handover).
+    // Historia: con "ningún punto a más de 0,5 px/paso" era el paso 126; con
+    // 2,2 px/paso el 89; el responsable lo pidió 0,7 s antes que eso (89 - 42).
+    // El reposo "oficial" de atRest no llega hasta el ~356 (5,9 s): esperar a
+    // ese era la pausa que se notaba antes de poder tocar los blobs.
+    const LIVE_AT = 47;
+    if (this.frames >= LIVE_AT) this.enableInteraction();
     if (pre.done && this.frames >= pre.end) this.land();
   }
 
