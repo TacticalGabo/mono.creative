@@ -414,12 +414,11 @@ body { margin: 0; }
   .contact-intro{margin-top:24px}
 }
 
-/* (2026-10-05) < 420: "Not sure yet" siempre solo en la última fila (si sube junto a "3D Art"
-   choca con el CTA circular). El label ocupa la fila entera (fuerza el salto sin añadir
-   hueco); el chip visible conserva su ancho y solo él recibe el clic. */
+/* (2026-10-05) < 420: los chips se reparten siempre como en Figma 360 (4 filas: 2·2·2·1, con
+   "Not sure yet" sola junto al CTA). Sangrado derecho solo en el contenedor de chips: su
+   ancho útil queda fijo en 312 px (el de 360) aunque la pantalla crezca hasta 419. */
 @media (max-width: 419.98px) {
-  .service-chips .choice-chip:has(input[value="Not sure yet"]) { flex: 0 0 100%; pointer-events: none; }
-  .service-chips .choice-chip:has(input[value="Not sure yet"]) > span { pointer-events: auto; }
+  .service-chips { padding-right: max(0px, calc(100% - 312px)); }
 }
 
 /* (2026-10-05) 420–750: el CTA circular ya no sube sobre los chips (paso 1) ni sobre las
