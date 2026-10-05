@@ -1,6 +1,5 @@
 /* Contact composition: shared header/footer styles remain in case-study.css. */
 :root { --contact-error: #ff8d9b; }
-.contact-page .page { min-width: 1080px; }
 .contact-page [hidden] { display: none !important; }
 .contact-page .page :is(input, textarea, button, a, [tabindex]):focus-visible {
   outline: 1px solid var(--accent); outline-offset: 5px;
@@ -138,7 +137,6 @@
    se congela. cqw = ancho de .page (container), que también se congela en 1920. */
 @media (min-width: 768px) { .contact-layout { width: auto; margin-left: var(--mnav); margin-right: var(--mnav); } }
 @media (min-width: 1440px) { .contact-layout { margin-left: min(272.3px, calc(120px + (100cqw - 1440px) * .3172917)); margin-right: min(272.3px, calc(120px + (100cqw - 1440px) * .3172917)); } }
-@media (max-width: 1279px) { .contact-layout { width: calc(100% - 96px); gap: 30px; } .contact-detail-row { grid-template-columns: 1fr; gap: 14px; } .contact-email { width: auto; overflow-wrap: anywhere; } .contact-direct { margin-top: 65px; } }
 @media (prefers-reduced-motion: reduce) { .contact-page *, .contact-page *::before, .contact-page *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
 /* Footer del contacto: sin titular ni CTA (la página ya es el CTA). */
 .contact-page .foot > .h7, .contact-page .foot > .foot-btn { display: none; }
@@ -147,9 +145,9 @@
 /* Redes bajo el correo; en el footer ya no van (ni su línea). */
 .contact-page .contact-socials { margin: 38px 0 0; gap: 32px; }
 .contact-page .foot > .socials, .contact-page .foot > .foot-rule { display: none; }
-/* Sin footer y sin scroll: la página es una sola pantalla. */
+/* Sin footer. En desktop el contenido cabe en una pantalla y va centrado en vertical; si la
+   ventana es más baja, la página scrollea (antes overflow:hidden recortaba el form). */
 .contact-page .foot { display: none !important; }
-html:has(body.contact-page), body.contact-page { overflow: hidden; height: 100%; }
 .contact-layout { margin-bottom: 0; }
 /* Integrantes: círculos +15% (49 → 56,35) */
 .contact-direct .avatar { width: 56.35px; height: 56.35px; }
@@ -160,3 +158,258 @@ html:has(body.contact-page), body.contact-page { overflow: hidden; height: 100%;
 .contact-page .page { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }
 .contact-page .nav { flex: none; }
 .contact-layout { margin-top: auto !important; margin-bottom: auto !important; padding-block: 24px; box-sizing: border-box; }
+
+/* ==========================================================================
+   (2026-10-05) DISEÑO FINAL — contact_desktop / contact_mobile (Claude Design)
+   Mismo DOM en todos los anchos; un solo corte de layout en 768 (el del home).
+   Desktop = Figma 1440, mobile = Figma 360; entre medias y por encima, las
+   reglas del home (--mnav/--m, container queries sobre .page).
+   ========================================================================== */
+body { margin: 0; }
+/* +4px padding vertical en campos; brief solo +4 arriba */
+.field-line { padding-top: 8px; padding-bottom: 8px; }
+.brief-field .field-line { padding-top: 8px; padding-bottom: 4px; }
+/* salto del titular solo en mobile (360: "Let's bring your / ideas to life") */
+@media (min-width: 768px) { .contact-aside .br-m { display: none; } }
+
+/* CTA circular con el efecto blob de los .btn: el círculo y el punto del cursor viven en
+   .circle-cta-fluid, que es lo único que pasa por el filtro #goo (el texto queda nítido). */
+.circle-cta { position: relative; background: none; }
+.circle-cta-fluid { position: absolute; inset: 0; pointer-events: none; }
+.circle-cta-bg { position: absolute; inset: 0; border-radius: 50%; background: var(--accent); transition: background .22s; }
+.circle-cta .btn-dot { position: absolute; left: 0; top: 0; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); transform: translate(-50%,-50%); opacity: 0; will-change: transform; pointer-events: none; }
+.circle-cta-inner, .circle-cta:hover .circle-cta-inner, .circle-cta:focus-visible .circle-cta-inner, .circle-cta:disabled .circle-cta-inner { position: relative; background: transparent; border-color: transparent; }
+.circle-cta:hover .circle-cta-bg, .circle-cta:focus-visible .circle-cta-bg { background: var(--lime400); }
+.circle-cta:disabled .circle-cta-bg { background: var(--accent); }
+@media (hover: hover) and (pointer: fine) and (min-width: 768px) { .circle-cta.goo .circle-cta-fluid { filter: url(#goo); } }
+
+/* tema claro: los fondos de hover estaban fijados al verde oscuro */
+:root[data-theme="light"] .choice-chip:hover > span,
+:root[data-theme="light"] .time-chip:hover > span,
+:root[data-theme="light"] .calendar-day:not(:disabled):hover { background: rgba(16,25,19,.06); }
+:root[data-theme="light"] .field-line input:-webkit-autofill { -webkit-box-shadow: 0 0 0 100px var(--bg) inset; }
+
+/* ---- desktop ≥ 768 (contact_desktop, 1440) ---- */
+@media (min-width: 768px) {
+  .timezone-label,.schedule-note,.skip-call,.schedule-heading p{font-size:14px;line-height:1.5}
+  .schedule-note svg,.skip-call svg{width:16px;height:16px}
+  .calendar-day,.calendar-weekdays{font-size:13px}
+  .time-chip > span{height:auto;min-height:48px;padding-top:13px;padding-bottom:13px;font:var(--t-mono-tag);letter-spacing:0;color:var(--body-strong);transition:border-color .18s,color .18s,background .18s}
+  .time-chip:hover > span{border-color:var(--body);background:#18231b}
+  .time-chip input:checked + span{background:var(--accent);color:var(--bg-d);border-color:var(--accent)}
+  .schedule-heading h2{font-weight:500;line-height:1.4;letter-spacing:0;color:var(--txt)}
+  .schedule-heading p{color:var(--body);line-height:1.75}
+  .contact-email{align-items:center}
+  .contact-email svg{top:0;align-self:center}
+  .contact-email{margin-top:-2px;gap:6px}
+  .contact-email{gap:4px}
+  .contact-email svg{top:4px}
+  .schedule-heading h2,.schedule-heading p{font-family:var(--sans)}
+  .schedule-heading{justify-content:flex-start}
+  .schedule-back{margin:2px 0 0 -6px}
+  .schedule-heading p{margin-top:5px}
+  .schedule-heading{flex-direction:column;align-items:flex-start;gap:8px}
+  .schedule-back{margin:0 0 0 -6px}
+  .schedule-heading p{font-size:14px !important}
+  .link-tools .text-action,.attachment-note,#deck,.file-details{font-size:12px}
+  .text-action svg{width:14px;height:14px}
+  .time-chip > span{min-height:40px;padding-top:9px;padding-bottom:9px}
+  .calendar-grid{grid-template-rows:none;grid-auto-rows:33px}
+  .calendar-grid:has(> :nth-child(36):empty) > :nth-child(n+36){display:none}
+  .time-field{margin-top:26px}
+  #slot-error{margin-bottom:-4px}
+  #skip-call{margin-top:26px}
+  .schedule-heading p{margin-top:3px}
+  .time-field legend{float:left;width:auto;margin:0 12px 12px 0;line-height:21px}
+  .time-field .tz-picker{line-height:21px;margin-bottom:12px}
+  #time-slots{clear:both}
+  #skip-call{width:max-content;margin-left:auto}
+  .time-field legend{color:var(--txt)}
+  .tz-picker .timezone-label{margin:0}
+  .tz-chev{flex:none;transition:transform .25s}
+  .schedule-heading{flex-direction:row;align-items:flex-start;gap:0}
+  .schedule-back{margin:2px 0 0 -6px}
+  .tz-picker{position:relative;display:block;width:max-content;max-width:100%;cursor:default}
+  .tz-btn{display:flex;align-items:center;gap:6px;color:var(--muted);font:inherit;line-height:inherit;padding:0}
+  .tz-btn:hover,.tz-btn[aria-expanded="true"]{color:var(--accent)}
+  .tz-btn[aria-expanded="true"] .tz-chev{transform:rotate(180deg)}
+  .tz-pop{position:absolute;z-index:60;top:calc(100% + 8px);left:0;width:300px;background:#152B1D;border:1px solid var(--border);border-radius:12px;padding:6px;box-shadow:0 16px 40px rgba(0,0,0,.35)}
+  :root[data-theme="light"] .tz-pop{background:#fff}
+  .tz-search{display:block;width:100%;box-sizing:border-box;height:36px;padding:0 10px;margin-bottom:6px;background:transparent;border:0;border-bottom:1px solid var(--border);color:var(--body-strong);font:400 13px/1 var(--mono);outline:none}
+  .tz-search::placeholder{color:var(--muted)}
+  .tz-search:focus{border-color:var(--accent)}
+  .tz-list{max-height:216px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--border) transparent;margin:0;padding:0;list-style:none;contain:content}
+  .tz-list li{display:flex;justify-content:space-between;gap:12px;padding:8px 10px;border-radius:8px;font:400 13px/18px var(--mono);color:var(--body-strong);cursor:pointer;outline:none}
+  .tz-list li em{font-style:normal;color:var(--muted);flex:none}
+  .tz-list li:hover,.tz-list li:focus{background:#233127}
+  :root[data-theme="light"] .tz-list li:hover,:root[data-theme="light"] .tz-list li:focus{background:#eef4f0}
+  .tz-list li[aria-selected="true"]{color:var(--accent)}
+  .tz-list li[aria-selected="true"] em{color:var(--accent)}
+  .tz-list .tz-empty{color:var(--muted);cursor:default}
+  .time-field .tz-picker{display:inline-block;vertical-align:top}
+  /* tz dropdown v2 — minimal */
+  .tz-pop{width:100%;min-width:0;box-sizing:border-box;top:calc(100% + 10px);padding:4px 0;background:var(--bg);border:1px solid var(--border);border-radius:8px;box-shadow:none}
+  :root[data-theme="light"] .tz-pop{background:var(--bg)}
+  .tz-search{height:34px;padding:0 12px;margin:0 0 4px;font:400 13px/1 var(--sans);border-bottom:1px solid var(--border)}
+  .tz-list{max-height:216px;overflow-x:hidden;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent;margin-right:4px}
+  .tz-list::-webkit-scrollbar{width:2px;height:0}
+  .tz-list::-webkit-scrollbar-track{background:transparent}
+  .tz-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+  .tz-list::-webkit-scrollbar-thumb:hover{background:var(--muted)}
+  .tz-list li{min-width:0;gap:8px;padding:7px 10px 7px 12px;border-radius:0;font:400 13px/18px var(--sans);color:var(--body)}
+  .tz-list li span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tz-list li em{font:400 11px/18px var(--sans);color:var(--muted)}
+  .tz-list li:hover,.tz-list li:focus,:root[data-theme="light"] .tz-list li:hover,:root[data-theme="light"] .tz-list li:focus{background:transparent;color:var(--accent)}
+  .tz-list li[aria-selected="true"]{color:var(--accent)}
+  .time-field legend{display:flex;align-items:center;justify-content:flex-start;gap:6px}
+  .time-field legend svg{width:16px;height:16px;stroke-width:1.5;flex:none}
+  .calendar-day.is-today{text-decoration-color:var(--accent)}
+  .time-field legend{display:flex;float:left}
+  .contact-page .page .tz-picker :is(input,button,li):focus,.contact-page .page .tz-picker :is(input,button,li):focus-visible{outline:none}
+  .tz-pop{width:300px;max-width:none}
+  .tz-search,.tz-list li{font-size:14px}
+  .tz-list li em{font-size:12px}
+  .contact-direct .contact-meta{font:400 13px/24px var(--mono);letter-spacing:.2px;color:#87918B}
+  .contact-direct{grid-template-columns:max-content minmax(0,1fr);column-gap:7px}
+  @keyframes mc-av-in{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+  .contact-direct .avatar{animation:mc-av-in .89s cubic-bezier(.2,.7,.2,1) both;animation-delay:.3s}
+  .contact-direct .avatar:nth-child(2){animation-delay:.389s}
+  .contact-direct .avatar:nth-child(3){animation-delay:.478s}
+  .contact-direct .avatar:nth-child(4){animation-delay:.567s}
+  @media (prefers-reduced-motion:reduce){.contact-direct .avatar{animation:none}}
+  .contact-intro{margin-top:38px}
+  .contact-email svg{width:36.94px;height:36.94px;top:5.51px;margin-left:-2.57px;stroke-width:1.35}
+}
+
+/* ---- tablet 768–1279: la columna izquierda (correo a 34 px) no deja sitio al form a su
+   lado; se apila encima con la tipografía desktop. El form conserva su CTA a la derecha. ---- */
+@media (min-width: 768px) {
+  @container (max-width: 1279.9px) {
+    .contact-layout { grid-template-columns: minmax(0, 1fr); row-gap: 56px; padding-block: 48px; }
+    .contact-direct { margin-top: 48px; }
+    .brief-field .field-line textarea { min-height: 104px; }
+  }
+}
+
+/* ---- mobile < 768 (contact_mobile, 360; fluido hasta 767) ---- */
+@media (max-width: 767.98px) {
+  .contact-page .page{min-height:0;display:block}
+  .contact-layout{width:auto !important;margin:0 var(--m) !important;padding:48px 0 48px !important;grid-template-columns:minmax(0,1fr);gap:32px}
+  .contact-symbol{width:96px;height:40px;margin-bottom:24px}
+  .contact-detail-row{grid-template-columns:minmax(0,1fr);gap:12px}
+  .contact-aside h1{font-size:32px;line-height:1.3}
+  .contact-email{width:auto;font-size:17px;line-height:1.5;margin-top:8px;gap:6px}
+  .contact-email svg{width:16px;height:16px;top:1px}
+  .contact-page .contact-socials{margin:24px 0 0;gap:28px}
+  .contact-intro{margin-top:16px;font-size:16px;line-height:1.7}
+  .contact-direct{margin-top:32px;grid-template-columns:72px minmax(0,1fr);gap:6px;align-items:center}
+  .contact-form{grid-template-columns:minmax(0,1fr);row-gap:24px}
+  .form-stage{grid-column:1;grid-row:1}
+  .form-bottom{grid-column:1;grid-row:2;flex-direction:row;justify-content:space-between;align-items:flex-end;gap:16px}
+  .form-bottom-copy{flex:1 1 auto;min-width:0}
+  .circle-cta{width:128px;height:128px}
+  .link-tools{flex-wrap:nowrap;gap:14px}
+  .attachment-note{margin-left:auto;flex-basis:auto}
+  .brief-field .field-line textarea{min-height:96px}
+  .service-field{margin-top:0 !important}
+  .schedule-heading h2{font-size:22px}
+  .time-chips{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .timezone-label,.schedule-note,.skip-call,.schedule-heading p{font-size:14px;line-height:1.5}
+  .schedule-note svg,.skip-call svg{width:16px;height:16px}
+  .calendar-day,.calendar-weekdays{font-size:13px}
+  .time-chip > span{height:auto;min-height:48px;padding-top:13px;padding-bottom:13px;font:var(--t-mono-tag);letter-spacing:0;color:var(--body-strong);transition:border-color .18s,color .18s,background .18s}
+  .time-chip:hover > span{border-color:var(--body);background:#18231b}
+  .time-chip input:checked + span{background:var(--accent);color:var(--bg-d);border-color:var(--accent)}
+  .schedule-heading h2{font-weight:500;line-height:1.4;letter-spacing:0;color:var(--txt)}
+  .schedule-heading p{color:var(--body);line-height:1.75}
+  .contact-email{align-items:center}
+  .contact-email svg{top:0;align-self:center}
+  .contact-email{gap:4px}
+  .contact-email{font-size:19.5px;line-height:1.5;width:auto;white-space:nowrap}
+  .contact-email svg{width:21.2px;height:21.2px;top:2.31px;margin-left:-4.18px;margin-right:-6.18px;stroke-width:1.35}
+  .schedule-heading h2,.schedule-heading p{font-family:var(--sans)}
+  .schedule-heading{justify-content:flex-start}
+  .schedule-back{margin:2px 0 0 -6px}
+  .schedule-heading p{margin-top:5px}
+  .schedule-heading{flex-direction:column;align-items:flex-start;gap:8px}
+  .schedule-back{margin:0 0 0 -6px}
+  .schedule-heading p{font-size:14px !important}
+  .contact-form{row-gap:4px}
+  .contact-form{row-gap:0}
+  .form-bottom{margin-top:-24px}
+  .circle-cta{position:relative;top:-40px}
+  .service-field legend{margin-bottom:8px}
+  .service-chips{margin-top:0}
+  .link-tools .text-action,.attachment-note,#deck,.file-details{font-size:12px}
+  .text-action svg{width:14px;height:14px}
+  .calendar-grid{row-gap:8px}
+  .schedule-heading{margin-bottom:25.65px}
+  .brief-field{flex:none}
+  .brief-field .field-line{flex:none}
+  .brief-field .field-line textarea{height:104px;min-height:104px}
+  .time-chip > span{min-height:40px;padding-top:9px;padding-bottom:9px}
+  .calendar-grid{grid-template-rows:none;grid-auto-rows:33px}
+  .calendar-grid:has(> :nth-child(36):empty) > :nth-child(n+36){display:none}
+  .time-field{margin-top:74px}
+  #skip-call{margin-top:74px}
+  .schedule-heading p{margin-top:3px}
+  .time-field legend{color:var(--txt)}
+  .tz-picker .timezone-label{margin:0}
+  .tz-chev{flex:none;transition:transform .25s}
+  .time-field .tz-picker{margin-bottom:12px}
+  .tz-picker{position:relative;display:block;width:max-content;max-width:100%;cursor:default}
+  .tz-btn{display:flex;align-items:center;gap:6px;color:var(--muted);font:inherit;line-height:inherit;padding:0}
+  .tz-btn:hover,.tz-btn[aria-expanded="true"]{color:var(--accent)}
+  .tz-btn[aria-expanded="true"] .tz-chev{transform:rotate(180deg)}
+  .tz-pop{position:absolute;z-index:60;top:calc(100% + 8px);left:0;width:300px;background:#152B1D;border:1px solid var(--border);border-radius:12px;padding:6px;box-shadow:0 16px 40px rgba(0,0,0,.35)}
+  :root[data-theme="light"] .tz-pop{background:#fff}
+  .tz-search{display:block;width:100%;box-sizing:border-box;height:36px;padding:0 10px;margin-bottom:6px;background:transparent;border:0;border-bottom:1px solid var(--border);color:var(--body-strong);font:400 13px/1 var(--mono);outline:none}
+  .tz-search::placeholder{color:var(--muted)}
+  .tz-search:focus{border-color:var(--accent)}
+  .tz-list{max-height:216px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--border) transparent;margin:0;padding:0;list-style:none;contain:content}
+  .tz-list li{display:flex;justify-content:space-between;gap:12px;padding:8px 10px;border-radius:8px;font:400 13px/18px var(--mono);color:var(--body-strong);cursor:pointer;outline:none}
+  .tz-list li em{font-style:normal;color:var(--muted);flex:none}
+  .tz-list li:hover,.tz-list li:focus{background:#233127}
+  :root[data-theme="light"] .tz-list li:hover,:root[data-theme="light"] .tz-list li:focus{background:#eef4f0}
+  .tz-list li[aria-selected="true"]{color:var(--accent)}
+  .tz-list li[aria-selected="true"] em{color:var(--accent)}
+  .tz-list .tz-empty{color:var(--muted);cursor:default}
+  /* tz dropdown v2 — minimal */
+  .tz-pop{width:100%;min-width:0;box-sizing:border-box;top:calc(100% + 10px);padding:4px 0;background:var(--bg);border:1px solid var(--border);border-radius:8px;box-shadow:none}
+  :root[data-theme="light"] .tz-pop{background:var(--bg)}
+  .tz-search{height:34px;padding:0 12px;margin:0 0 4px;font:400 13px/1 var(--sans);border-bottom:1px solid var(--border)}
+  .tz-list{max-height:216px;overflow-x:hidden;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent;margin-right:4px}
+  .tz-list::-webkit-scrollbar{width:2px;height:0}
+  .tz-list::-webkit-scrollbar-track{background:transparent}
+  .tz-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+  .tz-list::-webkit-scrollbar-thumb:hover{background:var(--muted)}
+  .tz-list li{min-width:0;gap:8px;padding:7px 10px 7px 12px;border-radius:0;font:400 13px/18px var(--sans);color:var(--body)}
+  .tz-list li span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tz-list li em{font:400 11px/18px var(--sans);color:var(--muted)}
+  .tz-list li:hover,.tz-list li:focus,:root[data-theme="light"] .tz-list li:hover,:root[data-theme="light"] .tz-list li:focus{background:transparent;color:var(--accent)}
+  .tz-list li[aria-selected="true"]{color:var(--accent)}
+  .time-field legend{display:flex;align-items:center;justify-content:flex-start;gap:6px}
+  .time-field legend svg{width:16px;height:16px;stroke-width:1.5;flex:none}
+  .calendar-day.is-today{text-decoration-color:var(--accent)}
+  .time-field legend{float:left;width:auto;margin:0 10px 12px 0;line-height:21px}
+  .time-field .tz-picker{display:inline-block;vertical-align:top;line-height:21px;margin-bottom:12px}
+  #time-slots{clear:both}
+  .contact-page .page .tz-picker :is(input,button,li):focus,.contact-page .page .tz-picker :is(input,button,li):focus-visible{outline:none}
+  .contact-form{position:relative}
+  .form-stage,.scheduling-panel{position:static}
+  #skip-call{position:absolute;left:0;bottom:93.5px;margin:0 !important;line-height:21px}
+  .schedule-heading{margin-bottom:72px}
+  .time-field{margin-top:52px}
+  .tz-pop{width:300px;max-width:none}
+  .tz-search,.tz-list li{font-size:14px}
+  .tz-list li em{font-size:12px}
+  .contact-direct .contact-meta{font:400 13px/24px var(--mono);letter-spacing:.2px;color:#87918B}
+  .contact-direct{grid-template-columns:max-content minmax(0,1fr);column-gap:7px}
+  @keyframes mc-av-in{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+  .contact-direct .avatar{animation:mc-av-in .89s cubic-bezier(.2,.7,.2,1) both;animation-delay:.3s}
+  .contact-direct .avatar:nth-child(2){animation-delay:.389s}
+  .contact-direct .avatar:nth-child(3){animation-delay:.478s}
+  .contact-direct .avatar:nth-child(4){animation-delay:.567s}
+  @media (prefers-reduced-motion:reduce){.contact-direct .avatar{animation:none}}
+  .contact-intro{margin-top:24px}
+}

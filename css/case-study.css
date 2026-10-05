@@ -40,7 +40,7 @@
   --chip-tx-off-d:#eef4f0; --chip-tx-off-l:#264532;
   --team-bd-d:#414b45; --team-bd-l:#bec8c2;
   --team-name-d:#eef4f0; --team-name-l:#101913;
-  --team-label-d:#2c513a; --team-label-l:#7baa00;
+  --team-label-d:#87918b; --team-label-l:#87918b;
   --team-lead-d:#ffffff; --team-lead-l:#101913;
   --link-card-d:#9bd700; --link-card-l:#7baa00;
   --sticker-d:#eef4f0; --sticker-l:#414b45;
@@ -467,10 +467,10 @@ html .page .sc-placeholder::before{display:none}
 .avatar{width:49px;height:49px;border-radius:50%;background-color:var(--neutral-100);background-size:cover;background-position:center;border:3px solid var(--bg)}
 .avatar+.avatar{margin-left:-13px}
 /* fotos del team (mismas del home): 1 Gabriel, 2 Ale, 3 Romina, 4 David */
-[data-asset="team-1"]{background-image:url(../assets/team/avatar-1.png)}
-[data-asset="team-2"]{background-image:url(../assets/team/avatar-2.png)}
-[data-asset="team-3"]{background-image:url(../assets/team/avatar-3.png)}
-[data-asset="team-4"]{background-image:url(../assets/team/avatar-4.png)}
+[data-asset="team-1"]{background-image:url(../assets/team/avatar-1.webp)}
+[data-asset="team-2"]{background-image:url(../assets/team/avatar-2.webp)}
+[data-asset="team-3"]{background-image:url(../assets/team/avatar-3.webp)}
+[data-asset="team-4"]{background-image:url(../assets/team/avatar-4.webp)}
 .cs-hero__right{margin-top:16px}
 .cs-hero__lead{font:500 20px/1.5 var(--ff-sans);letter-spacing:-.22px;color:var(--text-title)}
 .cs-hero__intro{font:400 15px/24px var(--ff-sans);margin-top:16px}

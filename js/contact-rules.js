@@ -141,9 +141,11 @@
     now = now || new Date();
     if (!(now instanceof Date) || Number.isNaN(now.getTime())) return false;
     var first = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 12);
-    var last = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 30, 12);
+    var dow = now.getDay(), monday = now.getDate() + (dow === 0 ? -6 : 1 - dow);
+    var last = new Date(now.getFullYear(), now.getMonth(), monday + 18, 12);
     return date >= first && date <= last;
   }
 
   return { validateName: validateName, validateEmail: validateEmail, validateTelegram: validateTelegram, validateLinks: validateLinks, validateBrief: validateBrief, validateFile: validateFile, isSpam: isSpam, dateKey: dateKey, eligibleDate: eligibleDate };
 });
+

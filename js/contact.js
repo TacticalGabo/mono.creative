@@ -11,18 +11,35 @@
     const find = (selector) => form.querySelector(selector);
     const all = (selector) => Array.from(form.querySelectorAll(selector));
     const state = { step: 1, date: '', time: '', skip: false, busy: false, sent: false };
-    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/Lima';
+    let timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/Lima';
+    form.addEventListener('mono:timezone', (event) => { if (event.detail) { timeZone = event.detail; renderTimes(); } });
+    form.dataset.timezone = timeZone;
     const today = new Date();
     const first = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1, 12);
-    const last = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 30, 12);
+    const last = new Date(today.getFullYear(), today.getMonth(), today.getDate() + (today.getDay() === 0 ? -6 : 1 - today.getDay()) + 18, 12);
     let month = new Date(first.getFullYear(), first.getMonth(), 1, 12);
     let nextLinkId = 2;
     const requestId = window.crypto?.randomUUID?.() || 'lead-' + Date.now() + '-' + Math.random().toString(36).slice(2);
     const cta = find('#form-cta');
     const feedback = find('#submit-feedback');
 
+    /* (2026-10-05) Iconos en línea: los 9 de Lucide 0.468 que usa el form. Antes se cargaba
+       la librería entera (350 KB) solo para esto. Mismo marcado que lucide.createIcons(). */
+    const ICONS = {"arrow-left": "<path d=\"m12 19-7-7 7-7\"/><path d=\"M19 12H5\"/>", "arrow-up-right": "<path d=\"M7 7h10v10\"/><path d=\"M7 17 17 7\"/>", "chevron-left": "<path d=\"m15 18-6-6 6-6\"/>", "chevron-right": "<path d=\"m9 18 6-6-6-6\"/>", "clock-3": "<circle cx=\"12\" cy=\"12\" r=\"10\"/><polyline points=\"12 6 12 12 16.5 12\"/>", "file": "<path d=\"M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z\"/><path d=\"M14 2v4a2 2 0 0 0 2 2h4\"/>", "paperclip": "<path d=\"M13.234 20.252 21 12.3\"/><path d=\"m16 6-8.414 8.586a2 2 0 0 0 0 2.828 2 2 0 0 0 2.828 0l8.414-8.586a4 4 0 0 0 0-5.656 4 4 0 0 0-5.656 0l-8.415 8.585a6 6 0 1 0 8.486 8.486\"/>", "plus": "<path d=\"M5 12h14\"/><path d=\"M12 5v14\"/>", "x": "<path d=\"M18 6 6 18\"/><path d=\"m6 6 12 12\"/>"};
     function icons() {
-      if (window.lucide) window.lucide.createIcons({ attrs: { 'aria-hidden': 'true' } });
+      form.closest('.page').querySelectorAll('i[data-lucide]').forEach((i) => {
+        const name = i.getAttribute('data-lucide');
+        if (!ICONS[name]) return;
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+        svg.setAttribute('width', '24'); svg.setAttribute('height', '24'); svg.setAttribute('viewBox', '0 0 24 24');
+        svg.setAttribute('fill', 'none'); svg.setAttribute('stroke', 'currentColor'); svg.setAttribute('stroke-width', '2');
+        svg.setAttribute('stroke-linecap', 'round'); svg.setAttribute('stroke-linejoin', 'round');
+        svg.setAttribute('class', ('lucide lucide-' + name + ' ' + (i.getAttribute('class') || '')).trim());
+        svg.setAttribute('aria-hidden', 'true');
+        svg.innerHTML = ICONS[name];
+        i.replaceWith(svg);
+      });
     }
 
     function setError(input, message, container, errorNode) {
@@ -191,7 +208,7 @@
       });
       const reference = state.date ? parseDay(state.date) : new Date();
       const zoneName = new Intl.DateTimeFormat('en', { timeZone, timeZoneName: 'shortOffset' }).formatToParts(reference).find((part) => part.type === 'timeZoneName').value;
-      find('#timezone-label').textContent = 'Your time: ' + timeZone.replace(/_/g, ' ') + ' (' + zoneName + ')';
+      find('#timezone-label').textContent = timeZone.replace(/_/g, ' ') + ' (' + zoneName + ')';
       find('#skip-call').setAttribute('aria-pressed', String(state.skip));
     }
 
@@ -199,7 +216,9 @@
       if (state.skip || !state.date || !state.time) return null;
       const [year, monthIndex, day] = state.date.split('-').map(Number);
       const [hour, minute] = state.time.split(':').map(Number);
-      const start = new Date(year, monthIndex - 1, day, hour, minute);
+      const guess = Date.UTC(year, monthIndex - 1, day, hour, minute);
+      const zp = Object.fromEntries(new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date(guess)).map((part) => [part.type, part.value]));
+      const start = new Date(guess - (Date.UTC(+zp.year, zp.month - 1, +zp.day, +zp.hour, +zp.minute) - guess));
       const parts = Object.fromEntries(new Intl.DateTimeFormat('en-CA', {
         timeZone: 'America/Lima', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23'
       }).formatToParts(start).map((part) => [part.type, part.value]));
@@ -421,9 +440,9 @@
       else sendBrief();
     });
 
-    document.querySelectorAll('#dc-root .nav-btn, #dc-root .foot-btn').forEach((button) => {
+    Array.from(document.querySelectorAll('.page .nav-btn, .page .foot-btn')).filter((b) => !b.closest('x-dc')).forEach((button) => {
       function moveToForm() {
-        form.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' });
+        window.scrollTo({ top: form.getBoundingClientRect().top + window.scrollY, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
         (state.step === 1 ? find('#name') : find('#schedule-title')).focus({ preventScroll: true });
       }
       button.addEventListener('click', moveToForm);
@@ -443,7 +462,7 @@
 
   // The shared runtime replaces x-dc; bind only to the committed form.
   function boot() {
-    const form = document.querySelector('#dc-root #contact-form');
+    const form = Array.from(document.querySelectorAll('#contact-form')).find((f) => !f.closest('x-dc'));
     if (!form || form.dataset.ready || !window.MonoContactRules) return Boolean(form?.dataset.ready);
     init(form);
     return true;
@@ -452,4 +471,114 @@
     const observer = new MutationObserver(() => { if (boot()) observer.disconnect(); });
     observer.observe(document.documentElement, { childList: true, subtree: true });
   }
+})();
+
+
+/* ---- selector de zona horaria (paso 2) ---- */
+(function(){
+  if(window.__mcTz)return; window.__mcTz=1;
+  var zones=null, cur=null;
+  function live(s){return [].find.call(document.querySelectorAll(s),function(e){return !e.closest('x-dc')})}
+  function build(){
+    if(zones)return zones;
+    var list=(Intl.supportedValuesOf&&Intl.supportedValuesOf('timeZone'))||[], now=new Date();
+    if(cur&&list.indexOf(cur)<0)list.unshift(cur);
+    zones=list.map(function(z){var off='';try{off=new Intl.DateTimeFormat('en',{timeZone:z,timeZoneName:'shortOffset'}).formatToParts(now).find(function(p){return p.type==='timeZoneName'}).value}catch(e){}
+      return {z:z,label:z.replace(/_/g,' '),off:off,key:(z+' '+off).toLowerCase().replace(/_/g,' ')}});
+    return zones;
+  }
+  function render(ul,q){
+    q=(q||'').trim().toLowerCase();
+    var html='',n=0;
+    build().forEach(function(o){ if(q&&o.key.indexOf(q)<0)return; n++;
+      html+='<li role="option" tabindex="-1" data-z="'+o.z+'" aria-selected="'+(o.z===cur)+'"><span>'+o.label+'</span><em>'+o.off+'</em></li>'; });
+    ul.innerHTML=html||'<li class="tz-empty">No matches</li>';
+  }
+  function open(p){
+    var btn=p.querySelector('.tz-btn'),pop=p.querySelector('.tz-pop'),ul=p.querySelector('.tz-list'),s=p.querySelector('.tz-search');
+    cur=p.closest('form').dataset.timezone||cur;
+    s.value=''; render(ul,''); pop.hidden=false;
+    var pg=p.closest('.page')||document.body, room=pg.getBoundingClientRect().right-16-btn.getBoundingClientRect().left; pop.style.width=Math.max(200,Math.min(300,room))+'px'; btn.setAttribute('aria-expanded','true');
+    var sel=ul.querySelector('[aria-selected="true"]'); if(sel)ul.scrollTop=sel.offsetTop-ul.clientHeight/2+sel.offsetHeight/2;
+    s.focus({preventScroll:true});
+  }
+  function close(p,focus){ var pop=p.querySelector('.tz-pop'); if(pop.hidden)return; pop.hidden=true; p.querySelector('.tz-btn').setAttribute('aria-expanded','false'); if(focus)p.querySelector('.tz-btn').focus(); }
+  function pick(p,z){
+    var f=p.closest('form'); cur=z; f.dataset.timezone=z;
+    f.dispatchEvent(new CustomEvent('mono:timezone',{detail:z})); close(p,true);
+  }
+  document.addEventListener('click',function(e){
+    var p=live('.tz-picker'); if(!p)return;
+    if(e.target.closest('.tz-btn')&&p.contains(e.target)){ p.querySelector('.tz-pop').hidden?open(p):close(p); return; }
+    var li=e.target.closest('.tz-list [data-z]'); if(li&&p.contains(li)){pick(p,li.dataset.z);return}
+    if(!p.contains(e.target))close(p);
+  });
+  document.addEventListener('input',function(e){ if(e.target.id!=='tz-search')return; var p=e.target.closest('.tz-picker'); render(p.querySelector('.tz-list'),e.target.value); });
+  document.addEventListener('keydown',function(e){
+    var p=e.target.closest&&e.target.closest('.tz-picker'); if(!p||p.querySelector('.tz-pop').hidden)return;
+    var items=[].slice.call(p.querySelectorAll('.tz-list [data-z]')), i=items.indexOf(document.activeElement);
+    if(e.key==='Escape'){e.preventDefault();close(p,true)}
+    else if(e.key==='ArrowDown'){e.preventDefault();(items[i+1]||items[0])&&(items[i+1]||items[0]).focus()}
+    else if(e.key==='ArrowUp'){e.preventDefault();if(i>0)items[i-1].focus();else p.querySelector('.tz-search').focus()}
+    else if(e.key==='Enter'){e.preventDefault();var t=i>=0?items[i]:items[0];if(t)pick(p,t.dataset.z)}
+  });
+  (function wait(n){ var f=live('#contact-form'); if(f&&f.dataset.ready){cur=f.dataset.timezone;return} if(n<200)setTimeout(function(){wait(n+1)},100); })(0);
+})();
+
+/* ---- clic en el correo: lo copia y cambia la flecha por un check 2 s ---- */
+(function(){
+  if(window.__mcEmail)return; window.__mcEmail=1;
+  var ICON='<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="m9 15 2 2 4-4"></path>';
+  document.addEventListener('click',function(e){
+    var a=e.target.closest&&e.target.closest('.contact-email'); if(!a)return;
+    var s=a.querySelector('svg'); if(!s)return;
+    e.preventDefault();
+    var mail=a.textContent.trim();
+    function legacy(){var t=document.createElement('textarea');t.value=mail;t.setAttribute('readonly','');t.style.cssText='position:fixed;opacity:0;top:0;left:0';document.body.appendChild(t);t.select();try{document.execCommand('copy')}catch(_){}t.remove();}
+    try{ if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(mail).catch(legacy); else legacy(); }catch(_){legacy()}
+    if(!s.__orig){s.__orig=s.innerHTML;s.__vb=s.getAttribute('viewBox');s.__sw=s.getAttribute('stroke-width')}
+    /* misma caja que la flecha (no mueve el layout); el viewBox encaja la hoja en el alto del texto */
+    s.setAttribute('viewBox','-6.36 -3.54 35.52 35.52');
+    s.setAttribute('overflow','visible');
+    s.style.strokeWidth='1.6';
+    s.innerHTML=ICON;
+    clearTimeout(s.__t); s.__t=setTimeout(function(){s.innerHTML=s.__orig;s.setAttribute('viewBox',s.__vb);s.style.strokeWidth=''},2000);
+  });
+})();
+
+/* ---- flecha 'atrás' del paso 2 = botón #back-step ---- */
+(function(){if(window.__mcBack)return;window.__mcBack=1;document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('.schedule-back');if(!b)return;var f=b.closest('form');var s=f&&f.querySelector('#back-step');if(s)s.click();});})();
+
+/* ---- CTA circular: mismo efecto blob que los .btn del sitio (JS-BTN) ----
+   Un punto del color del acento sigue al cursor y se funde con el círculo bajo el filtro
+   #goo compartido. Solo desktop con ratón (≥768); en táctil no hay nada que fundir. */
+(function(){
+  if(window.__mcCtaGoo)return; window.__mcCtaGoo=1;
+  var ZONE=40, BLUR=null, ev=null, raf=0, b=null, dot=null;
+  var FINE=window.matchMedia&&matchMedia('(hover:hover) and (pointer:fine)').matches;
+  function fine(){return FINE&&window.innerWidth>=768}
+  function frame(){
+    raf=0;
+    if(!b||!b.isConnected){b=[].find.call(document.querySelectorAll('.circle-cta'),function(x){return !x.closest('x-dc')});dot=b&&b.querySelector('.btn-dot');}
+    if(!dot)return;
+    var p=0, r=b.getBoundingClientRect();
+    if(ev&&fine()){
+      var R=r.width/2, dx=ev.x-(r.left+R), dy=ev.y-(r.top+R), d=Math.sqrt(dx*dx+dy*dy)-R;
+      p=d<=0?1:(d<ZONE?1-d/ZONE:0);
+    }
+    if(p>0){
+      dot.style.transform='translate3d('+(ev.x-r.left)+'px,'+(ev.y-r.top)+'px,0) translate(-50%,-50%)';
+      dot.style.opacity=p.toFixed(3);
+      b.classList.add('goo');
+      if(!BLUR)BLUR=document.querySelector('#goo feGaussianBlur');
+      if(BLUR)BLUR.setAttribute('stdDeviation',(0.2+5.8*p).toFixed(2));
+      window.__mcGooNear=Math.max(window.__mcGooNear||0,p);
+    } else if(b.classList.contains('goo')){
+      dot.style.opacity='0'; b.classList.remove('goo'); window.__mcGooNear=0;
+    }
+  }
+  function go(){ if(!raf)raf=requestAnimationFrame(frame); }
+  document.addEventListener('mousemove',function(e){ if(!fine())return; ev={x:e.clientX,y:e.clientY}; go(); },{passive:true});
+  document.addEventListener('mouseleave',function(){ ev=null; go(); });
+  addEventListener('scroll',function(){ if(ev)go(); },{passive:true});
 })();

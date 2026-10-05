@@ -16,8 +16,11 @@
 @font-face{font-family:'Plus Jakarta Sans';font-style:italic;font-weight:200 800;font-display:swap;src:url(./fonts/plus-jakarta-sans/webfont/PlusJakartaSans-200-800-italic-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 @font-face{font-family:'Space Mono';font-style:normal;font-weight:400;font-display:swap;src:url(./fonts/space-mono/webfont/SpaceMono-400-normal-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 </style>
-<link rel="stylesheet" href="./css/case-study.css?v=4">
-<link rel="stylesheet" href="./css/contact.css">
+<!-- (2026-10-05) las dos fuentes del primer pantallazo, pedidas ya con el HTML (sin esperar al CSS) -->
+<link rel="preload" as="font" type="font/woff2" crossorigin href="./fonts/plus-jakarta-sans/webfont/PlusJakartaSans-200-800-normal-latin.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="./fonts/space-mono/webfont/SpaceMono-400-normal-latin.woff2">
+<link rel="stylesheet" href="./css/case-study.css?v=5">
+<link rel="stylesheet" href="./css/contact.css?v=2">
 <!-- (2026-10-04) CARGA: React desde el propio dominio, igual que el home (mismos bytes,
      sha384 idéntico al SRI de support.js). Además, con window.__resources definido
      support.js NO vuelve a descargar la página entera (fetch(location.href)). -->
@@ -28,10 +31,9 @@ if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.
 </script>
 <script src="./vendor/support.js"></script>
 <script src="./js/case-study.js" defer></script>
-<script src="./vendor/lucide-0.468.0.min.js" defer></script>
 <script src="./js/contact-config.js" defer></script>
-<script src="./js/contact-rules.js" defer></script>
-<script src="./js/contact.js" defer></script>
+<script src="./js/contact-rules.js?v=2" defer></script>
+<script src="./js/contact.js?v=2" defer></script>
 </head>
 <body class="contact-page">
 <x-dc>
@@ -307,7 +309,7 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
       if(!hb||hb.dataset.pf)return;
       hb.dataset.pf='1';
       var u=hb.getAttribute('data-href'), lst=[u];
-      if(/contact\.html/.test(u))lst=lst.concat(['./css/contact.css','./js/contact.js','./js/contact-rules.js','./js/contact-config.js','./vendor/lucide-0.468.0.min.js']);
+      if(/contact\.html/.test(u))lst=lst.concat(['./css/contact.css','./js/contact.js','./js/contact-rules.js','./js/contact-config.js']);
       lst.forEach(function(h){ var l=document.createElement('link'); l.rel='prefetch'; l.href=h; document.head.appendChild(l); });
     }
     document.addEventListener('pointerover',precarga,{passive:true});
@@ -491,7 +493,7 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
 <!-- /SHARED:NAV -->
 
   <main class="contact-layout" id="contact">
-        <section class="contact-aside" aria-labelledby="contact-title">
+        <section class="contact-aside fx" aria-labelledby="contact-title">
           <a class="contact-symbol" href="./index.html" aria-label="mono.creative — home"><svg class="contact-symbol-svg" aria-hidden="true" preserveAspectRatio="xMidYMid meet" overflow="visible" style="display: block;" width="70.0048" height="29.1754" viewBox="0 0 70.0048 29.1754" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g id="Vector">
 <path id="Vector_2" d="M29.0576 0.00357075C32.1531 -0.0810891 35.1523 1.34252 37.4136 3.96976C39.6489 6.55278 40.9589 10.1395 41.0494 13.9295C41.1777 17.9526 40.169 21.5605 37.9597 24.5236C34.7542 28.7889 29.8141 30.283 25.3875 28.327C23.5713 27.5056 22.5226 26.0859 20.3978 26.1953C18.5676 26.2895 18.0292 27.0545 16.4507 27.954C15.0287 28.7656 13.6559 29.0741 12.1024 29.1485C9.05281 29.2893 6.08173 27.9298 3.8354 25.3648C-0.896209 19.9463 -1.36165 10.6247 3.0634 4.73322C6.31064 0.366331 11.3579 -1.13907 15.8483 0.919851C17.7767 1.77927 18.4994 3.03231 20.827 2.88837C22.7031 2.77232 23.3612 1.90367 24.9796 1.05258C26.2373 0.391177 27.7052 0.0625816 29.0576 0.00357075Z" fill="currentColor"></path>
@@ -500,7 +502,7 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
 </svg></a>
           <div class="contact-detail-row contact-heading">
             <div>
-              <h1 id="contact-title">Let&rsquo;s bring your ideas to life</h1>
+              <h1 id="contact-title">Let&rsquo;s bring your<br class="br-m"> ideas to life</h1>
               <a class="contact-email" href="mailto:hello.monocreative@gmail.com">hello.monocreative@gmail.com<i data-lucide="arrow-up-right" aria-hidden="true"></i></a>
               <div class="socials contact-socials" data-comp="social-icons">
       <div class="ico"><i style="left:.355px;top:.354px;width:16.7684px;height:16.7749px;-webkit-mask-image:url(./assets/social-instagram-frame-17x17.svg);mask-image:url(./assets/social-instagram-frame-17x17.svg)"></i><i style="left:4.435px;top:4.435px;width:8.6178px;height:8.6178px;-webkit-mask-image:url(./assets/social-instagram-lens-9x9.svg);mask-image:url(./assets/social-instagram-lens-9x9.svg)"></i><i style="left:12.735px;top:3.635px;width:2.012px;height:2.012px;-webkit-mask-image:url(./assets/social-instagram-dot-2x2.svg);mask-image:url(./assets/social-instagram-dot-2x2.svg)"></i></div>
@@ -511,7 +513,7 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
             </div>
           </div>
           <div class="contact-detail-row contact-direct">
-            <p class="contact-meta">SAY HELLO</p>
+            <p class="contact-meta">Say Hello</p>
             <div class="avatars" role="group" aria-label="The mono.creative team">
               <span class="avatar" data-asset="team-1" role="img" aria-label="Gabriel" title="Gabriel"></span>
               <span class="avatar" data-asset="team-2" role="img" aria-label="Ale" title="Ale"></span>
@@ -521,7 +523,7 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
           </div>
         </section>
 
-        <form id="contact-form" class="contact-form" novalidate aria-label="Project enquiry">
+        <form id="contact-form" class="contact-form fx" novalidate aria-label="Project enquiry">
           <div class="contact-honeypot" aria-hidden="true">
             <label for="website">Website</label><input id="website" name="website" tabindex="-1" autocomplete="off">
           </div>
@@ -549,7 +551,7 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
                     <p class="field-error" id="link-1-error" aria-live="polite"></p>
                   </div>
                 </div>
-                <div class="link-tools"><button id="add-link" class="text-action" type="button"><i data-lucide="plus" aria-hidden="true"></i>Add link</button><button id="attach-deck" class="text-action" type="button"><i data-lucide="paperclip" aria-hidden="true"></i>Attach deck</button><span class="attachment-note">PDF, Keynote, PPTX / 20 MB</span></div>
+                <div class="link-tools"><button id="add-link" class="text-action" type="button"><i data-lucide="plus" aria-hidden="true"></i>Add link</button><button id="attach-deck" class="text-action" type="button"><i data-lucide="paperclip" aria-hidden="true"></i>Attach deck</button><span class="attachment-note">max size 20MB</span></div>
                 <input class="sr-only" id="deck" name="deck" type="file" accept=".pdf,.key,.keynote,.pptx" tabindex="-1" aria-label="Attach deck" aria-describedby="file-error">
                 <div class="file-details" id="file-details" hidden="hidden"><i data-lucide="file" aria-hidden="true"></i><span id="file-name"></span><button class="icon-button" id="remove-file" type="button" title="Remove attachment" aria-label="Remove attachment"><i data-lucide="x" aria-hidden="true"></i></button></div>
                 <p class="field-error" id="file-error" aria-live="polite"></p>
@@ -580,19 +582,18 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
             </section>
 
             <section class="step-panel scheduling-panel" data-step="2" aria-labelledby="schedule-title" hidden="hidden">
-              <div class="schedule-heading"><div><h2 id="schedule-title" tabindex="-1">A good place to start.</h2><p>A quick call to meet, share ideas and see what fits.</p></div></div>
+              <div class="schedule-heading"><button class="icon-button schedule-back" type="button" aria-label="Back to your project" title="Back to your project"><i data-lucide="arrow-left" aria-hidden="true"></i></button><div><h2 id="schedule-title" tabindex="-1">A good place to start.</h2><p>Quick call to share ideas and see what fits.</p></div></div>
               <div class="calendar-heading"><h3 id="calendar-month" aria-live="polite"></h3><div><button class="icon-button" id="previous-month" type="button" aria-label="Previous month" title="Previous month"><i data-lucide="chevron-left" aria-hidden="true"></i></button><button class="icon-button" id="next-month" type="button" aria-label="Next month" title="Next month"><i data-lucide="chevron-right" aria-hidden="true"></i></button></div></div>
               <div class="calendar-weekdays" aria-hidden="true"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
               <div class="calendar-grid" id="calendar-days" role="group" aria-label="Choose a weekday"></div>
-              <fieldset class="time-field"><legend id="time-label">Pick a time <span class="optional-note">Tentative</span></legend><p id="timezone-label" class="timezone-label"></p><div id="time-slots" class="time-chips"></div><p class="field-error" id="slot-error" aria-live="polite"></p></fieldset>
-              <p class="schedule-note"><i data-lucide="clock-3" aria-hidden="true"></i>30 min. We'll confirm your slot by email.</p>
-              <button id="skip-call" type="button" class="skip-call" aria-pressed="false">Skip, just email me<i data-lucide="arrow-up-right" aria-hidden="true"></i></button>
+              <fieldset class="time-field"><legend id="time-label"><i data-lucide="clock-3" aria-hidden="true"></i>Pick a time</legend><div class="tz-picker"><button type="button" class="tz-btn" id="tz-btn" aria-haspopup="listbox" aria-expanded="false" aria-controls="tz-pop"><span id="timezone-label" class="timezone-label"></span><svg class="tz-chev" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2.5 4.25C4.2 6.4 5 7.6 6 7.6S7.8 6.4 9.5 4.25" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></button><div class="tz-pop" id="tz-pop" hidden="hidden"><input class="tz-search" id="tz-search" type="text" placeholder="Search city or offset" aria-label="Search time zone" autocomplete="off"><ul class="tz-list" id="tz-list" role="listbox" aria-label="Time zones"></ul></div></div><div id="time-slots" class="time-chips"></div><p class="field-error" id="slot-error" aria-live="polite"></p></fieldset>
+              <button id="skip-call" type="button" class="skip-call" aria-pressed="false">Skip, just email me</button>
             </section>
           </div>
 
           <div class="form-bottom">
             <div class="form-bottom-copy"><button class="text-action back-step" id="back-step" type="button" hidden="hidden"><i data-lucide="arrow-left" aria-hidden="true"></i>Back to your project</button><p id="step-caption" hidden="hidden"></p><p class="submit-feedback" id="submit-feedback" aria-live="polite"></p><a class="direct-submit" id="direct-submit" href="mailto:hello.monocreative@gmail.com" hidden="hidden">Email your brief<i data-lucide="arrow-up-right" aria-hidden="true"></i></a></div>
-            <button class="circle-cta" id="form-cta" type="submit"><span class="circle-cta-inner"><span id="cta-label">LET'S CONNECT</span><i data-lucide="arrow-up-right" aria-hidden="true"></i></span></button>
+            <button class="circle-cta" id="form-cta" type="submit"><span class="circle-cta-fluid" aria-hidden="true"><span class="circle-cta-bg"></span><i class="btn-dot"></i></span><span class="circle-cta-inner"><span id="cta-label">LET'S CONNECT</span><i data-lucide="arrow-up-right" aria-hidden="true"></i></span></button>
           </div>
         </form>
       </main>

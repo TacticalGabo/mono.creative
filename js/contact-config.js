@@ -4,3 +4,4 @@ window.MONO_CONTACT_CONFIG = Object.assign({
   // Preview mode bypasses validation and never sends a real enquiry.
   testing: true
 }, window.MONO_CONTACT_CONFIG || {});
+
