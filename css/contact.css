@@ -6,7 +6,7 @@
   outline: 1px solid var(--accent); outline-offset: 5px;
 }
 .contact-layout {
-  width: min(1200px, calc(100% - 96px)); margin: 84px auto 100px;
+  width: min(1200px, calc(100% - 96px)); margin: auto;
   display: grid; grid-template-columns: minmax(0, 1fr) max-content; gap: 28px;
   letter-spacing: 0;
 }
@@ -47,7 +47,7 @@
 .service-field { margin-top: auto; padding-bottom: 14px; }
 #services-error:empty { min-height: 0; padding-top: 0; }
 .service-field.is-invalid .choice-chip > span { border-color: var(--contact-error); }
-.field-line { position: relative; display: flex; align-items: center; gap: 10px; min-height: 47px; padding: 0 10px; border-bottom: 1px solid var(--border); color: var(--body); transition: border-color .18s, background-color .18s; }
+.field-line { position: relative; display: flex; align-items: center; gap: 10px; min-height: 47px; padding: 4px 10px; border-bottom: 1px solid var(--border); color: var(--body); transition: border-color .18s, background-color .18s; }
 .field-line:hover { border-color: var(--body); }
 .field-line:focus-within { border-color: var(--accent); color: var(--accent); background: var(--surface-showcase-2); }
 .field-line input, .field-line textarea { width: 100%; min-width: 0; font: var(--t-body-m); background: transparent; border: 0; border-radius: 0; color: var(--body-strong); padding: 8px 0; letter-spacing: 0; box-shadow: none; }
@@ -156,3 +156,7 @@ html:has(body.contact-page), body.contact-page { overflow: hidden; height: 100%;
    email bajan de tamaño lo justo para caber en una línea (36 px en cuanto hay sitio). */
 .contact-aside { container-type: inline-size; }
 .contact-aside h1, .contact-email { font-size: min(36px, calc((100cqi - 40px) / 16.3)); }
+/* Contenido centrado en vertical en el alto que deja el header (la página no scrollea). */
+.contact-page .page { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }
+.contact-page .nav { flex: none; }
+.contact-layout { margin-top: auto !important; margin-bottom: auto !important; padding-block: 24px; box-sizing: border-box; }
