@@ -319,6 +319,18 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
       var hb=e.target.closest&&e.target.closest('.btn[data-href]');
       if(hb){ e.preventDefault(); window.location.href=hb.getAttribute('data-href'); }
     });
+    // Precarga del destino en cuanto el puntero o el dedo llegan al botón: al
+    // hacer clic la página ya está bajada y el salto es inmediato.
+    function precarga(e){
+      var hb=e.target.closest&&e.target.closest('.btn[data-href]');
+      if(!hb||hb.dataset.pf)return;
+      hb.dataset.pf='1';
+      var u=hb.getAttribute('data-href'), lst=[u];
+      if(/contact\.html/.test(u))lst=lst.concat(['./css/contact.css','./js/contact.js','./js/contact-rules.js','./js/contact-config.js','./vendor/lucide-0.468.0.min.js']);
+      lst.forEach(function(h){ var l=document.createElement('link'); l.rel='prefetch'; l.href=h; document.head.appendChild(l); });
+    }
+    document.addEventListener('pointerover',precarga,{passive:true});
+    document.addEventListener('touchstart',precarga,{passive:true});
     document.addEventListener('keydown',function(e){
       if(e.key!=='Enter'&&e.key!==' ')return;
       var hb=e.target.closest&&e.target.closest('.btn[data-href]');
@@ -351,6 +363,8 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
       }
       var b=e.target.closest&&e.target.closest('.btn');
       if(!b||b.dataset.tapping)return;
+      // enlace a otra página: salto inmediato, sin esperar la animación del tap
+      if(b.getAttribute('data-href')&&!b.getAttribute('data-scroll')){ e.preventDefault(); window.location.href=b.getAttribute('data-href'); return; }
       e.preventDefault();
       b.dataset.tapping='1';
       set(b,true);

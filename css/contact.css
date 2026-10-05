@@ -132,11 +132,10 @@
 .skip-call svg { width: 13px; height: 13px; }
 .skip-call[aria-pressed="true"] { color: var(--accent); }
 .contact-page .contact-form .sr-only, .contact-page .contact-honeypot { position: absolute; display: block; width: 1px; height: 1px; overflow: hidden; padding: 0; margin: -1px; clip: rect(0,0,0,0); clip-path: inset(50%); white-space: nowrap; border: 0; }
-/* 1440 → 1920: igual que el header (RESPONSIVE_HEADER_Y_CONTENIDO.md §2.3): el bloque
-   va de borde a borde con --mnav (120 en 1440 → 84 en 1920), así el símbolo queda bajo
-   el logo del header y el CTA termina donde termina "Let's Talk". La columna izquierda
-   absorbe el ancho; texto y formulario no crecen. Por encima de 1920 .page se congela. */
-@media (min-width: 1440px) { .contact-layout { width: auto; margin-left: var(--mnav); margin-right: var(--mnav); } }
+/* Columna de contenido = la de todas las páginas (.wrap, --m: 191 en 1440 → 272,3 en 1920),
+   con su sangrado respecto del header (--mnav). Texto y formulario no crecen; la columna
+   izquierda absorbe el ancho. Por encima de 1920 .page se congela. */
+@media (min-width: 768px) { .contact-layout { width: auto; margin-left: var(--m); margin-right: var(--m); } }
 @media (max-width: 1279px) { .contact-layout { width: calc(100% - 96px); gap: 32px; } .contact-detail-row { grid-template-columns: 1fr; gap: 14px; } .contact-email { width: auto; overflow-wrap: anywhere; } .contact-direct { margin-top: 65px; } }
 @media (prefers-reduced-motion: reduce) { .contact-page *, .contact-page *::before, .contact-page *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
 /* Footer del contacto: sin titular ni CTA (la página ya es el CTA). */
@@ -153,3 +152,7 @@ html:has(body.contact-page), body.contact-page { overflow: hidden; height: 100%;
 /* Integrantes: círculos +15% (49 → 56,35) */
 .contact-direct .avatar { width: 56.35px; height: 56.35px; }
 .contact-direct .avatar + .avatar { margin-left: -14.95px; }
+/* Con la columna de contenido (--m) a 1440 la izquierda mide ~464 px: el titular y el
+   email bajan de tamaño lo justo para caber en una línea (36 px en cuanto hay sitio). */
+.contact-aside { container-type: inline-size; }
+.contact-aside h1, .contact-email { font-size: min(36px, calc((100cqi - 40px) / 16.3)); }
