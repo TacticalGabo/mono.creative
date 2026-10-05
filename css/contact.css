@@ -6,7 +6,7 @@
   outline: 1px solid var(--accent); outline-offset: 5px;
 }
 .contact-layout {
-  width: min(1200px, calc(100% - 96px)); margin: 52px auto 100px;
+  width: min(1200px, calc(100% - 96px)); margin: 84px auto 100px;
   display: grid; grid-template-columns: minmax(0, 1fr) max-content; gap: 28px;
   letter-spacing: 0;
 }
