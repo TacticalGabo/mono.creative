@@ -421,3 +421,12 @@ body { margin: 0; }
   .service-chips .choice-chip:has(input[value="Not sure yet"]) { flex: 0 0 100%; pointer-events: none; }
   .service-chips .choice-chip:has(input[value="Not sure yet"]) > span { pointer-events: auto; }
 }
+
+/* (2026-10-05) 420–750: el CTA circular ya no sube sobre los chips (paso 1) ni sobre las
+   horas (paso 2): baja a su propia franja con 32 px de aire. "Skip, just email me" queda a
+   su izquierda, pegado a él y centrado en su alto (128 px → centro a 64 px del borde). */
+@media (min-width: 420px) and (max-width: 750px) {
+  .form-bottom { margin-top: 32px; }
+  .circle-cta { top: 0; }
+  #skip-call { left: auto; right: calc(128px + 20px); bottom: calc(64px - 10.5px); }
+}
