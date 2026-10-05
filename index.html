@@ -2606,14 +2606,16 @@ class Component extends DCLogic {
      su mezcla a pantalla completa. Ahora assets/grain-{dark,light}.svg traen las dos ya
      fusionadas con un filtro, y una sola mezcla da el mismo resultado (overlay es lineal
      sobre fondo oscuro y multiply siempre lo es). Tile de 282px, entero: con 281.6px el
-     navegador reescala dos veces y el grano sale más blando. -->
+     navegador reescala dos veces y el grano sale más blando.
+     Light: grain-light.svg va al DOBLE de fuerza, así que su opacity es el mando
+     del grano en light (.5 = el aspecto aprobado; 1 = el doble). -->
 <div class="grain-overlay" aria-hidden="true"></div>
 <link rel="prefetch" href="./assets/grain-light.svg">
 <style>
   .grain-overlay{position:fixed;inset:0;pointer-events:none;z-index:2147483000;
     background:url('./assets/grain-dark.svg') 0 0/282px 282px;
     mix-blend-mode:overlay;will-change:transform}
-  :root[data-theme="light"] .grain-overlay{background-image:url('./assets/grain-light.svg');mix-blend-mode:multiply}
+  :root[data-theme="light"] .grain-overlay{background-image:url('./assets/grain-light.svg');mix-blend-mode:multiply;opacity:.5}
 </style>
 <!-- GRAIN-OVERLAY:END -->
 </body>
