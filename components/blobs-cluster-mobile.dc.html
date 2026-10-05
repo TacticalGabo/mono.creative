@@ -156,6 +156,8 @@ class Component extends DCLogic {
     this.stopped = true;
     if (this.raf) cancelAnimationFrame(this.raf);
     if (this.io) this.io.disconnect();
+    if (this.ro) this.ro.disconnect();
+    if (this.preIdle) { if (window.cancelIdleCallback) cancelIdleCallback(this.preIdle); clearTimeout(this.preIdle); }
     if (this.onDragMove) window.removeEventListener('pointermove', this.onDragMove);
     if (this.onDragUp) {
       window.removeEventListener('pointerup', this.onDragUp);
@@ -256,6 +258,13 @@ class Component extends DCLogic {
     order.forEach((b, i) => { b.seq = i * 22; });
 
     this.paintSupports();
+    // La caída se calcula ya, en el tiempo libre del hilo, mucho antes de que
+    // el usuario llegue al clúster (ver preInit).
+    this.preInit();
+    this.preRun();
+    // Las capas de las etiquetas se miden y montan ya (vacías, sin
+    // will-change): el arranque de la caída solo tiene que mover nodos.
+    this.ensureOverlays();
     // Arranca al entrar en pantalla (30 %) y, además, el bucle se detiene
     // mientras el clúster está fuera de la vista: en móvil el simulador ya no
     // consume nada mientras se recorre el resto de la página.
@@ -351,10 +360,10 @@ class Component extends DCLogic {
     // Colgarlo del grupo y no de window/svg es deliberado: marca como
     // "bloqueante" solo la silueta de los blobs, no todo el clúster.
     this.onTouchMove = e => { if (this.drag && e.cancelable) e.preventDefault(); };
-    this.blobs.forEach(b => {
-      b.g.style.touchAction = 'none';   // inútil en Chrome, correcto donde sí se respeta
-      b.g.addEventListener('touchmove', this.onTouchMove, { passive: false });
-    });
+    // Ese listener (y el touch-action) se cuelgan en enableInteraction(), al
+    // terminar la caída: mientras cae, el clúster no es interactuable y un
+    // touchmove no pasivo sobre blobs en movimiento solo obligaba al
+    // compositor a esperar al hilo principal antes de empezar cada scroll.
     this.svgEl = svg;
     // El rect y el viewBox se leen UNA vez al agarrar, no en cada pointermove:
     // getBoundingClientRect con mutaciones SVG pendientes fuerza layout síncrono
@@ -412,7 +421,9 @@ class Component extends DCLogic {
   }
 
   grab(b, e) {
-    if (!this.toSvg) return;
+    // Antes de que termine la caída el clúster no se puede tocar: el gesto
+    // sigue de largo y la página scrollea como si los blobs no estuvieran.
+    if (!this.toSvg || !this.interactive || this.playing) return;
     // El rect se vuelve a medir en cada gesto, y tiene que ser ANTES del toSvg
     // de abajo, no después: entre un gesto y el siguiente la página sí pudo
     // haber scrolleado, y con el rect del gesto anterior el punto de agarre
@@ -442,6 +453,131 @@ class Component extends DCLogic {
     layer.style.pointerEvents = 'none';
     strokes.parentNode.insertBefore(layer, strokes.nextSibling);
     this.blobs.forEach(b => layer.appendChild(b.label));
+    this.labelsG = layer;
+  }
+
+  // ─── ETIQUETAS EN CAPA DEL COMPOSITOR MIENTRAS HAY MOVIMIENTO ──
+  // Cada etiqueta son 3-11 KB de glifos en paths. Dentro del <svg>, cambiarle
+  // la matriz obliga a re-rasterizar todos esos glifos en CADA frame, y en un
+  // móvil flojo ese rasterizado era lo que saturaba la GPU durante la caída
+  // (y con ella el scroll). Mientras algo se mueve, cada etiqueta vive en un
+  // <svg> propio con will-change:transform: se rasteriza UNA vez y el
+  // compositor la mueve con una matriz CSS, sin repintar nada.
+  // En reposo vuelven al <g data-role="labels"> del <svg> con el mismo
+  // atributo transform de siempre: lo quieto se pinta exactamente igual que
+  // antes (vector nítido, sin remuestreo de una textura).
+  // Las capas van dentro de una caja con overflow:clip del tamaño del clúster:
+  // Chrome da por hecho que una capa con will-change:transform puede tapar
+  // cualquier cosa pintada después dentro de su recorte, y sin la caja ese
+  // recorte era la página entera (re-layerizaba todo lo de debajo).
+  ensureOverlays() {
+    if (this.lbox) return !!this.lfit;
+    const root = this.rootRef.current;
+    if (!root || !this.labelsG || typeof ResizeObserver === 'undefined') return false;
+    const NS = 'http://www.w3.org/2000/svg', boxes = [];
+    for (const b of this.blobs) {
+      let bb = null;
+      // getBBox no incluye el transform del propio grupo: da la caja de diseño
+      try { bb = b.label.getBBox(); } catch (e) { bb = null; }
+      if (!bb || !(bb.width > 0) || !(bb.height > 0)) return false;   // aún sin layout: se reintenta luego
+      const PAD = 2;   // holgura para el antialias del borde de los glifos
+      const x0 = Math.floor(bb.x - PAD), y0 = Math.floor(bb.y - PAD);
+      boxes.push([x0, y0, Math.ceil(bb.x + bb.width + PAD) - x0, Math.ceil(bb.y + bb.height + PAD) - y0]);
+    }
+    const box = document.createElement('div');
+    box.setAttribute('data-role', 'label-layers');
+    box.style.cssText = 'position:absolute;left:0;top:0;width:100%;height:100%;overflow:hidden;overflow:clip;pointer-events:none;';
+    this.blobs.forEach((b, i) => {
+      const r = boxes[i], o = document.createElementNS(NS, 'svg');
+      o.setAttribute('viewBox', r.join(' '));
+      o.setAttribute('fill', 'none');
+      o.style.cssText = 'position:absolute;left:0;top:0;overflow:visible;pointer-events:none;transform-origin:0 0;';
+      box.appendChild(o);
+      b.lsvg = o; b.lbox = r; b.lpx = null;
+    });
+    root.style.position = 'relative';   // sin desplazamiento: no mueve nada, solo ancla la caja
+    root.appendChild(box);
+    this.lbox = box;
+    // Escala y desplazamiento del viewBox en la caja (preserveAspectRatio
+    // xMidYMid meet). El ResizeObserver da tamaños de layout fraccionarios y
+    // su primer aviso llega antes de pintar, así que la matriz nunca sale
+    // con una medida vieja.
+    this.ro = new ResizeObserver(es => {
+      const cr = es[es.length - 1].contentRect;
+      this.setFit(cr.width, cr.height);
+    });
+    this.ro.observe(root);
+    const rc = root.getBoundingClientRect();
+    this.setFit(rc.width, rc.height);
+    return !!this.lfit;
+  }
+
+  setFit(w, h) {
+    if (!(w > 0) || !(h > 0) || !this.lbox) return;
+    const s = Math.min(w / W, h / H), ox = (w - W * s) / 2, oy = (h - H * s) / 2;
+    const F = this.lfit;
+    if (F && F.s === s && F.ox === ox && F.oy === oy) return;
+    this.lfit = { s: s, ox: ox, oy: oy };
+    for (const b of this.blobs) {
+      // el viewBox de cada capa se escala dentro del propio <svg> (vector):
+      // la matriz CSS solo lleva el giro/aplastamiento, que ronda la
+      // identidad, así que la textura se rasteriza a la escala real
+      b.lsvg.style.width = (b.lbox[2] * s) + 'px';
+      b.lsvg.style.height = (b.lbox[3] * s) + 'px';
+      b.lpx = null;
+      if (this.lmode) this.labelPx(b);
+    }
+  }
+
+  // Matriz de la etiqueta (unidades del viewBox) llevada a px de la caja.
+  // Un punto local (u,v) de la capa es el punto (x0+u/s, y0+v/s) del viewBox,
+  // y tiene que acabar en s·(M·X + t) + o: el lineal queda M y la traslación
+  // s·(M·(x0,y0) + t) + o.
+  labelPx(b) {
+    const F = this.lfit;
+    if (!F || !b.lsvg) return;
+    const m = b.lm, s = F.s, x0 = b.lbox[0], y0 = b.lbox[1];
+    const a = m ? m[0] : 1, bb = m ? m[1] : 0, c = m ? m[2] : 0, d = m ? m[3] : 1;
+    const e = s * (a * x0 + c * y0 + (m ? m[4] : 0)) + F.ox;
+    const f = s * (bb * x0 + d * y0 + (m ? m[5] : 0)) + F.oy;
+    const t = 'matrix(' + a.toFixed(5) + ',' + bb.toFixed(5) + ',' + c.toFixed(5) + ',' + d.toFixed(5)
+      + ',' + e.toFixed(3) + ',' + f.toFixed(3) + ')';
+    if (t !== b.lpx) { b.lsvg.style.transform = t; b.lpx = t; }
+  }
+
+  // on: etiquetas a sus capas (hay movimiento). off: de vuelta al <svg> con
+  // su atributo transform (reposo). Si las capas no se pueden montar, todo
+  // sigue como antes, dentro del <svg>.
+  labelMode(on) {
+    if (!this.blobs || !this.labelsG) return;
+    if (on && !this.ensureOverlays()) on = false;
+    if (!!this.lmode === on) return;
+    this.lmode = on;
+    for (const b of this.blobs) {
+      if (on) {
+        b.lpx = null;
+        this.labelPx(b);
+        b.lsvg.style.willChange = 'transform';
+        b.label.removeAttribute('transform');
+        b.lsvg.appendChild(b.label);
+      } else {
+        if (b.lastT) b.label.setAttribute('transform', b.lastT); else b.label.removeAttribute('transform');
+        this.labelsG.appendChild(b.label);   // mismo orden que al montar
+        if (b.lsvg) b.lsvg.style.willChange = '';
+      }
+    }
+  }
+
+  // Se llama al aterrizar: a partir de aquí el clúster responde al tacto con
+  // la física de siempre (arrastre con correa, tap para el verde).
+  enableInteraction() {
+    if (this.interactive || !this.blobs) return;
+    this.interactive = true;
+    this.blobs.forEach(b => {
+      b.g.style.cursor = 'grab';
+      b.g.style.touchAction = 'none';   // inútil en Chrome, correcto donde sí se respeta
+      if (this.onTouchMove) b.g.addEventListener('touchmove', this.onTouchMove, { passive: false });
+    });
   }
 
   setupActive(root) {
@@ -460,7 +596,7 @@ class Component extends DCLogic {
       // contabilidad de transiciones de ~40 nodos SVG en cada recálculo de
       // estilo, y el cruce dark→light recalcula el documento entero en cada
       // frame de scroll. El color sigue cambiando igual de golpe sin ellas.
-      b.g.style.cursor = 'grab';
+      // (El cursor 'grab' lo pone enableInteraction, al terminar la caída.)
       b.g.addEventListener('pointerdown', e => this.grab(b, e));
     });
   }
@@ -536,13 +672,17 @@ class Component extends DCLogic {
   // se quita, y con ella el trazado de la silueta de la pareja y el fitMask.
   drawCut(b, k, dOf) {
     if (!b.strokeP) return;
-    b.strokeP.setAttribute('d', dOf(b));
+    // Igual que la forma: si la 'd' no cambió (el tramo final del asentado),
+    // no se reescribe. Reescribirla igual la volvía a parsear y repintar.
+    const ds = dOf(b);
+    if (ds !== b.lastSD) { b.strokeP.setAttribute('d', ds); b.lastSD = ds; }
     if (k <= 0) {
       if (b.cutOn !== false) { b.strokeP.removeAttribute('mask'); b.cutOn = false; }
       return;
     }
     if (b.cutOn !== true) { b.strokeP.setAttribute('mask', b.maskUrl); b.cutOn = true; }
-    b.cutP.setAttribute('d', dOf(b.mate));
+    const dc = dOf(b.mate);
+    if (dc !== b.lastCD) { b.cutP.setAttribute('d', dc); b.lastCD = dc; }
     if (b.cutK !== k) { b.cutP.setAttribute('fill-opacity', k.toFixed(3)); b.cutK = k; }
     this.fitMask(b);
   }
@@ -843,12 +983,13 @@ class Component extends DCLogic {
     // trazo de la fusión y para la máscara de la pareja: 14 trazados por frame
     // en vez de 6, cada uno con ~100 toFixed.
     if (!atRest) for (const b of this.blobs) b.dNow = ringPath(b.P);
+    else this.labelMode(false);
     this.drawMerge(atRest ? (b => b.restD) : (b => b.dNow), atRest);
     for (const b of this.blobs) {
       if (atRest) {
         b.shape.setAttribute('d', b.restD);
         b.label.removeAttribute('transform');
-        b.lastD = null; b.lastT = null;   // la caché no describe ya lo que hay en el DOM
+        b.lastD = null; b.lastT = null; b.lm = null;   // la caché no describe ya lo que hay en el DOM
         continue;
       }
       if (b.dNow !== b.lastD) { b.shape.setAttribute('d', b.dNow); b.lastD = b.dNow; }
@@ -882,7 +1023,13 @@ class Component extends DCLogic {
       // Cuando el blob ya está posado el string no cambia y no se escribe nada.
       const tr = 'matrix(' + a11.toFixed(4) + ' ' + a21.toFixed(4) + ' '
         + a12.toFixed(4) + ' ' + a22.toFixed(4) + ' ' + tx.toFixed(2) + ' ' + ty.toFixed(2) + ')';
-      if (tr !== b.lastT) { b.label.setAttribute('transform', tr); b.lastT = tr; }
+      if (tr !== b.lastT) {
+        b.lastT = tr;
+        const m = b.lm || (b.lm = new Float64Array(6));
+        m[0] = a11; m[1] = a21; m[2] = a12; m[3] = a22; m[4] = tx; m[5] = ty;
+        // en capa: matriz CSS que aplica el compositor; si no, el atributo de siempre
+        if (this.lmode) this.labelPx(b); else b.label.setAttribute('transform', tr);
+      }
     }
   }
 
@@ -913,7 +1060,103 @@ class Component extends DCLogic {
   status(txt) { if (this.statusRef.current) this.statusRef.current.textContent = txt; }
   detail(txt) { if (this.detailRef.current) this.detailRef.current.textContent = txt; }
 
-  start() { this.started = true; this.settled = false; this.frames = 0; this.frozen = false; this.tprev = null; this.acc = 0; this.status(this.strategy() + ' · cayendo'); this.kick(); }
+  start() {
+    this.started = true; this.settled = false; this.frames = 0; this.frozen = false; this.tprev = null; this.acc = 0;
+    // la caída se reproduce desde lo precalculado (o se calcula en el acto lo
+    // que aún falte): el resultado es el mismo paso a paso
+    if (!this.pre) { this.preInit(); this.preRun(); }
+    this.playing = !!this.pre;
+    this.labelMode(true);
+    this.status(this.strategy() + ' · cayendo'); this.kick();
+  }
+
+  // ─── CAÍDA PRECALCULADA ─────────────────────────────────────
+  // La caída no depende de nada del usuario (hasta aterrizar no se puede
+  // tocar): con el mismo estado inicial y el mismo paso fijo, step() da
+  // SIEMPRE la misma secuencia. Así que se calcula antes, en el tiempo libre
+  // del hilo y sobre una copia del estado, y durante la caída el bucle solo
+  // copia posiciones y dibuja. En un móvil lento eran varios ms de física por
+  // frame (hasta 3 pasos si iba con retraso) justo mientras se scrollea.
+  // · Misma física: la copia hereda los métodos y props del componente
+  //   (Object.create) y se le dan blobs, parejas y contadores propios.
+  // · Mismo final: se calcula hasta el mismo criterio de reposo que el bucle
+  //   vivo (frames > 140 y atRest) y al aterrizar se copia el estado completo,
+  //   velocidades incluidas, así que la física interactiva sigue desde ahí.
+  // · Si el usuario llega antes de que termine, lo que falte se calcula en el
+  //   momento (el mismo coste que antes, solo para esos pasos).
+  preInit() {
+    if (!this.blobs) return;
+    const sim = Object.create(this), byId = {};
+    sim.blobs = this.blobs.map(b => (byId[b.id] = {
+      id: b.id, P: b.P.map(p => ({ x: p.x, y: p.y, px: p.px, py: p.py })),
+      q0: b.q0, rest: b.rest, rest2: b.rest2, A0: b.A0, r: b.r, bulge: b.bulge,
+      cradle: b.cradle, seq: b.seq, hold: 0
+    }));
+    sim.capPairs = (this.capPairs || []).map(pr => ({ A: byId[pr.A.id], B: byId[pr.B.id] }));
+    sim.frames = 0; sim.drag = null; sim.restSnap = null; sim.restFrame = 0;
+    this.pre = { sim: sim, xy: [], done: false, end: 0, fin: null };
+  }
+
+  preStep() {
+    const pre = this.pre, sim = pre.sim;
+    sim.step(); sim.frames++;
+    const a = new Float64Array(sim.blobs.length * N * 2);
+    let j = 0;
+    for (const b of sim.blobs) for (const p of b.P) { a[j++] = p.x; a[j++] = p.y; }
+    pre.xy.push(a);
+    // 1800 pasos = 30 s: red de seguridad por si algo no llegara a posarse
+    if ((sim.frames > 140 && sim.atRest()) || sim.frames >= 1800) {
+      pre.done = true; pre.end = sim.frames;
+      pre.fin = sim.blobs.map(b => b.P.map(p => [p.x, p.y, p.px, p.py]));
+    }
+  }
+
+  // En trozos dentro de requestIdleCallback: un paso cuesta ~0,2 ms en un PC
+  // y unos pocos ms en un móvil lento, así que solo se da otro si queda hueco
+  // de sobra en el tiempo libre del frame. Sin rIC (Safari), trozos de 4 ms.
+  preRun() {
+    if (this.preIdle || !this.pre || this.pre.done) return;
+    const ric = window.requestIdleCallback;
+    const go = dl => {
+      this.preIdle = 0;
+      const pre = this.pre;
+      if (this.stopped || !pre || pre.done) return;
+      const t0 = performance.now(), slack = dl && !dl.didTimeout;
+      do { this.preStep(); } while (!pre.done && (slack ? dl.timeRemaining() > 4 : performance.now() - t0 < 4));
+      if (!pre.done) this.preIdle = ric ? ric(go, { timeout: 1000 }) : setTimeout(go, 16);
+    };
+    this.preIdle = ric ? ric(go, { timeout: 1000 }) : setTimeout(go, 16);
+  }
+
+  // Un paso del bucle: durante la caída, el estado precalculado; después, la
+  // física viva de siempre.
+  advance() {
+    const pre = this.pre;
+    if (!this.playing || !pre) { this.step(); this.frames++; return; }
+    while (pre.xy.length <= this.frames && !pre.done) this.preStep();
+    const a = pre.xy[this.frames];
+    if (a) {
+      let j = 0;
+      for (const b of this.blobs) for (const p of b.P) { p.x = a[j++]; p.y = a[j++]; }
+      this.frames++;
+    }
+    if (pre.done && this.frames >= pre.end) this.land();
+  }
+
+  // Fin de la caída: estado completo (con velocidades) en los blobs de verdad,
+  // el bucle se duerme como al posarse y el clúster pasa a ser interactuable.
+  land() {
+    const fin = this.pre.fin;
+    this.blobs.forEach((b, i) => b.P.forEach((p, k) => {
+      const f = fin[i][k];
+      p.x = f[0]; p.y = f[1]; p.px = f[2]; p.py = f[3];
+    }));
+    this.playing = false;
+    this.pre = null;   // ~1 MB de posiciones que ya no hacen falta
+    this.restSnap = null;
+    this.frozen = true;
+    this.enableInteraction();
+  }
 
   // El bucle solo corre si hay algo que simular: arrancado, en pantalla y en
   // movimiento. Cualquiera de las tres condiciones que falle lo para.
@@ -923,7 +1166,7 @@ class Component extends DCLogic {
     this.raf = requestAnimationFrame(this.loop);
   }
 
-  wake() { this.restSnap = null; this.frozen = false; this.tprev = null; this.acc = 0; this.kick(); }
+  wake() { this.restSnap = null; this.frozen = false; this.tprev = null; this.acc = 0; this.labelMode(true); this.kick(); }
 
   // ¿Está quieto? Nadie se ha alejado más de REST_EPS px de donde estaba hace
   // REST_WIN frames. Durante la caída el desvío es de decenas de px; una vez
@@ -970,6 +1213,7 @@ class Component extends DCLogic {
     });
     this.started = false;
     this.frames = 0;
+    this.pre = null; this.playing = false;   // start() vuelve a precalcular desde aquí
     this.draw(true);
     this.status('listo');
     this.detail('');
@@ -990,7 +1234,7 @@ class Component extends DCLogic {
       let acc = (this.acc || 0) + Math.min(200, t - this.tprev);
       this.tprev = t;
       let n = 0;
-      while (acc >= DT && n < MAXSTEPS) { this.step(); this.frames++; acc -= DT; n++; }
+      while (acc >= DT && n < MAXSTEPS && !this.frozen) { this.advance(); acc -= DT; n++; }
       // Antes, si un frame se pasaba de tiempo (p. ej. el recálculo de estilo del
       // cruce), se agotaban los 3 pasos y el resto del tiempo simulado SE TIRABA.
       // Eso no hace la caída más lenta: le borra trozos, y eso es justo lo que se
@@ -999,7 +1243,9 @@ class Component extends DCLogic {
       this.acc = acc > DT * 2 ? DT * 2 : acc;
       if (!n) return this.kick();
       this.draw(false);
-      if (!this.settled && this.frames > 140) {
+      // durante la caída los p.px no se copian (no hacen falta para dibujar):
+      // este cálculo de "quieto" solo tiene sentido con la física viva
+      if (!this.playing && !this.settled && this.frames > 140) {
         let moving = 0;
         for (const b of this.blobs) for (const p of b.P) moving = Math.max(moving, hyp(p.x - p.px, p.y - p.py));
         if (moving < 0.05) {
@@ -1011,7 +1257,9 @@ class Component extends DCLogic {
       }
       // Posado: se duerme en vez de seguir simulando a 60 fps para siempre
       // (era lo que fundía el móvil al llegar a esta sección).
-      if (!this.drag && this.frames > 140 && this.atRest()) this.frozen = true;
+      if (!this.playing && !this.frozen && !this.drag && this.frames > 140 && this.atRest()) this.frozen = true;
+      // quieto: las etiquetas vuelven al <svg> con el atributo de siempre
+      if (this.frozen) this.labelMode(false);
     }
     this.kick();
   };
