@@ -421,9 +421,11 @@ class Component extends DCLogic {
   }
 
   grab(b, e) {
-    // Antes de que termine la caída el clúster no se puede tocar: el gesto
-    // sigue de largo y la página scrollea como si los blobs no estuvieran.
-    if (!this.toSvg || !this.interactive || this.playing) return;
+    // Mientras caen no se pueden tocar: el gesto sigue de largo y la página
+    // scrollea como si los blobs no estuvieran. Desde el aterrizaje sí, y si
+    // aún se estaban asentando, se pasa a la física viva en este paso.
+    if (!this.toSvg || !this.interactive) return;
+    if (this.playing) this.handover();
     // El rect se vuelve a medir en cada gesto, y tiene que ser ANTES del toSvg
     // de abajo, no después: entre un gesto y el siguiente la página sí pudo
     // haber scrolleado, y con el rect del gesto anterior el punto de agarre
@@ -1094,16 +1096,28 @@ class Component extends DCLogic {
     }));
     sim.capPairs = (this.capPairs || []).map(pr => ({ A: byId[pr.A.id], B: byId[pr.B.id] }));
     sim.frames = 0; sim.drag = null; sim.restSnap = null; sim.restFrame = 0;
-    this.pre = { sim: sim, xy: [], done: false, end: 0, fin: null };
+    this.pre = { sim: sim, xy: [], done: false, end: 0, fin: null, live: 0 };
   }
 
+  // Cada paso guarda x, y, px, py de los 96 puntos: con las velocidades se
+  // puede saltar a la física viva en CUALQUIER paso (ver handover).
   preStep() {
     const pre = this.pre, sim = pre.sim;
     sim.step(); sim.frames++;
-    const a = new Float64Array(sim.blobs.length * N * 2);
-    let j = 0;
-    for (const b of sim.blobs) for (const p of b.P) { a[j++] = p.x; a[j++] = p.y; }
+    const a = new Float64Array(sim.blobs.length * N * 4), q = pre.xy[pre.xy.length - 1];
+    let j = 0, sp = 0;
+    for (const b of sim.blobs) for (const p of b.P) {
+      if (q) { const dx = p.x - q[j], dy = p.y - q[j + 1], v = dx * dx + dy * dy; if (v > sp) sp = v; }
+      a[j++] = p.x; a[j++] = p.y; a[j++] = p.px; a[j++] = p.py;
+    }
     pre.xy.push(a);
+    // ATERRIZAJE: pasado el choque, el primer paso en que ningún punto avanza
+    // más de LAND_V px. Medido: ~paso 125 (2,1 s). Desde ahí solo queda el
+    // asentado final (unos px a menos de medio px por frame, invisible), y el
+    // reposo "oficial" de atRest no llega hasta el ~356 (5,9 s): esperar a ese
+    // era la pausa que se notaba antes de poder tocar los blobs.
+    const LAND_V = 0.5;
+    if (!pre.live && sim.frames > 100 && sp < LAND_V * LAND_V) pre.live = sim.frames;
     // 1800 pasos = 30 s: red de seguridad por si algo no llegara a posarse
     if ((sim.frames > 140 && sim.atRest()) || sim.frames >= 1800) {
       pre.done = true; pre.end = sim.frames;
@@ -1137,10 +1151,25 @@ class Component extends DCLogic {
     const a = pre.xy[this.frames];
     if (a) {
       let j = 0;
-      for (const b of this.blobs) for (const p of b.P) { p.x = a[j++]; p.y = a[j++]; }
+      for (const b of this.blobs) for (const p of b.P) { p.x = a[j]; p.y = a[j + 1]; j += 4; }
       this.frames++;
     }
+    // ya en su sitio: se pueden tocar aunque sigan asentándose
+    if (pre.live && this.frames >= pre.live) this.enableInteraction();
     if (pre.done && this.frames >= pre.end) this.land();
+  }
+
+  // Un toque durante el asentado: la reproducción cede a la física viva
+  // desde el estado exacto que se está viendo (posiciones y velocidades del
+  // paso actual), así que no hay salto y el arrastre responde en el acto.
+  handover() {
+    const pre = this.pre, a = pre && pre.xy[this.frames - 1];
+    if (a) {
+      let j = 0;
+      for (const b of this.blobs) for (const p of b.P) { p.x = a[j++]; p.y = a[j++]; p.px = a[j++]; p.py = a[j++]; }
+    }
+    this.playing = false;
+    this.pre = null;
   }
 
   // Fin de la caída: estado completo (con velocidades) en los blobs de verdad,
