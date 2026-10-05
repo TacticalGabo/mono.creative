@@ -36,6 +36,27 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
 
+/* avatares del team (hero): tap / clic abre la tarjeta de ese miembro (.is-open), otro tap la
+   cierra, igual que tocar fuera o Escape. Delegado en document: un solo listener, vale para la
+   página montada sin esperarla. Al cerrar se quita el foco, si no :focus-within la dejaría
+   abierta (ver el CSS "avatares → tarjeta mínima"). */
+(function(){
+  if(window.__csTeam)return; window.__csTeam=1;
+  function close(){
+    [].forEach.call(document.querySelectorAll('.cs-hero .is-open'),function(el){el.classList.remove('is-open')});
+    var f=document.activeElement; if(f&&f.closest&&f.closest('.cs-hero .avatars'))f.blur();
+  }
+  document.addEventListener('click',function(e){
+    var t=e.target, a=t.closest&&t.closest('.cs-hero .avatar');
+    if(a&&t.closest('.pcard'))return;   /* enlaces de la tarjeta: abrir sin cerrarla */
+    if(!a){if(document.querySelector('.cs-hero .avatars.is-open, .cs-hero .avatars:focus-within'))close();return}
+    var was=a.classList.contains('is-open');
+    close();
+    if(!was){a.classList.add('is-open');a.parentNode.classList.add('is-open')}
+  });
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')close()});
+})();
+
 /* 5.3 Constraints — curva + items.
    Dos modos según el layout que pinte el CSS:
    · 'h' (≥ 1100): curva horizontal, revelado ligado al scroll + borrado con desfase,

@@ -600,8 +600,6 @@ html.mc-leaving .page{opacity:0;transition:opacity .28s ease-out}
 @media (min-width:768px){
   .nav-anim{position:relative;display:inline-block;width:204px;height:21px;flex:none;color:var(--accent)}
 }
-.logo-mark{display:none !important;width:53.998px;height:22.909px}
-.logo-word{display:none !important;width:148.269px;height:16.981px}
 .nav-right{display:flex;align-items:center;gap:12px}   /* mobile: 12 entre botón, toggle y menú (mono.case_mobile.html) */
 .nav-links{display:none;gap:40px}
 .nav-link{font-family:var(--mono);font-size:13px;line-height:24px;letter-spacing:.2px;color:var(--nav-link);white-space:nowrap}
@@ -616,13 +614,8 @@ html.mc-leaving .page{opacity:0;transition:opacity .28s ease-out}
    Color: forest-600 en light, neutral-200 en dark. */
 .menu{position:relative;width:29px;height:42px;flex:none;display:flex;flex-direction:column;gap:5.4px;justify-content:center;align-items:flex-start;padding-left:3px;cursor:pointer}
 .menu span{width:20px;height:1.6px;background:color-mix(in oklab,#2c513a calc(var(--fade-p,0) * 100%),#bec8c2)}
-/* contorno en SVG: un border CSS de 1.2px Chrome lo redondea a 1px; el trazo SVG no (igual que el CTA) */
-.menu-ring{display:none}   /* contorno retirado 2026-10-04 (antes: SVG 48x48 r11.4, trazo --btn1-stroke) */
-.menu-ring rect{fill:none;stroke:var(--btn1-stroke);stroke-width:1.2px}
 @media (min-width:768px){
   .nav-anim-m{display:none}
-  .logo-mark{display:none !important}
-  .logo-word{display:none !important}
   .nav-logo{gap:8.167px}
   .nav-links{display:flex}
   .nav-right{gap:40px}
@@ -666,6 +659,65 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
 .btn.nav-btn .al,.btn.foot-btn .al{left:13.45px}
 .btn.nav-btn .ar,.btn.foot-btn .ar{left:120.14px}
 .btn.nav-btn .btn-label,.btn.foot-btn .btn-label{height:48px;line-height:48px;transform:translateX(-50%) translateX(18.51px)}
+/* MENÚ MOBILE (2026-10-05) — desplegable de la hamburguesa (diseño mono-home-mobile-dark/light).
+   Compartido: sync-shared.py lo copia a entries y contact con el header (CSS-NAV, MENU, JS-MENU).
+   · Panel STICKY al principio de .page con margen negativo igual a su alto: no ocupa sitio y
+     queda pegado arriba aunque la página se mueva debajo. (position:fixed no sirve: .page es
+     contenedor —container-type— y ancla los fixed a sí misma.)
+   · Cerrado = display:none: cero coste de layout/pintado mientras no se usa.
+   · Estado: html.mm-open (script JS-MENU). Entrada en tres tiempos con @starting-style: fondo
+     plano → línea + links escalonados (suben 8 px) → CTA. Al cerrar se funde el panel entero y
+     display:none espera al fundido (allow-discrete). Sin soporte: abre y cierra sin fundido.
+   · Solo opacity/translate en la animación (compositor). Colores: dark = tokens; light =
+     valores del diseño (#fff fondo, #bec8c2 separadores), interpolados con --fade-p para
+     seguir al toggle de tema. */
+.mm{display:none}
+@media (max-width:767.98px){
+  .mm{position:sticky;top:0;z-index:40;flex:none;flex-direction:column;gap:8px;
+    height:100vh;height:100dvh;margin-bottom:-100vh;margin-bottom:-100dvh;
+    padding:100px var(--mnav) 32px;overflow-y:auto;overscroll-behavior:contain;
+    background:color-mix(in oklab,#fff calc(var(--fade-p,0) * 100%),var(--bg-d));
+    opacity:0;transition:opacity .35s ease,display .35s;transition-behavior:allow-discrete}
+  html.mm-open .mm{display:flex;opacity:1;transition-duration:.3s}
+  .mm-nav{display:flex;flex-direction:column;border-top:1px solid var(--border);padding:16px 16px 0;transition:border-top-color .4s ease .14s}
+  /* Space Mono solo tiene 400 (el diseño pide 300, que cae igualmente en 400) */
+  .mm-link{display:flex;align-items:center;justify-content:space-between;height:60px;border-bottom:1px solid color-mix(in oklab,#bec8c2 calc(var(--fade-p,0) * 100%),rgba(44,81,58,.4));font-family:var(--mono);font-size:20px;letter-spacing:-.3px;color:var(--txt)}
+  .mm-link:hover{color:var(--txt)}
+  .mm-link:last-child{border-bottom:0}
+  .mm-link.on span:first-child{text-decoration:underline;text-underline-offset:6px;text-decoration-thickness:1px}
+  .mm-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex:none}
+  /* CTA 280x50 del diseño; por debajo de 328 px de pantalla se estrecha (≤3 %, imperceptible) */
+  .mm-cta{position:relative;display:block;align-self:center;width:min(280px,100%);height:50px;margin-top:64px;flex:none}
+  .mm-cta svg{position:absolute;display:block;overflow:visible}
+  .mm-cta-shape{left:0;top:0;width:100%;height:100%}
+  .mm-cta-shape path{fill:var(--btn2-fill);stroke:var(--btn2-stroke);vector-effect:non-scaling-stroke}
+  .mm-cta-arr{left:14.76px;top:21.65px}
+  .mm-cta-arr path{stroke:var(--btn2-arrow)}
+  .mm-cta span{position:absolute;left:40px;right:0;top:13px;text-align:center;font-family:var(--mono);font-size:13px;line-height:24px;letter-spacing:.002em;white-space:nowrap;color:var(--btn2-label)}
+  .mm-link,.mm-cta{transition:opacity .4s ease var(--mm-d),translate .55s cubic-bezier(.22,.7,.2,1) var(--mm-d)}
+  .mm-link:nth-child(1){--mm-d:.16s}
+  .mm-link:nth-child(2){--mm-d:.22s}
+  .mm-link:nth-child(3){--mm-d:.28s}
+  .mm-cta{--mm-d:.4s}
+  @starting-style{
+    html.mm-open .mm{opacity:0}
+    html.mm-open .mm-nav{border-top-color:transparent}
+    html.mm-open .mm-link,html.mm-open .mm-cta{opacity:0;translate:0 8px}
+  }
+  /* header con el menú abierto: por encima del panel (y no vuelve abajo hasta que el panel se
+     ha fundido), sin el Let's Talk, y la hamburguesa se cruza en X (líneas a 7 c-c => ±3.5) */
+  .nav{transition:z-index 0s .35s}
+  html.mm-open .nav{z-index:41;transition:none}
+  .nav-btn{transition:opacity .25s ease}
+  html.mm-open .nav-btn{opacity:0;pointer-events:none}
+  .menu span{transition:rotate .22s cubic-bezier(.6,0,.2,1),translate .2s cubic-bezier(.6,0,.2,1) .18s}
+  html.mm-open .menu span{transition:translate .2s cubic-bezier(.6,0,.2,1),rotate .28s cubic-bezier(.6,0,.2,1) .18s}
+  html.mm-open .menu span:first-child{translate:0 3.5px;rotate:45deg}
+  html.mm-open .menu span:last-child{translate:0 -3.5px;rotate:-45deg}
+}
+@media (max-width:767.98px) and (prefers-reduced-motion:reduce){
+  .mm,.mm-nav,.mm-link,.mm-cta,.menu span,html.mm-open .mm,html.mm-open .menu span{transition:none}
+}
 /* hero */
 .hero{position:relative;padding-top:61px}
 .hero-lines{display:flex;flex-direction:column;gap:5.03px}
@@ -2336,12 +2388,22 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
   <div class="grain"></div>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="goo" x="-60%" y="-140%" width="220%" height="380%" color-interpolation-filters="sRGB"><feGaussianBlur in="SourceGraphic" stdDeviation="6" result="b"></feGaussianBlur><feColorMatrix in="b" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -9" result="g"></feColorMatrix><feComposite in="SourceGraphic" in2="g" operator="atop"></feComposite></filter></svg>
 
+  <!-- MENÚ MOBILE (2026-10-05): desplegable de la hamburguesa. Va ANTES del header porque es
+       sticky (ver CSS .mm). sync-shared.py lo copia (bloque MENU) cortando en el primer
+       </div>: no meter <div> dentro. En las entries los links pasan a ./index.html#… -->
+  <div class="mm" id="mm">
+    <nav class="mm-nav" aria-label="Menu">
+      <a class="mm-link on" href="#work" data-scroll=".work"><span>Work</span><span class="mm-dot"></span></a>
+      <a class="mm-link" href="#about" data-scroll=".team">About</a>
+      <a class="mm-link" href="#services" data-scroll=".about" data-scroll-up="40">Services</a>
+    </nav>
+    <a class="mm-cta" href="./contact.html"><svg class="mm-cta-shape" viewBox="0 0 280 50" preserveAspectRatio="none" fill="none" aria-hidden="true"><path d="M255.3011 0C268.9416 0 280 11.0583 280 24.699C280 38.3397 268.9416 49.398 255.3011 49.398H62.7945C52.2225 49.398 43.2026 42.755 39.6789 33.416C37.0679 42.3441 30.4084 49.0158 22.2414 49.9026C20.8245 50.0562 19.3997 50.0279 17.9875 49.8189C7.1948 48.2264 -0.6894 36.5739 0.0477 23.3039C0.7865 10.0336 9.8873 -0.2063 20.758 0.0035C29.3756 0.1699 36.712 6.8593 39.5789 16.2482C43.0302 6.7691 52.122 0 62.7945 0H255.3011Z"/></svg><svg class="mm-cta-arr" width="9.777" height="6.693" viewBox="0 0 9.77705 6.69316" fill="none" aria-hidden="true"><path d="M0 3.34658H9M5.47413 6.31042L9 3.34658L5.47413 0.38274"/></svg><span>Let's Talk</span></a>
+  </div>
+
   <header class="nav" data-comp="nav">
     <div class="nav-logo">
       <span class="nav-anim-m"><dc-import name="brandmark-fusion" hint-size="100%,100%"></dc-import></span>
       <span class="nav-anim d-only"><dc-import name="header-logo-hover" hint-size="100%,100%"></dc-import></span>
-      <span class="logo-mark" style="display:inline-block;background:var(--accent);-webkit-mask:url(./assets/logo-mark-55x23.svg) 0 0 / 100% 100% no-repeat;mask:url(./assets/logo-mark-55x23.svg) 0 0 / 100% 100% no-repeat"></span>
-      <span class="logo-word" style="display:inline-block;background:var(--accent);-webkit-mask:url(./assets/logo-wordmark-mono-creative-148x17.svg) 0 0 / 100% 100% no-repeat;mask:url(./assets/logo-wordmark-mono-creative-148x17.svg) 0 0 / 100% 100% no-repeat"></span>
     </div>
     <div class="nav-right">
       <div class="nav-links">
@@ -2356,7 +2418,7 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
         <svg class="btn-arr al" width="12.22" height="14.67" viewBox="11.9 14.75 10 12" fill="none" overflow="visible" style="color:var(--btn1-arrow)"><path d="M12.3984 20.747H21.3984M17.8726 23.7109L21.3984 20.747L17.8726 17.7832" stroke="currentColor" stroke-width="1.2" vector-effect="non-scaling-stroke"></path></svg>
         <svg class="btn-arr ar" width="12.22" height="14.67" viewBox="11.9 14.75 10 12" fill="none" overflow="visible" style="color:var(--btn1-arrow)"><path d="M12.3984 20.747H21.3984M17.8726 23.7109L21.3984 20.747L17.8726 17.7832" stroke="currentColor" stroke-width="1.2" vector-effect="non-scaling-stroke"></path></svg>
       </div>
-      <div class="menu" data-comp="icon-button/menu"><svg class="menu-ring" viewBox="0 0 48 48" aria-hidden="true"><rect x=".6" y=".6" width="46.8" height="46.8" rx="11.4"/></svg><span></span><span></span></div>
+      <div class="menu" data-comp="icon-button/menu" role="button" tabindex="0" aria-label="Open menu" aria-controls="mm" aria-expanded="false"><span></span><span></span></div>
     </div>
   </header>
 
@@ -2647,6 +2709,47 @@ class Component extends DCLogic {
   arm();
   var q=0;
   new MutationObserver(function(){ if(q)return; q=requestAnimationFrame(function(){ q=0; arm(); }); }).observe(document.documentElement,{childList:true,subtree:true});
+})();
+</script>
+<script>
+/* MENÚ MOBILE (2026-10-05): abre y cierra el desplegable (.mm) con la hamburguesa. Compartido:
+   sync-shared.py lo copia a entries y contact (bloque JS-MENU, allí dentro del <helmet>: sin
+   nombres camelCase seguidos de '=').
+   El estado vive en <html class="mm-open">, fuera del árbol que re-renderiza el runtime, y los
+   eventos se delegan en document. Todo lo visual lo hace el CSS; aquí no se mide nada.
+   Links con data-scroll (home): el scroll suave lo hace el script de navegación, que corre antes
+   en el mismo clic; aquí solo se cierra. Links normales (entries): navegan sin más.
+   Bloqueo de scroll SOLO en <html>: con overflow en <body> también, body pasaría a ser
+   contenedor de scroll y el panel sticky saltaría si se abre con la página ya movida. */
+(function(){
+  if(window.__mcMenu)return; window.__mcMenu=1;
+  var h=document.documentElement, desk=window.matchMedia('(min-width:768px)');
+  function abierto(){ return h.classList.contains('mm-open'); }
+  function pon(on){
+    if(on===abierto()||(on&&desk.matches))return;
+    h.classList.toggle('mm-open',on);
+    h.style.overflow=on?'hidden':'';
+    var b=document.querySelector('.page .menu');
+    if(b){ b.setAttribute('aria-expanded',on?'true':'false'); b.setAttribute('aria-label',on?'Close menu':'Open menu'); }
+    return b;
+  }
+  document.addEventListener('click',function(e){
+    var t=e.target; if(!t.closest)return;
+    if(t.closest('.page .menu')){ pon(!abierto()); return; }
+    var l=abierto()&&t.closest('.mm-link[data-scroll]');
+    if(l){ e.preventDefault(); pon(false); }
+  });
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'&&abierto()){ var b=pon(false); if(b)b.focus(); return; }
+    if((e.key==='Enter'||e.key===' ')&&e.target.closest&&e.target.closest('.page .menu')){
+      e.preventDefault(); pon(!abierto());
+      if(abierto()){ var l=document.querySelector('.page .mm-link'); if(l)l.focus(); }
+    }
+  });
+  // al pasar a desktop (giro de tablet) o volver con "atrás" (bfcache) el menú queda cerrado
+  function ancho(){ if(desk.matches)pon(false); }
+  if(desk.addEventListener)desk.addEventListener('change',ancho); else if(desk.addListener)desk.addListener(ancho);
+  addEventListener('pageshow',function(e){ if(e.persisted)pon(false); });
 })();
 </script>
 <!-- MANCHAS PRE-DESENFOCADAS (2026-10-05). Cada .glow lleva filter:blur(70-100px)

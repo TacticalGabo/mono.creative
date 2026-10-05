@@ -286,8 +286,6 @@ html .page,html .page *{cursor:none}
 @media (min-width:768px){
   .nav-anim{position:relative;display:inline-block;width:204px;height:21px;flex:none;color:var(--accent)}
 }
-.logo-mark{display:none !important;width:53.998px;height:22.909px}
-.logo-word{display:none !important;width:148.269px;height:16.981px}
 .nav-right{display:flex;align-items:center;gap:12px}   /* mobile: 12 entre botón, toggle y menú (mono.case_mobile.html) */
 .nav-links{display:none;gap:40px}
 .nav-link{font-family:var(--mono);font-size:13px;line-height:24px;letter-spacing:.2px;color:var(--nav-link);white-space:nowrap}
@@ -302,13 +300,8 @@ html .page,html .page *{cursor:none}
    Color: forest-600 en light, neutral-200 en dark. */
 .menu{position:relative;width:29px;height:42px;flex:none;display:flex;flex-direction:column;gap:5.4px;justify-content:center;align-items:flex-start;padding-left:3px;cursor:pointer}
 .menu span{width:20px;height:1.6px;background:color-mix(in oklab,#2c513a calc(var(--fade-p,0) * 100%),#bec8c2)}
-/* contorno en SVG: un border CSS de 1.2px Chrome lo redondea a 1px; el trazo SVG no (igual que el CTA) */
-.menu-ring{display:none}   /* contorno retirado 2026-10-04 (antes: SVG 48x48 r11.4, trazo --btn1-stroke) */
-.menu-ring rect{fill:none;stroke:var(--btn1-stroke);stroke-width:1.2px}
 @media (min-width:768px){
   .nav-anim-m{display:none}
-  .logo-mark{display:none !important}
-  .logo-word{display:none !important}
   .nav-logo{gap:8.167px}
   .nav-links{display:flex}
   .nav-right{gap:40px}
@@ -352,6 +345,65 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
 .btn.nav-btn .al,.btn.foot-btn .al{left:13.45px}
 .btn.nav-btn .ar,.btn.foot-btn .ar{left:120.14px}
 .btn.nav-btn .btn-label,.btn.foot-btn .btn-label{height:48px;line-height:48px;transform:translateX(-50%) translateX(18.51px)}
+/* MENÚ MOBILE (2026-10-05) — desplegable de la hamburguesa (diseño mono-home-mobile-dark/light).
+   Compartido: sync-shared.py lo copia a entries y contact con el header (CSS-NAV, MENU, JS-MENU).
+   · Panel STICKY al principio de .page con margen negativo igual a su alto: no ocupa sitio y
+     queda pegado arriba aunque la página se mueva debajo. (position:fixed no sirve: .page es
+     contenedor —container-type— y ancla los fixed a sí misma.)
+   · Cerrado = display:none: cero coste de layout/pintado mientras no se usa.
+   · Estado: html.mm-open (script JS-MENU). Entrada en tres tiempos con @starting-style: fondo
+     plano → línea + links escalonados (suben 8 px) → CTA. Al cerrar se funde el panel entero y
+     display:none espera al fundido (allow-discrete). Sin soporte: abre y cierra sin fundido.
+   · Solo opacity/translate en la animación (compositor). Colores: dark = tokens; light =
+     valores del diseño (#fff fondo, #bec8c2 separadores), interpolados con --fade-p para
+     seguir al toggle de tema. */
+.mm{display:none}
+@media (max-width:767.98px){
+  .mm{position:sticky;top:0;z-index:40;flex:none;flex-direction:column;gap:8px;
+    height:100vh;height:100dvh;margin-bottom:-100vh;margin-bottom:-100dvh;
+    padding:100px var(--mnav) 32px;overflow-y:auto;overscroll-behavior:contain;
+    background:color-mix(in oklab,#fff calc(var(--fade-p,0) * 100%),var(--bg-d));
+    opacity:0;transition:opacity .35s ease,display .35s;transition-behavior:allow-discrete}
+  html.mm-open .mm{display:flex;opacity:1;transition-duration:.3s}
+  .mm-nav{display:flex;flex-direction:column;border-top:1px solid var(--border);padding:16px 16px 0;transition:border-top-color .4s ease .14s}
+  /* Space Mono solo tiene 400 (el diseño pide 300, que cae igualmente en 400) */
+  .mm-link{display:flex;align-items:center;justify-content:space-between;height:60px;border-bottom:1px solid color-mix(in oklab,#bec8c2 calc(var(--fade-p,0) * 100%),rgba(44,81,58,.4));font-family:var(--mono);font-size:20px;letter-spacing:-.3px;color:var(--txt)}
+  .mm-link:hover{color:var(--txt)}
+  .mm-link:last-child{border-bottom:0}
+  .mm-link.on span:first-child{text-decoration:underline;text-underline-offset:6px;text-decoration-thickness:1px}
+  .mm-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex:none}
+  /* CTA 280x50 del diseño; por debajo de 328 px de pantalla se estrecha (≤3 %, imperceptible) */
+  .mm-cta{position:relative;display:block;align-self:center;width:min(280px,100%);height:50px;margin-top:64px;flex:none}
+  .mm-cta svg{position:absolute;display:block;overflow:visible}
+  .mm-cta-shape{left:0;top:0;width:100%;height:100%}
+  .mm-cta-shape path{fill:var(--btn2-fill);stroke:var(--btn2-stroke);vector-effect:non-scaling-stroke}
+  .mm-cta-arr{left:14.76px;top:21.65px}
+  .mm-cta-arr path{stroke:var(--btn2-arrow)}
+  .mm-cta span{position:absolute;left:40px;right:0;top:13px;text-align:center;font-family:var(--mono);font-size:13px;line-height:24px;letter-spacing:.002em;white-space:nowrap;color:var(--btn2-label)}
+  .mm-link,.mm-cta{transition:opacity .4s ease var(--mm-d),translate .55s cubic-bezier(.22,.7,.2,1) var(--mm-d)}
+  .mm-link:nth-child(1){--mm-d:.16s}
+  .mm-link:nth-child(2){--mm-d:.22s}
+  .mm-link:nth-child(3){--mm-d:.28s}
+  .mm-cta{--mm-d:.4s}
+  @starting-style{
+    html.mm-open .mm{opacity:0}
+    html.mm-open .mm-nav{border-top-color:transparent}
+    html.mm-open .mm-link,html.mm-open .mm-cta{opacity:0;translate:0 8px}
+  }
+  /* header con el menú abierto: por encima del panel (y no vuelve abajo hasta que el panel se
+     ha fundido), sin el Let's Talk, y la hamburguesa se cruza en X (líneas a 7 c-c => ±3.5) */
+  .nav{transition:z-index 0s .35s}
+  html.mm-open .nav{z-index:41;transition:none}
+  .nav-btn{transition:opacity .25s ease}
+  html.mm-open .nav-btn{opacity:0;pointer-events:none}
+  .menu span{transition:rotate .22s cubic-bezier(.6,0,.2,1),translate .2s cubic-bezier(.6,0,.2,1) .18s}
+  html.mm-open .menu span{transition:translate .2s cubic-bezier(.6,0,.2,1),rotate .28s cubic-bezier(.6,0,.2,1) .18s}
+  html.mm-open .menu span:first-child{translate:0 3.5px;rotate:45deg}
+  html.mm-open .menu span:last-child{translate:0 -3.5px;rotate:-45deg}
+}
+@media (max-width:767.98px) and (prefers-reduced-motion:reduce){
+  .mm,.mm-nav,.mm-link,.mm-cta,.menu span,html.mm-open .mm,html.mm-open .menu span{transition:none}
+}
 /* /SHARED:CSS-NAV */
 
 /* ==========================================================================
@@ -471,6 +523,51 @@ html .page .sc-placeholder::before{display:none}
 [data-asset="team-2"]{background-image:url(../assets/team/avatar-2.webp)}
 [data-asset="team-3"]{background-image:url(../assets/team/avatar-3.webp)}
 [data-asset="team-4"]{background-image:url(../assets/team/avatar-4.webp)}
+/* avatares → tarjeta mínima (nombre + redes, mismos enlaces que el home). Fuente:
+   mono.creative_entry/mono.case_desktop.html y mono.case_mobile.html. Abre con tap/clic
+   (.is-open, JS "avatares del team" en js/case-study.js) o con foco; en desktop con ratón,
+   también con hover. Mobile: la tarjeta sale a la derecha del grupo (con 3 avatares no cabe
+   en 360: va debajo); desktop: debajo de su avatar. Todo bajo .cs-hero: contact.html también
+   carga esta hoja y sus avatares no llevan tarjeta. */
+.cs-hero__left{position:relative;z-index:1}   /* la tarjeta pasa por encima de lo que sigue */
+.cs-hero .avatars{position:relative}
+.cs-hero .avatar{flex:0 0 auto;outline:0;box-shadow:0 0 0 0 var(--accent);-webkit-tap-highlight-color:transparent;transition:margin-left .45s cubic-bezier(.34,1.56,.64,1),opacity .3s ease,box-shadow .3s ease}
+.cs-hero .avatars:is(.is-open,:focus-within) .avatar+.avatar{margin-left:6px}
+.cs-hero .avatars.is-open .avatar:not(.is-open):not(:focus-within){opacity:.45}
+.cs-hero .avatar:is(:focus-visible,:focus-within,.is-open){z-index:2;box-shadow:0 0 0 1px var(--accent)}
+.pcard{position:absolute;left:120px;top:50%;translate:0 -50%;display:flex;flex-direction:column;align-items:center;gap:2px;padding:24px 40px;white-space:nowrap;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .2s ease,visibility 0s linear .2s}
+.cs-hero .avatars:has(>.avatar:nth-child(3)) .pcard{left:0;top:calc(100% + 12px);translate:none}
+.pcard__ring{position:absolute;inset:0;width:100%;height:100%;overflow:visible;fill:none;stroke:var(--border);stroke-width:1;pointer-events:none}
+.pcard__ring ellipse{stroke-dasharray:1 1;stroke-dashoffset:1;transition:stroke-dashoffset 0s linear .2s}
+.pcard__ring ellipse:first-child{fill:var(--bg)}
+.pcard__name,.pcard__links{position:relative;transform:rotate(-3deg);opacity:0;transition:opacity .15s ease}
+.pcard__name{font:400 16px/24px var(--ff-sans);letter-spacing:-.32px;color:var(--text-title)}
+.pcard__links{display:flex;gap:10px}
+.pcard__links a{display:block;font:400 13px/18px var(--ff-mono);letter-spacing:.52px;color:var(--accent-mono);text-decoration:underline;text-underline-offset:2px;transition:color .2s ease}
+.pcard__links a:hover,.pcard__links a:focus-visible{color:var(--accent);outline:0}
+.cs-hero .avatar:is(:focus-within,.is-open) .pcard{opacity:1;visibility:visible;pointer-events:auto;transition:opacity 0s,visibility 0s}
+.cs-hero .avatar:is(:focus-within,.is-open) .pcard__ring ellipse{stroke-dashoffset:0;transition:stroke-dashoffset .45s cubic-bezier(.65,0,.35,1) 0s}
+.cs-hero .avatar:is(:focus-within,.is-open) .pcard__ring ellipse+ellipse{transition-delay:.45s}
+.cs-hero .avatar:is(:focus-within,.is-open) :is(.pcard__name,.pcard__links){opacity:1;transition:opacity .4s ease .5s}
+/* al cambiar de avatar, la tarjeta anterior se va en el acto y la nueva se dibuja. :not(:focus-within):
+   el tap enfoca el avatar nuevo antes del clic; sin esto su tarjeta abría ya sin transición */
+.cs-hero .avatars.is-open .avatar:not(.is-open):not(:focus-within) :is(.pcard,.pcard *){transition:none!important}
+@media (min-width:768px){
+  .cs-hero .avatar{position:relative}
+  .pcard{left:0;top:calc(100% + 12px);translate:none}
+  .pcard::before{content:"";position:absolute;left:0;right:0;top:-14px;height:14px}   /* puente: el hover no se corta al bajar */
+}
+@media (min-width:768px) and (hover:hover) and (pointer:fine){
+  .cs-hero .avatars:hover .avatar+.avatar{margin-left:6px}
+  .cs-hero .avatars:hover .avatar:not(:hover){opacity:.45}
+  .cs-hero .avatar:hover{z-index:2;box-shadow:0 0 0 1px var(--accent)}
+  .cs-hero .avatar:hover .pcard{opacity:1;visibility:visible;pointer-events:auto;transition:opacity 0s,visibility 0s}
+  .cs-hero .avatar:hover .pcard__ring ellipse{stroke-dashoffset:0;transition:stroke-dashoffset .45s cubic-bezier(.65,0,.35,1) 0s}
+  .cs-hero .avatar:hover .pcard__ring ellipse+ellipse{transition-delay:.45s}
+  .cs-hero .avatar:hover :is(.pcard__name,.pcard__links){opacity:1;transition:opacity .4s ease .5s}
+  .cs-hero .avatars:hover .avatar:not(:hover) :is(.pcard,.pcard *){transition:none!important}
+}
+@media (prefers-reduced-motion:reduce){.cs-hero .avatar,.cs-hero .avatar :is(.pcard,.pcard *){transition:none!important}}
 .cs-hero__right{margin-top:16px}
 .cs-hero__lead{font:500 20px/1.5 var(--ff-sans);letter-spacing:-.22px;color:var(--text-title)}
 .cs-hero__intro{font:400 15px/24px var(--ff-sans);margin-top:16px}
@@ -615,7 +712,14 @@ html.js main .cs-hero .fx-line{animation:fx-in-b .7s ease both;animation-delay:c
 @media (prefers-reduced-motion:no-preference){
   html.js main .cs-hero :is(.cs-hero__meta,.cs-hero__lead,.cs-hero__intro,.cs-hero__col){opacity:0}
   html.js main .cs-hero :is(.cs-hero__meta,.cs-hero__lead,.cs-hero__intro,.cs-hero__col).hr-in{opacity:1;animation:fx-in-b .7s ease var(--hr-d,0s) both}
+  /* avatares: fade + deslizamiento sutil, escalonados (los de contact.css, mc-av-in), al
+     entrar su meta. "backwards" y no "both": el relleno final pisaría el atenuado (.45) del hover */
+  html.js main .cs-hero .cs-hero__meta.hr-in .avatar{animation:av-in .89s cubic-bezier(.2,.7,.2,1) calc(var(--hr-d,0s) + .3s) backwards}
+  html.js main .cs-hero .cs-hero__meta.hr-in .avatar:nth-child(2){animation-delay:calc(var(--hr-d,0s) + .389s)}
+  html.js main .cs-hero .cs-hero__meta.hr-in .avatar:nth-child(3){animation-delay:calc(var(--hr-d,0s) + .478s)}
+  html.js main .cs-hero .cs-hero__meta.hr-in .avatar:nth-child(4){animation-delay:calc(var(--hr-d,0s) + .567s)}
 }
+@keyframes av-in{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
 /* imagen del hero: fade + escala al montar (compositor: nunca se traban). El radio se calcula
    en el hilo principal, ocupado justo tras montar: se queda a 0 (cuadrada) hasta que el JS ve
    la página libre y lo anima (clase .ir-r + Web Animations); si no, saltaría de golpe. */

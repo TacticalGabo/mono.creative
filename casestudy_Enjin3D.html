@@ -16,7 +16,7 @@
 @font-face{font-family:'Plus Jakarta Sans';font-style:italic;font-weight:200 800;font-display:swap;src:url(./fonts/plus-jakarta-sans/webfont/PlusJakartaSans-200-800-italic-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 @font-face{font-family:'Space Mono';font-style:normal;font-weight:400;font-display:swap;src:url(./fonts/space-mono/webfont/SpaceMono-400-normal-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 </style>
-<link rel="stylesheet" href="./css/case-study.css?v=5">
+<link rel="stylesheet" href="./css/case-study.css?v=7">
 <!-- (2026-10-04) CARGA: React desde el propio dominio, igual que el home (mismos bytes,
      sha384 idéntico al SRI de support.js). Además, con window.__resources definido
      support.js NO vuelve a descargar la página entera (fetch(location.href)). -->
@@ -26,7 +26,7 @@ if(!r[u+'react@18.3.1/umd/react.production.min.js'])r[u+'react@18.3.1/umd/react.
 if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.1/umd/react-dom.production.min.js']='./vendor/react-dom.production.min.js';})();
 </script>
 <script src="./vendor/support.js"></script>
-<script src="./js/case-study.js" defer></script>
+<script src="./js/case-study.js?v=2" defer></script>
 </head>
 <body>
 <x-dc>
@@ -487,6 +487,49 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
 })();
 </script>
 <!-- /SHARED:JS-COPY -->
+<!-- SHARED:JS-MENU -->
+<script>
+/* MENÚ MOBILE (2026-10-05): abre y cierra el desplegable (.mm) con la hamburguesa. Compartido:
+   sync-shared.py lo copia a entries y contact (bloque JS-MENU, allí dentro del <helmet>: sin
+   nombres camelCase seguidos de '=').
+   El estado vive en <html class="mm-open">, fuera del árbol que re-renderiza el runtime, y los
+   eventos se delegan en document. Todo lo visual lo hace el CSS; aquí no se mide nada.
+   Links con data-scroll (home): el scroll suave lo hace el script de navegación, que corre antes
+   en el mismo clic; aquí solo se cierra. Links normales (entries): navegan sin más.
+   Bloqueo de scroll SOLO en <html>: con overflow en <body> también, body pasaría a ser
+   contenedor de scroll y el panel sticky saltaría si se abre con la página ya movida. */
+(function(){
+  if(window.__mcMenu)return; window.__mcMenu=1;
+  var h=document.documentElement, desk=window.matchMedia('(min-width:768px)');
+  function abierto(){ return h.classList.contains('mm-open'); }
+  function pon(on){
+    if(on===abierto()||(on&&desk.matches))return;
+    h.classList.toggle('mm-open',on);
+    h.style.overflow=on?'hidden':'';
+    var b=document.querySelector('.page .menu');
+    if(b){ b.setAttribute('aria-expanded',on?'true':'false'); b.setAttribute('aria-label',on?'Close menu':'Open menu'); }
+    return b;
+  }
+  document.addEventListener('click',function(e){
+    var t=e.target; if(!t.closest)return;
+    if(t.closest('.page .menu')){ pon(!abierto()); return; }
+    var l=abierto()&&t.closest('.mm-link[data-scroll]');
+    if(l){ e.preventDefault(); pon(false); }
+  });
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'&&abierto()){ var b=pon(false); if(b)b.focus(); return; }
+    if((e.key==='Enter'||e.key===' ')&&e.target.closest&&e.target.closest('.page .menu')){
+      e.preventDefault(); pon(!abierto());
+      if(abierto()){ var l=document.querySelector('.page .mm-link'); if(l)l.focus(); }
+    }
+  });
+  // al pasar a desktop (giro de tablet) o volver con "atrás" (bfcache) el menú queda cerrado
+  function ancho(){ if(desk.matches)pon(false); }
+  if(desk.addEventListener)desk.addEventListener('change',ancho); else if(desk.addListener)desk.addListener(ancho);
+  addEventListener('pageshow',function(e){ if(e.persisted)pon(false); });
+})();
+</script>
+<!-- /SHARED:JS-MENU -->
 </helmet>
 <div class="qa-w" data-comp="qa-width-overlay"></div>
 <div class="page" data-screen-label="case study — Enjin">
@@ -495,13 +538,22 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="goo" x="-60%" y="-140%" width="220%" height="380%" color-interpolation-filters="sRGB"><feGaussianBlur in="SourceGraphic" stdDeviation="6" result="b"></feGaussianBlur><feColorMatrix in="b" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -9" result="g"></feColorMatrix><feComposite in="SourceGraphic" in2="g" operator="atop"></feComposite></filter></svg>
 <!-- /SHARED:GOO -->
 
+  <!-- SHARED:MENU -->
+<div class="mm" id="mm">
+    <nav class="mm-nav" aria-label="Menu">
+      <a class="mm-link on" href="./index.html#work"><span>Work</span><span class="mm-dot"></span></a>
+      <a class="mm-link" href="./index.html#about">About</a>
+      <a class="mm-link" href="./index.html#services">Services</a>
+    </nav>
+    <a class="mm-cta" href="./contact.html"><svg class="mm-cta-shape" viewBox="0 0 280 50" preserveAspectRatio="none" fill="none" aria-hidden="true"><path d="M255.3011 0C268.9416 0 280 11.0583 280 24.699C280 38.3397 268.9416 49.398 255.3011 49.398H62.7945C52.2225 49.398 43.2026 42.755 39.6789 33.416C37.0679 42.3441 30.4084 49.0158 22.2414 49.9026C20.8245 50.0562 19.3997 50.0279 17.9875 49.8189C7.1948 48.2264 -0.6894 36.5739 0.0477 23.3039C0.7865 10.0336 9.8873 -0.2063 20.758 0.0035C29.3756 0.1699 36.712 6.8593 39.5789 16.2482C43.0302 6.7691 52.122 0 62.7945 0H255.3011Z"/></svg><svg class="mm-cta-arr" width="9.777" height="6.693" viewBox="0 0 9.77705 6.69316" fill="none" aria-hidden="true"><path d="M0 3.34658H9M5.47413 6.31042L9 3.34658L5.47413 0.38274"/></svg><span>Let's Talk</span></a>
+  </div>
+<!-- /SHARED:MENU -->
+
   <!-- SHARED:NAV -->
 <header class="nav" data-comp="nav">
     <a class="nav-logo" href="./index.html" aria-label="mono.creative — home">
       <span class="nav-anim-m"><dc-import name="brandmark-fusion" hint-size="100%,100%"></dc-import></span>
       <span class="nav-anim d-only"><dc-import name="header-logo-hover" hint-size="100%,100%"></dc-import></span>
-      <span class="logo-mark" style="display:inline-block;background:var(--accent);-webkit-mask:url(./assets/logo-mark-55x23.svg) 0 0 / 100% 100% no-repeat;mask:url(./assets/logo-mark-55x23.svg) 0 0 / 100% 100% no-repeat"></span>
-      <span class="logo-word" style="display:inline-block;background:var(--accent);-webkit-mask:url(./assets/logo-wordmark-mono-creative-148x17.svg) 0 0 / 100% 100% no-repeat;mask:url(./assets/logo-wordmark-mono-creative-148x17.svg) 0 0 / 100% 100% no-repeat"></span>
     </a>
     <div class="nav-right">
       <div class="nav-links">
@@ -516,7 +568,7 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
         <svg class="btn-arr al" width="12.22" height="14.67" viewBox="11.9 14.75 10 12" fill="none" overflow="visible" style="color:var(--btn1-arrow)"><path d="M12.3984 20.747H21.3984M17.8726 23.7109L21.3984 20.747L17.8726 17.7832" stroke="currentColor" stroke-width="1.2" vector-effect="non-scaling-stroke"></path></svg>
         <svg class="btn-arr ar" width="12.22" height="14.67" viewBox="11.9 14.75 10 12" fill="none" overflow="visible" style="color:var(--btn1-arrow)"><path d="M12.3984 20.747H21.3984M17.8726 23.7109L21.3984 20.747L17.8726 17.7832" stroke="currentColor" stroke-width="1.2" vector-effect="non-scaling-stroke"></path></svg>
       </div>
-      <div class="menu" data-comp="icon-button/menu"><svg class="menu-ring" viewBox="0 0 48 48" aria-hidden="true"><rect x=".6" y=".6" width="46.8" height="46.8" rx="11.4"/></svg><span></span><span></span></div>
+      <div class="menu" data-comp="icon-button/menu" role="button" tabindex="0" aria-label="Open menu" aria-controls="mm" aria-expanded="false"><span></span><span></span></div>
     </div>
   </header>
 <!-- /SHARED:NAV -->
@@ -533,7 +585,7 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
           <div class="cs-hero__meta">
             <div class="meta--year"><span class="meta__label">Year</span><span class="meta__value">2024–2025</span></div>
             <div class="meta--role"><span class="meta__label">Role</span><span class="meta__value">3D Artist</span></div>
-            <div class="avatars"><span class="avatar" data-asset="team-1"></span><span class="avatar" data-asset="team-2"></span><span class="avatar" data-asset="team-3"></span></div>
+            <div class="avatars"><span class="avatar" data-asset="team-1" tabindex="0" aria-label="Gabriel Luyo"><span class="pcard" role="tooltip"><svg class="pcard__ring" viewBox="0 0 288 95" preserveAspectRatio="none" aria-hidden="true"><ellipse pathLength="1" cx="144" cy="47.5" rx="143.5" ry="45" transform="rotate(-1.5 144 47.5)"/><ellipse pathLength="1" cx="145" cy="48.5" rx="143" ry="46" transform="rotate(1 145 48.5)"/></svg><span class="pcard__name">Gabriel Luyo</span><span class="pcard__links"><a href="https://www.behance.net/gabriel_luyo" target="_blank" rel="noopener noreferrer" aria-label="Behance">Be</a><a href="https://www.linkedin.com/in/gabriel-luyo/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">In</a></span></span></span><span class="avatar" data-asset="team-2" tabindex="0" aria-label="Ale Serruto"><span class="pcard" role="tooltip"><svg class="pcard__ring" viewBox="0 0 288 95" preserveAspectRatio="none" aria-hidden="true"><ellipse pathLength="1" cx="144" cy="47.5" rx="143.5" ry="45" transform="rotate(-1.5 144 47.5)"/><ellipse pathLength="1" cx="145" cy="48.5" rx="143" ry="46" transform="rotate(1 145 48.5)"/></svg><span class="pcard__name">Ale Serruto</span><span class="pcard__links"><a href="https://www.behance.net/AlessandraSerruto" target="_blank" rel="noopener noreferrer" aria-label="Behance">Be</a><a href="https://www.linkedin.com/in/alessandra-serruto/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">In</a><a data-pending="1">Ig</a></span></span></span><span class="avatar" data-asset="team-3" tabindex="0" aria-label="Romina Veliz"><span class="pcard" role="tooltip"><svg class="pcard__ring" viewBox="0 0 288 95" preserveAspectRatio="none" aria-hidden="true"><ellipse pathLength="1" cx="144" cy="47.5" rx="143.5" ry="45" transform="rotate(-1.5 144 47.5)"/><ellipse pathLength="1" cx="145" cy="48.5" rx="143" ry="46" transform="rotate(1 145 48.5)"/></svg><span class="pcard__name">Romina Veliz</span><span class="pcard__links"><a href="https://www.behance.net/romaveliz" target="_blank" rel="noopener noreferrer" aria-label="Behance">Be</a><a href="https://www.linkedin.com/in/romina-v-397746b6/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">In</a><a data-pending="1">Ig</a></span></span></span></div>
           </div>
         </div>
         <div class="cs-hero__right">
