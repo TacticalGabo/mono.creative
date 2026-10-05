@@ -18,8 +18,8 @@
 .contact-detail-row { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 6px; }
 .contact-heading { grid-template-columns: minmax(0, 1fr); }
 .contact-meta { font: 400 10px/1.6 var(--mono); color: var(--body); padding-top: 12px; }
-.contact-aside h1 { font-size: 36px; line-height: 1.4; font-weight: 500; letter-spacing: 0; color: var(--txt); }
-.contact-email { display: flex; align-items: center; gap: 8px; width: max-content; max-width: 100%; margin-top: 2px; font-size: 36px; line-height: 1.4; color: var(--accent); }
+.contact-aside h1 { font-size: 34px; line-height: 1.4; font-weight: 500; letter-spacing: 0; color: var(--txt); }
+.contact-email { display: flex; align-items: center; gap: 8px; width: max-content; max-width: 100%; margin-top: 2px; font-size: 34px; line-height: 1.4; color: var(--accent); }
 .contact-email svg { flex: none; width: 28px; height: 28px; stroke-width: 1.4; position: relative; top: 3.5px; }   /* centrada con la altura de las minúsculas, no con las mayúsculas */
 .contact-email:hover { color: var(--body-strong); }
 .contact-intro { margin-top: 19px; font-size: 18px; line-height: 1.75; color: var(--body); }
@@ -132,10 +132,12 @@
 .skip-call svg { width: 13px; height: 13px; }
 .skip-call[aria-pressed="true"] { color: var(--accent); }
 .contact-page .contact-form .sr-only, .contact-page .contact-honeypot { position: absolute; display: block; width: 1px; height: 1px; overflow: hidden; padding: 0; margin: -1px; clip: rect(0,0,0,0); clip-path: inset(50%); white-space: nowrap; border: 0; }
-/* Columna de contenido = la de todas las páginas (.wrap, --m: 191 en 1440 → 272,3 en 1920),
-   con su sangrado respecto del header (--mnav). Texto y formulario no crecen; la columna
-   izquierda absorbe el ancho. Por encima de 1920 .page se congela. */
-@media (min-width: 768px) { .contact-layout { width: auto; margin-left: var(--m); margin-right: var(--m); } }
+/* Hasta 1440 el contacto ocupa el ancho del header (--mnav, sin sangrado extra). De 1440 a
+   1920 el margen pasa de 120 (el del header) a 272,3 (el del contenido, --m en 1920): el
+   bloque se va cerrando hasta el ancho máximo de siempre, con su sangrado. Desde 1920 .page
+   se congela. cqw = ancho de .page (container), que también se congela en 1920. */
+@media (min-width: 768px) { .contact-layout { width: auto; margin-left: var(--mnav); margin-right: var(--mnav); } }
+@media (min-width: 1440px) { .contact-layout { margin-left: min(272.3px, calc(120px + (100cqw - 1440px) * .3172917)); margin-right: min(272.3px, calc(120px + (100cqw - 1440px) * .3172917)); } }
 @media (max-width: 1279px) { .contact-layout { width: calc(100% - 96px); gap: 32px; } .contact-detail-row { grid-template-columns: 1fr; gap: 14px; } .contact-email { width: auto; overflow-wrap: anywhere; } .contact-direct { margin-top: 65px; } }
 @media (prefers-reduced-motion: reduce) { .contact-page *, .contact-page *::before, .contact-page *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
 /* Footer del contacto: sin titular ni CTA (la página ya es el CTA). */
@@ -155,7 +157,7 @@ html:has(body.contact-page), body.contact-page { overflow: hidden; height: 100%;
 /* Con la columna de contenido (--m) a 1440 la izquierda mide ~464 px: el titular y el
    email bajan de tamaño lo justo para caber en una línea (36 px en cuanto hay sitio). */
 .contact-aside { container-type: inline-size; }
-.contact-aside h1, .contact-email { font-size: min(36px, calc((100cqi - 40px) / 16.3)); }
+.contact-aside h1, .contact-email { font-size: min(34px, calc((100cqi - 40px) / 16.3)); }
 /* Contenido centrado en vertical en el alto que deja el header (la página no scrollea). */
 .contact-page .page { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }
 .contact-page .nav { flex: none; }
