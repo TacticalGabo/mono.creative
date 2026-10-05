@@ -40,7 +40,7 @@
 .service-row { display: contents; }
 .choice-chip { display: inline-flex; position: relative; }
 .choice-chip input { position: absolute; opacity: 0; width: 1px; height: 1px; }
-.choice-chip > span { display: inline-flex; min-height: 40px; padding: 9px 8px; border: 1px solid var(--border); border-radius: 4px; align-items: center; justify-content: center; font: var(--t-mono-tag); letter-spacing: 0; color: var(--body-strong); transition: border-color .18s, color .18s, background .18s; white-space: nowrap; }
+.choice-chip > span { display: inline-flex; min-height: 48px; padding: 13px 12px; border: 1px solid var(--border); border-radius: 4px; align-items: center; justify-content: center; font: var(--t-mono-tag); letter-spacing: 0; color: var(--body-strong); transition: border-color .18s, color .18s, background .18s; white-space: nowrap; }
 .choice-chip:hover > span { border-color: var(--body); background: #18231b; }
 .choice-chip input:checked + span, .choice-chip[aria-pressed="true"] > span { background: var(--accent); color: var(--bg-d); border-color: var(--accent); }
 .choice-chip input:focus-visible + span { outline: 1px solid var(--accent); outline-offset: 3px; }
