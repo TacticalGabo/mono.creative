@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8">
-<script>/* .js síncrono (antes lo ponía case-study.js, diferido: según qué llegaba antes, el hero se veía, se ocultaba y reaparecía) + tema elegido en el toggle (home o entry); sin elección = light */document.documentElement.classList.add('js');try{localStorage.removeItem('mc-theme');var t=sessionStorage.getItem('mc-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<script>/* .js síncrono (antes lo ponía case-study.js, diferido: según qué llegaba antes, el hero se veía, se ocultaba y reaparecía) + tema elegido en el toggle (home o entry); sin elección = dark */document.documentElement.classList.add('js');try{localStorage.removeItem('mc-theme');var t=sessionStorage.getItem('mc-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
 <link rel="icon" type="image/svg+xml" href="./assets/logo-favicon-48x29.svg?v=3">
-<title>Jupiter DTF — Case study · mono.creative</title>
+<title>Contact · mono.creative</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Jupiter DTF: the first Decentralized Token Formation platform for Jupiter, a leading Solana brand.">
+<meta name="description" content="Tell mono.creative what you are building. Design, direction and a conversation about what comes next.">
 <!-- (2026-10-04) CARGA: fuentes del propio dominio (./fonts, mismos woff2 de Google:
      variable 200-800, subsets latin + latin-ext con unicode-range) en lugar del CSS de
      Google Fonts, que bloqueaba el render y abría 2 conexiones externas. -->
@@ -17,6 +17,7 @@
 @font-face{font-family:'Space Mono';font-style:normal;font-weight:400;font-display:swap;src:url(./fonts/space-mono/webfont/SpaceMono-400-normal-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 </style>
 <link rel="stylesheet" href="./css/case-study.css?v=4">
+<link rel="stylesheet" href="./css/contact.css">
 <!-- (2026-10-04) CARGA: React desde el propio dominio, igual que el home (mismos bytes,
      sha384 idéntico al SRI de support.js). Además, con window.__resources definido
      support.js NO vuelve a descargar la página entera (fetch(location.href)). -->
@@ -27,20 +28,20 @@ if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.
 </script>
 <script src="./vendor/support.js"></script>
 <script src="./js/case-study.js" defer></script>
+<script src="./vendor/lucide-0.468.0.min.js" defer></script>
+<script src="./js/contact-config.js" defer></script>
+<script src="./js/contact-rules.js" defer></script>
+<script src="./js/contact.js" defer></script>
 </head>
-<body>
+<body class="contact-page">
 <x-dc>
 <helmet>
 <!--
-  CASE STUDY 5 · JUPITER DTF — página responsive (360 → 1920+)
-  · Fusión de mono.case_desktop.html (Figma 1440) + mono.case_mobile.html (Figma 360).
-  · Reglas: RESPONSIVE_HEADER_Y_CONTENIDO.md. Breakpoint único 768; tramo tablet
-    768–1099 por container query sobre .page; .page tope 1920 y centrada.
-  · CSS/JS comunes: ./css/case-study.css y ./js/case-study.js (no duplicar aquí).
-  · Header, CTA y footer = los del home, literal. Viven entre marcadores SHARED y
-    se regeneran con:  python "build/sync-shared.py"   (NO editarlos aquí a mano).
-  · Imágenes del caso: carpeta ./casestudy_JupiterDTF/  (ver bloque ASSETS al final
-    del bloque style y casestudy_JupiterDTF/README.md).
+  CONTACT — formulario de contacto (desktop 1440 de referencia).
+  · CSS/JS propios: ./css/contact.css, ./js/contact*.js. Comunes: case-study.css/js.
+  · Header, botones, cursor, tema y grano = los del home, entre marcadores SHARED:
+    se regeneran con  python "build/sync-shared.py"  (NO editarlos aquí a mano).
+  · Sin footer ni CTA-FOOT (decisión de diseño 2026-10-05).
 -->
 <!-- SHARED:JS-GEOM -->
 <script>
@@ -88,29 +89,6 @@ window.MC_GEOM = G;
 window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEOM); else setTimeout(p, 30); })(); };
 </script>
 <!-- /SHARED:JS-GEOM -->
-<style>
-/* ==========================================================================
-   9 · ASSETS — imágenes del caso en ./casestudy_JupiterDTF/
-       Para cambiar una imagen: reemplaza el archivo con el MISMO nombre.
-       Si cambias la extensión (.png/.jpg), cámbiala solo aquí.
-       Sin archivo, el hueco muestra el color placeholder (--media).
-   ========================================================================== */
-[data-asset="hero"]{background-image:url(./casestudy_JupiterDTF/01-hero.webp)}
-[data-asset="research"]{background-image:url(./casestudy_JupiterDTF/04-research.webp)}
-[data-asset="direction-left"]{background-image:url(./casestudy_JupiterDTF/05-direction-left.webp)}
-[data-asset="direction-right"]{background-image:url(./casestudy_JupiterDTF/05-direction-right.webp)}
-[data-asset="direction-screen"]{background-image:url(./casestudy_JupiterDTF/05-direction-screen.webp)}
-[data-asset="ui-1"]{background-image:url(./casestudy_JupiterDTF/06-ui-1.webp)}
-[data-asset="ui-2"]{background-image:url(./casestudy_JupiterDTF/06-ui-2.webp)}
-[data-asset="before-1"]{background-image:url(./casestudy_JupiterDTF/07-before-1.webp)}
-[data-asset="after-1"]{background-image:url(./casestudy_JupiterDTF/07-after-1.webp)}
-[data-asset="before-2"]{background-image:url(./casestudy_JupiterDTF/07-before-2.webp)}
-[data-asset="after-2"]{background-image:url(./casestudy_JupiterDTF/07-after-2.webp)}
-[data-asset="mobile"]{background-image:url(./casestudy_JupiterDTF/09-mobile.webp)}
-[data-asset="closing-scene"]{background-image:url(./casestudy_JupiterDTF/10-closing-scene.webp)}
-[data-asset="closing-screen"]{background-image:url(./casestudy_JupiterDTF/10-closing-screen.webp)}
-</style>
-
 <!-- SHARED:JS-SBW -->
 <script>
 (function(){
@@ -454,8 +432,7 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
 </script>
 <!-- /SHARED:JS-COPY -->
 </helmet>
-<div class="qa-w" data-comp="qa-width-overlay"></div>
-<div class="page" data-screen-label="case study — Jupiter DTF">
+<div class="page" data-screen-label="contact">
   <div class="grain"></div>
   <!-- SHARED:GOO -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="goo" x="-60%" y="-140%" width="220%" height="380%" color-interpolation-filters="sRGB"><feGaussianBlur in="SourceGraphic" stdDeviation="6" result="b"></feGaussianBlur><feColorMatrix in="b" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -9" result="g"></feColorMatrix><feComposite in="SourceGraphic" in2="g" operator="atop"></feComposite></filter></svg>
@@ -487,175 +464,112 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
   </header>
 <!-- /SHARED:NAV -->
 
-  <main data-case="jupiter">
-
-  <!-- ===== 5.1 Project Hero (B01) ===== -->
-  <section class="cs-hero" data-block="5.1 Project Hero (B01)">
-    <div class="wrap">
-      <div class="cs-hero__media media" data-asset="hero"></div>
-      <div class="cs-hero__body">
-        <div class="cs-hero__left">
-          <h1 class="cs-hero__title"><span class="fx-line">Jupiter</span><span class="fx-line accent">DTF</span></h1>
-          <div class="cs-hero__meta">
-            <div class="meta--year"><span class="meta__label">Year</span><span class="meta__value">2025</span></div>
-            <div class="meta--role"><span class="meta__label">Role</span><span class="meta__value">Product Designer</span></div>
-            <div class="avatars"><span class="avatar" data-asset="team-1"></span><span class="avatar" data-asset="team-2"></span></div>
-          </div>
-        </div>
-        <div class="cs-hero__right">
-          <p class="cs-hero__lead">The first Decentralized Token Formation platform for Jupiter, a leading Solana brand.</p>
-          <p class="cs-hero__intro">DTF lets communities fund new Solana projects from their earliest stage, directly on Jupiter. The platform was designed end to end, from the public landing to the commit flow where people put money behind a project, for users ranging from seasoned traders to first-time participants.</p>
-          <div class="cs-hero__cols">
-            <div class="cs-hero__col"><h2 class="cs-hero__label">Objective</h2><p class="cs-hero__text">The challenge was to turn an emerging product direction into a UX/UI experience explaining a new Web3 funding model quickly, while supporting user needs across discovery, evaluation, and participation.</p></div>
-            <div class="cs-hero__col"><h2 class="cs-hero__label">Outcome</h2><p class="cs-hero__text">A platform that feels reliable and easy to navigate, from first impression to evaluation and community participation, giving Jupiter a clear home for token launches and the communities that back them.</p></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== 5.2 Statement (B06) ===== -->
-  <section class="cs-statement fx" data-block="5.2 Statement (B06)">
-    <div class="wrap">
-      <p class="cs-statement__label">The idea</p>
-      <p class="cs-statement__text">DTF was designed as a launch environment where projects could form, validate, and grow through transparent, community-driven participation, from their first commit to a full token launch.</p>
-    </div>
-  </section>
-
-  <!-- ===== 5.3 Constraints (B04) ===== -->
-  <section class="cs-constraints fx" data-block="5.3 Constraints (B04)">
-    <div class="wrap">
-      <div class="sh"><h2 class="sh__title"><span>Challenges</span><span>along the way</span></h2><p class="sh__desc">DTF had to fit Jupiter’s brand, explain a new funding model and bring several teams’ input into one product, while the wider ecosystem kept changing.</p></div>
-      <div class="cs-constraints__canvas">
-        <svg class="curve curve--h" viewBox="0 0 1057 416" aria-hidden="true"><path d="M-210 38C-140 17 -70 6.4 -17 5C60 3 150 0 230 120C255 150 265 163 287 173C340 195 380 205 420 203C480 200 530 175 569 160C610 143 640 130 670 130C730 130 790 180 851 230C870 245 890 258 908 266"/></svg>
-        <svg class="curve curve--v" viewBox="0 0 61 601" preserveAspectRatio="none" aria-hidden="true"><path d="M-30 -46C-22 -36 -7.717 -10.813 0.603 0.446C7.711 10.064 19.216 16.275 24.542 27.4C40.199 60.504 17.344 94.684 24.542 130.946C30.18 159.344 40.132 174.727 45.644 191.606C69.103 263.446 40.603 307.946 13.571 386.944C-7.645 448.946 13.512 483.301 34.103 520.446C55.012 548.801 69.779 569.618 51.395 600.446"/></svg>
-        <ol class="cs-constraints__list">
-          <li class="ci"><span class="ci__dot"></span><span class="ci__num">01</span><h3 class="ci__title">Aligned<br class="br-d"> with Jupiter</h3><p class="ci__text">An established visual identity was already in place; components and design system rules were defined to extend it across all screens.</p></li>
-          <li class="ci"><span class="ci__dot"></span><span class="ci__num">02</span><h3 class="ci__title">Complex, not<br class="br-d"> intimidating</h3><p class="ci__text">Token formation, project validation, funding stages and on-chain participation had to be broken into clear steps that read at a glance.</p></li>
-          <li class="ci"><span class="ci__dot"></span><span class="ci__num">03</span><h3 class="ci__title">Many teams,<br class="br-d"> one product</h3><p class="ci__text">Product, brand, technical and strategic inputs came from different sides and were brought together into a single design direction.</p></li>
-          <li class="ci"><span class="ci__dot"></span><span class="ci__num">04</span><h3 class="ci__title">Room<br class="br-d"> to evolve</h3><p class="ci__text">New flows, iterations and product requirements were still to come, so layouts and components were structured to take them in.</p></li>
-        </ol>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== 5.4 Research & Exploration (B10) ===== -->
-  <section class="cs-media-2up-wide fx" data-block="5.4 Research &amp; Exploration (B10)" data-reveal="wipe">
-    <div class="wrap"><div class="sh"><h2 class="sh__title"><span>Research and</span><span class="accent">exploration</span></h2><p class="sh__desc">The design process was supplemented with user and competitor research to better understand launchpad patterns, trust signals, and usability expectations in the Web3 space.</p></div></div>
-    <div class="m2w__wide media" data-asset="research"></div>
-    <div class="wrap"><p class="m2w__caption">Different ways to structure the landing page, commit flow, dashboard, and project pages were explored so users could understand the platform’s value and take action with confidence.</p></div>
-  </section>
-
-  <!-- ===== 5.5 Final Direction (B07) ===== -->
-  <section class="cs-feature-bleed fx" data-block="5.5 Final Direction (B07)" data-reveal="wipe">
-    <div class="wrap"><div class="sh"><h2 class="sh__title"><span>Platform</span><span class="accent">direction</span></h2><p class="sh__desc">The final direction organized the experience into a scalable product structure. The aim was to make the platform feel reliable and direct, with a clear path from first impression to community participation.</p></div></div>
-    <div class="fb__row">
-      <div class="fb__left media" data-asset="direction-left"></div>
-      <div class="fb__right media" data-asset="direction-right"><div class="fb__screen" data-asset="direction-screen"></div></div>
-    </div>
-  </section>
-
-  <!-- ===== 5.6 UI Details (B10 modified) ===== -->
-  <section class="cs-media-2up-captions fx" data-block="5.6 UI Details (B10 modified)">
-    <div class="wrap">
-      <div class="sh"><h2 class="sh__title"><span>Interface</span><span class="accent">details</span></h2><p class="sh__desc">Interface details, states, popups, tooltips, and responsive layouts were refined to make the experience feel consistent, functional, and aligned with Jupiter’s product ecosystem.</p></div>
-      <div class="m2c__grid">
-        <figure class="m2c__item"><div class="m2c__img media" data-asset="ui-1"></div><ul><li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>States · Popups · Tooltips · Responsive layouts</span></li></ul></figure>
-        <figure class="m2c__item"><div class="m2c__img media" data-asset="ui-2"></div><ul><li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>Consistent UI patterns aligned with Jupiter’s ecosystem.</span></li></ul></figure>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== 5.7 Before / After (B09) ===== -->
-  <section class="cs-before-after fx" data-block="5.7 Before / After (B09)">
-    <div class="wrap">
-      <div class="sh"><h2 class="sh__title"><span>Before</span><span class="accent">&amp; After</span></h2><p class="sh__desc">Key flows went through several rounds before launch. Comparing early and final versions shows where guidance and hierarchy made the biggest difference.</p></div>
-      <div class="ba__grid">
-        <figure class="ba ba--before"><div class="ba__img media" data-asset="before-1"></div><div class="ba__bar"></div><figcaption><span class="ba__label">Before</span><p class="ba__text">An early commit flow, with more steps and less guidance for first-time participants.</p></figcaption></figure>
-        <figure class="ba ba--after"><div class="ba__img media" data-asset="after-1"></div><div class="ba__bar"></div><figcaption><span class="ba__label">After</span><p class="ba__text">The final commit flow, reduced to the steps needed to act with clarity.</p></figcaption></figure>
-        <figure class="ba ba--before"><div class="ba__img media" data-asset="before-2"></div><div class="ba__bar"></div><figcaption><span class="ba__label">Before</span><p class="ba__text">A first project page layout, before the information hierarchy was refined.</p></figcaption></figure>
-        <figure class="ba ba--after"><div class="ba__img media" data-asset="after-2"></div><div class="ba__bar"></div><figcaption><span class="ba__label">After</span><p class="ba__text">The final project page, with stronger trust signals and a clearer hierarchy.</p></figcaption></figure>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== 5.8 Tradeoffs (B04) ===== -->
-  <section class="cs-list-numbered fx" data-block="5.8 Tradeoffs (B04)">
-    <div class="wrap ln">
-      <div class="ln__head">
-        <h2 class="sh__title"><span>Audience</span><span class="accent">tradeoffs</span></h2>
-        <p class="ln__desc">DTF served both Web3 natives and newcomers. These two decisions balanced speed for experienced users with the guidance others needed to take part.</p>
-      </div>
-      <ol class="ln__list">
-        <li class="ln__item"><span class="ln__num">01</span><h3 class="ln__title">Native yet approachable</h3><p class="ln__text">There was a balance between making the platform feel native to Web3 users and keeping it approachable for users who needed more guidance.</p></li>
-        <li class="ln__item"><span class="ln__num">02</span><h3 class="ln__title">Complexity spread out</h3><p class="ln__text">The final direction avoided overloading the first interaction with technical explanations, choosing instead to distribute complexity across the landing page, project pages, dashboard, and supporting UI states.</p></li>
-      </ol>
-    </div>
-  </section>
-
-  <!-- ===== 5.9 Mobile (B14) ===== -->
-  <section class="cs-media-single fx" data-block="5.9 Mobile (B14)">
-    <div class="wrap">
-      <div class="sh"><h2 class="sh__title"><span>Mobile-first</span><span class="accent">interactions</span></h2><p class="sh__desc">Launches are time-sensitive and often followed from a phone, so the core flows were designed for small screens first, keeping every commitment as clear and safe on mobile as on desktop.</p></div>
-      <div class="ms__img media" data-asset="mobile"></div>
-    </div>
-  </section>
-
-  <!-- ===== 5.10 Outcome (B02) ===== -->
-  <section class="cs-closing-scene fx" data-block="5.10 Outcome (B02)">
-    <div class="wrap">
-      <div class="sh"><h2 class="sh__title"><span>Platform</span><span class="accent">impact</span></h2><p class="sh__desc">DTF launched as a high-traffic product within Jupiter's ecosystem, giving new projects a single place to launch, get evaluated and grow alongside their community.</p></div>
-      <ul class="csc__bullets">
-        <li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>1 commitment flow built for both experienced traders and first-time participants</span></li>
-        <li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>Mobile-first adaptations for every core interaction</span></li>
-        <li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>4 core surfaces designed end to end: landing, discovery, project pages and commit flow</span></li>
-      </ul>
-    </div>
-    <div class="csc__scene media" data-asset="closing-scene"><div class="csc__inner" data-asset="closing-screen"></div></div>
-  </section>
-
-  </main>
-
-  <!-- SHARED:CTA-FOOT -->
-<section class="cta" data-comp="cta">
-    <div class="glow g-d" style="width:708.32px;height:150.04px;left:calc(49.51% - 354.16px);top:-147.25px;transform:rotate(-173.5deg);opacity:var(--g5);filter:blur(100px)"></div>
-    <div class="glow g-m" style="width:95px;height:77px;left:calc(50.1% - 47.5px);top:-26px;opacity:var(--g7);filter:blur(84px)"></div>
-    <div class="wrap cta-inner">
-      <div class="cta-copy">
-        <div class="cta-head">
-          <span class="h6">Have a project?</span>
-          <span class="cta-bubble"><dc-import name="cta-bubble" hint-size="100%,100%"></dc-import></span>
-        </div>
-        <p class="cta-b">Tell us what you are building and where expert guidance would help.</p>
-      </div>
-      <div class="oval" data-comp="email-oval">
-        <i></i><b></b>
-        <span>hello@mono.creative</span>
-      </div>
-    </div>
-  </section>
-
-  <footer class="foot wrap" data-comp="footer">
-    <h2 class="h7">Let us make something <i style="color:var(--lime400)">together</i></h2>
-    <div data-href="./contact.html" class="btn foot-btn" data-h="48" data-pad="6" data-shift="5" data-comp="button/footer" role="button" tabindex="0">
-      <div class="btn-fluid"><svg class="btn-shape" width="158" height="48" viewBox="0 0 158 48" fill="none"><clipPath class="bclip" id="bclip3"><path d="M37.83 14.83C41.54 5.85 50.3 0 60.01 0L134 0C147.25 0 158 10.75 158 24C158 37.25 147.25 48 134 48L60.01 48C50.3 48 41.54 42.15 37.83 33.17L37.83 33.17C34.25 43.75 25.04 49.77 15.83 47.54C6.63 45.31 0 35.45 0 24C0 12.55 6.63 2.69 15.83 0.46C25.04 -1.77 34.25 4.25 37.83 14.83Z"></path></clipPath><path class="bpath" d="M37.83 14.83C41.54 5.85 50.3 0 60.01 0L134 0C147.25 0 158 10.75 158 24C158 37.25 147.25 48 134 48L60.01 48C50.3 48 41.54 42.15 37.83 33.17L37.83 33.17C34.25 43.75 25.04 49.77 15.83 47.54C6.63 45.31 0 35.45 0 24C0 12.55 6.63 2.69 15.83 0.46C25.04 -1.77 34.25 4.25 37.83 14.83Z" fill="var(--btn3-fill)" stroke="var(--btn3-stroke)" stroke-width="2.4" clip-path="url(#bclip3)"></path></svg><i class="btn-dot"></i></div>
-      <span class="btn-label" style="color:var(--btn3-label)">Let's Talk</span>
-      <svg class="btn-arr al" width="12.22" height="14.67" viewBox="11.9 14.75 10 12" fill="none" overflow="visible" style="color:var(--btn3-arrow)"><path d="M12.3984 20.747H21.3984M17.8726 23.7109L21.3984 20.747L17.8726 17.7832" stroke="currentColor" stroke-width="1.2" vector-effect="non-scaling-stroke"></path></svg>
-      <svg class="btn-arr ar" width="12.22" height="14.67" viewBox="11.9 14.75 10 12" fill="none" overflow="visible" style="color:var(--btn3-arrow)"><path d="M12.3984 20.747H21.3984M17.8726 23.7109L21.3984 20.747L17.8726 17.7832" stroke="currentColor" stroke-width="1.2" vector-effect="non-scaling-stroke"></path></svg>
-    </div>
-    <div class="socials" data-comp="social-icons">
+  <main class="contact-layout" id="contact">
+        <section class="contact-aside" aria-labelledby="contact-title">
+          <a class="contact-symbol" href="./index.html" aria-label="mono.creative — home"><svg class="contact-symbol-svg" aria-hidden="true" preserveAspectRatio="xMidYMid meet" overflow="visible" style="display: block;" width="70.0048" height="29.1754" viewBox="0 0 70.0048 29.1754" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Vector">
+<path id="Vector_2" d="M29.0576 0.00357075C32.1531 -0.0810891 35.1523 1.34252 37.4136 3.96976C39.6489 6.55278 40.9589 10.1395 41.0494 13.9295C41.1777 17.9526 40.169 21.5605 37.9597 24.5236C34.7542 28.7889 29.8141 30.283 25.3875 28.327C23.5713 27.5056 22.5226 26.0859 20.3978 26.1953C18.5676 26.2895 18.0292 27.0545 16.4507 27.954C15.0287 28.7656 13.6559 29.0741 12.1024 29.1485C9.05281 29.2893 6.08173 27.9298 3.8354 25.3648C-0.896209 19.9463 -1.36165 10.6247 3.0634 4.73322C6.31064 0.366331 11.3579 -1.13907 15.8483 0.919851C17.7767 1.77927 18.4994 3.03231 20.827 2.88837C22.7031 2.77232 23.3612 1.90367 24.9796 1.05258C26.2373 0.391177 27.7052 0.0625816 29.0576 0.00357075Z" fill="currentColor"></path>
+<path id="Vector_3" d="M56.8146 29.0699C50.5929 28.1408 46.0478 21.3411 46.4728 13.598C46.8987 5.85474 52.1449 -0.120324 58.4115 0.00209181C64.6771 0.124508 69.7691 6.30145 69.9969 14.0571C70.2255 21.8129 65.5092 28.4323 59.2669 29.1184C58.45 29.208 57.6287 29.1919 56.8146 29.0699Z" fill="currentColor"></path>
+</g>
+</svg></a>
+          <div class="contact-detail-row contact-heading">
+            <div>
+              <h1 id="contact-title">Let&rsquo;s bring your ideas to life</h1>
+              <a class="contact-email" href="mailto:hello.monocreative@gmail.com">hello.monocreative@gmail.com<i data-lucide="arrow-up-right" aria-hidden="true"></i></a>
+              <div class="socials contact-socials" data-comp="social-icons">
       <div class="ico"><i style="left:.355px;top:.354px;width:16.7684px;height:16.7749px;-webkit-mask-image:url(./assets/social-instagram-frame-17x17.svg);mask-image:url(./assets/social-instagram-frame-17x17.svg)"></i><i style="left:4.435px;top:4.435px;width:8.6178px;height:8.6178px;-webkit-mask-image:url(./assets/social-instagram-lens-9x9.svg);mask-image:url(./assets/social-instagram-lens-9x9.svg)"></i><i style="left:12.735px;top:3.635px;width:2.012px;height:2.012px;-webkit-mask-image:url(./assets/social-instagram-dot-2x2.svg);mask-image:url(./assets/social-instagram-dot-2x2.svg)"></i></div>
       <div class="ico"><i style="left:1.46px;top:1.46px;width:14.5723px;height:14.5723px;-webkit-mask-image:url(./assets/social-linkedin-15x15.svg);mask-image:url(./assets/social-linkedin-15x15.svg)"></i></div>
       <div class="ico"><i style="left:-.75px;top:2.55px;width:18.9924px;height:12.3863px;-webkit-mask-image:url(./assets/social-behance-19x12.svg);mask-image:url(./assets/social-behance-19x12.svg)"></i></div>
     </div>
-    <div class="foot-rule"></div>
-    <div class="legal-row">
-      <span class="foot-marks"><span class="foot-anim"><dc-import name="brandmark-fusion" hint-size="100%,100%"></dc-import></span></span>
-      <span class="legal legal-c">© 2026 mono.creative</span>
-      <span class="legal legal-r">All rights reserved</span>
-    </div>
-  </footer>
-<!-- /SHARED:CTA-FOOT -->
+              <p class="contact-intro">Big idea. New chapter.<br>Let's give it a shape of its own.</p>
+            </div>
+          </div>
+          <div class="contact-detail-row contact-direct">
+            <p class="contact-meta">SAY HELLO</p>
+            <div class="avatars" role="group" aria-label="The mono.creative team">
+              <span class="avatar" data-asset="team-1" role="img" aria-label="Gabriel" title="Gabriel"></span>
+              <span class="avatar" data-asset="team-2" role="img" aria-label="Ale" title="Ale"></span>
+              <span class="avatar" data-asset="team-3" role="img" aria-label="Romina" title="Romina"></span>
+              <span class="avatar" data-asset="team-4" role="img" aria-label="David" title="David"></span>
+            </div>
+          </div>
+        </section>
+
+        <form id="contact-form" class="contact-form" novalidate aria-label="Project enquiry">
+          <div class="contact-honeypot" aria-hidden="true">
+            <label for="website">Website</label><input id="website" name="website" tabindex="-1" autocomplete="off">
+          </div>
+
+          <div class="form-stage">
+            <section class="step-panel" data-step="1" aria-label="Your project">
+              <div class="line-field" data-field="name">
+                <div class="field-line"><label class="sr-only" for="name">Your name (required)</label><input id="name" name="name" placeholder="Your name" autocomplete="name" required="required" aria-describedby="name-error"><span class="required-mark" aria-hidden="true">*</span></div>
+                <p class="field-error" id="name-error" aria-live="polite"></p>
+              </div>
+              <div class="line-field" data-field="email">
+                <div class="field-line"><label class="sr-only" for="email">Email (required)</label><input id="email" name="email" type="email" placeholder="you@project.xyz" autocomplete="email" required="required" aria-describedby="email-error email-suggestion"><span class="required-mark" aria-hidden="true">*</span></div>
+                <div class="field-feedback"><p class="field-error" id="email-error" aria-live="polite"></p><button id="email-suggestion" class="email-suggestion" type="button" hidden="hidden"></button></div>
+              </div>
+              <div class="line-field" data-field="telegram">
+                <div class="field-line"><label class="sr-only" for="telegram">Telegram (optional)</label><input id="telegram" name="telegram" placeholder="Telegram @handle" autocomplete="off" aria-describedby="telegram-error"></div>
+                <p class="field-error" id="telegram-error" aria-live="polite"></p>
+              </div>
+
+              <fieldset class="links-field">
+                <legend class="sr-only">Links &amp; files (optional)</legend>
+                <div id="link-list">
+                  <div class="link-row" data-link-row>
+                    <div class="field-line"><label class="sr-only" for="link-1">Link 1 (optional)</label><input id="link-1" name="links" type="text" inputmode="url" placeholder="Website, X, deck..." autocomplete="url" aria-describedby="link-1-error"><button class="icon-button remove-link" type="button" aria-label="Remove link 1" title="Remove link" hidden="hidden"><i data-lucide="x" aria-hidden="true"></i></button></div>
+                    <p class="field-error" id="link-1-error" aria-live="polite"></p>
+                  </div>
+                </div>
+                <div class="link-tools"><button id="add-link" class="text-action" type="button"><i data-lucide="plus" aria-hidden="true"></i>Add link</button><button id="attach-deck" class="text-action" type="button"><i data-lucide="paperclip" aria-hidden="true"></i>Attach deck</button><span class="attachment-note">PDF, Keynote, PPTX / 20 MB</span></div>
+                <input class="sr-only" id="deck" name="deck" type="file" accept=".pdf,.key,.keynote,.pptx" tabindex="-1" aria-label="Attach deck" aria-describedby="file-error">
+                <div class="file-details" id="file-details" hidden="hidden"><i data-lucide="file" aria-hidden="true"></i><span id="file-name"></span><button class="icon-button" id="remove-file" type="button" title="Remove attachment" aria-label="Remove attachment"><i data-lucide="x" aria-hidden="true"></i></button></div>
+                <p class="field-error" id="file-error" aria-live="polite"></p>
+              </fieldset>
+
+              <div class="line-field brief-field" data-field="brief">
+                <div class="field-line"><label class="sr-only" for="brief">What are you building? (optional)</label><textarea id="brief" name="brief" rows="2" placeholder="What are you building?" aria-describedby="brief-error brief-count"></textarea></div>
+                <div class="brief-meta"><span id="brief-count" hidden="hidden">0 / 1000</span></div>
+                <p class="field-error" id="brief-error" aria-live="polite"></p>
+              </div>
+              <fieldset class="service-field" id="services-field" aria-describedby="services-error">
+                <legend>What do you need? <span class="required-mark" aria-hidden="true">*</span><span class="sr-only">(required)</span></legend>
+                <div class="service-chips">
+                  <div class="service-row">
+                    <label class="choice-chip"><input type="checkbox" name="services" value="UX/UI Design"><span>UX/UI Design</span></label>
+                    <label class="choice-chip"><input type="checkbox" name="services" value="Brand Direction"><span>Brand Direction</span></label>
+                    <label class="choice-chip"><input type="checkbox" name="services" value="Illustration"><span>Illustration</span></label>
+                  </div>
+                  <div class="service-row">
+                    <label class="choice-chip"><input type="checkbox" name="services" value="Packaging"><span>Packaging</span></label>
+                    <label class="choice-chip"><input type="checkbox" name="services" value="Motion design"><span>Motion design</span></label>
+                    <label class="choice-chip"><input type="checkbox" name="services" value="3D Art"><span>3D Art</span></label>
+                    <label class="choice-chip"><input type="checkbox" name="services" value="Not sure yet"><span>Not sure yet</span></label>
+                  </div>
+                </div>
+                <p class="field-error" id="services-error" aria-live="polite"></p>
+              </fieldset>
+            </section>
+
+            <section class="step-panel scheduling-panel" data-step="2" aria-labelledby="schedule-title" hidden="hidden">
+              <div class="schedule-heading"><div><h2 id="schedule-title" tabindex="-1">A good place to start.</h2><p>A quick call to meet, share ideas and see what fits.</p></div></div>
+              <div class="calendar-heading"><h3 id="calendar-month" aria-live="polite"></h3><div><button class="icon-button" id="previous-month" type="button" aria-label="Previous month" title="Previous month"><i data-lucide="chevron-left" aria-hidden="true"></i></button><button class="icon-button" id="next-month" type="button" aria-label="Next month" title="Next month"><i data-lucide="chevron-right" aria-hidden="true"></i></button></div></div>
+              <div class="calendar-weekdays" aria-hidden="true"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
+              <div class="calendar-grid" id="calendar-days" role="group" aria-label="Choose a weekday"></div>
+              <fieldset class="time-field"><legend id="time-label">Pick a time <span class="optional-note">Tentative</span></legend><p id="timezone-label" class="timezone-label"></p><div id="time-slots" class="time-chips"></div><p class="field-error" id="slot-error" aria-live="polite"></p></fieldset>
+              <p class="schedule-note"><i data-lucide="clock-3" aria-hidden="true"></i>30 min. We'll confirm your slot by email.</p>
+              <button id="skip-call" type="button" class="skip-call" aria-pressed="false">Skip, just email me<i data-lucide="arrow-up-right" aria-hidden="true"></i></button>
+            </section>
+          </div>
+
+          <div class="form-bottom">
+            <div class="form-bottom-copy"><button class="text-action back-step" id="back-step" type="button" hidden="hidden"><i data-lucide="arrow-left" aria-hidden="true"></i>Back to your project</button><p id="step-caption" hidden="hidden"></p><p class="submit-feedback" id="submit-feedback" aria-live="polite"></p><a class="direct-submit" id="direct-submit" href="mailto:hello.monocreative@gmail.com" hidden="hidden">Email your brief<i data-lucide="arrow-up-right" aria-hidden="true"></i></a></div>
+            <button class="circle-cta" id="form-cta" type="submit"><span class="circle-cta-inner"><span id="cta-label">LET'S CONNECT</span><i data-lucide="arrow-up-right" aria-hidden="true"></i></span></button>
+          </div>
+        </form>
+      </main>
 </div>
 </x-dc>
 <!-- SHARED:GRAIN -->
@@ -674,5 +588,6 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
 </style>
 <!-- GRAIN-OVERLAY:END -->
 <!-- /SHARED:GRAIN -->
+<noscript>This form needs JavaScript. Email <a href="mailto:hello.monocreative@gmail.com">hello.monocreative@gmail.com</a> to get in touch.</noscript>
 </body>
 </html>

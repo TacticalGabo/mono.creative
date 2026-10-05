@@ -1,0 +1,148 @@
+/* Contact composition: shared header/footer styles remain in case-study.css. */
+:root { --contact-error: #ff8d9b; }
+.contact-page .page { min-width: 1080px; }
+.contact-page [hidden] { display: none !important; }
+.contact-page .page :is(input, textarea, button, a, [tabindex]):focus-visible {
+  outline: 1px solid var(--accent); outline-offset: 5px;
+}
+.contact-layout {
+  width: min(1200px, calc(100% - 96px)); margin: 52px auto 100px;
+  display: grid; grid-template-columns: minmax(0, 1fr) max-content; gap: 28px;
+  letter-spacing: 0;
+}
+.contact-aside { padding-top: 0; }
+/* Header estándar del sitio; su logo no se ve aquí: el símbolo abre la columna izquierda. */
+.contact-page .nav-logo { visibility: hidden; }
+.contact-symbol { display: block; width: 171.72px; height: 71.55px; margin-bottom: 30.45px; color: var(--accent); }
+.contact-symbol svg { display: block; width: 100%; height: 100%; }
+.contact-detail-row { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 6px; }
+.contact-heading { grid-template-columns: minmax(0, 1fr); }
+.contact-meta { font: 400 10px/1.6 var(--mono); color: var(--body); padding-top: 12px; }
+.contact-aside h1 { font-size: 36px; line-height: 1.4; font-weight: 500; letter-spacing: 0; color: var(--txt); }
+.contact-email { display: flex; align-items: center; gap: 8px; width: max-content; max-width: 100%; margin-top: 2px; font-size: 36px; line-height: 1.4; color: var(--accent); }
+.contact-email svg { flex: none; width: 28px; height: 28px; stroke-width: 1.4; position: relative; top: 3.5px; }   /* centrada con la altura de las minúsculas, no con las mayúsculas */
+.contact-email:hover { color: var(--body-strong); }
+.contact-intro { margin-top: 19px; font-size: 18px; line-height: 1.75; color: var(--body); }
+.contact-direct { margin-top: 82px; align-items: center; }
+.contact-direct .contact-meta { padding-top: 0; }
+.contact-direct .avatars { margin-top: 0; order: 0; }
+.contact-form { min-width: 0; display: grid; grid-template-columns: max-content 148.72px; grid-template-rows: auto; column-gap: 30px; }
+/* Both panels contribute their height; changing steps cannot move the CTA. */
+.form-stage { grid-column: 1; grid-row: 1; display: grid; grid-template-columns: minmax(0, 1fr); width: 385px; max-width: 385px; min-width: 0; font: var(--t-mono-tag); }
+.step-panel { grid-area: 1 / 1; align-self: start; height: auto; min-width: 0; overflow: visible; padding: 2px 0 0; }
+.step-panel[data-step="1"] { display: flex; flex-direction: column; align-self: stretch; }
+.contact-page .form-stage .step-panel[hidden] { display: block !important; visibility: hidden; pointer-events: none; }
+.contact-form fieldset { border: 0; min-width: 0; }
+.contact-form legend { position: relative; width: 100%; display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; font: var(--t-mono-label); letter-spacing: 0; color: var(--body-strong); }
+.required-mark { position: absolute; top: 0; right: 0; font: 400 18px/1 var(--mono); color: var(--accent); }
+.optional-note { flex: none; font: 400 9px/1.6 var(--mono); color: var(--muted); }
+.service-chips { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 7px 6px; }
+.service-row { display: contents; }
+.choice-chip { display: inline-flex; position: relative; }
+.choice-chip input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.choice-chip > span { display: inline-flex; min-height: 40px; padding: 9px 8px; border: 1px solid var(--border); border-radius: 4px; align-items: center; justify-content: center; font: var(--t-mono-tag); letter-spacing: 0; color: var(--body-strong); transition: border-color .18s, color .18s, background .18s; white-space: nowrap; }
+.choice-chip:hover > span { border-color: var(--body); background: #18231b; }
+.choice-chip input:checked + span, .choice-chip[aria-pressed="true"] > span { background: var(--accent); color: var(--bg-d); border-color: var(--accent); }
+.choice-chip input:focus-visible + span { outline: 1px solid var(--accent); outline-offset: 3px; }
+.service-field { margin-top: auto; padding-bottom: 14px; }
+#services-error:empty { min-height: 0; padding-top: 0; }
+.service-field.is-invalid .choice-chip > span { border-color: var(--contact-error); }
+.field-line { position: relative; display: flex; align-items: center; gap: 10px; min-height: 47px; padding: 0 10px; border-bottom: 1px solid var(--border); color: var(--body); transition: border-color .18s, background-color .18s; }
+.field-line:hover { border-color: var(--body); }
+.field-line:focus-within { border-color: var(--accent); color: var(--accent); background: var(--surface-showcase-2); }
+.field-line input, .field-line textarea { width: 100%; min-width: 0; font: var(--t-body-m); background: transparent; border: 0; border-radius: 0; color: var(--body-strong); padding: 8px 0; letter-spacing: 0; box-shadow: none; }
+.field-line .required-mark { top: 3px; right: 2px; }
+.contact-page .page .field-line :is(input, textarea):focus-visible { outline: none; }
+.field-line input::placeholder, .field-line textarea::placeholder { color: var(--muted); opacity: 1; }
+.field-line input:-webkit-autofill { -webkit-text-fill-color: var(--body-strong); -webkit-box-shadow: 0 0 0 100px var(--bg-d) inset; caret-color: var(--accent); }
+.field-line input { flex: 1 1 auto; }
+.field-line .optional-note { padding-left: 6px; }
+.field-error { color: var(--contact-error); font-size: 10px; line-height: 17px; min-height: 18px; padding-top: 2px; overflow-wrap: anywhere; }
+.line-field, .link-row { min-height: 63px; }
+.is-invalid > .field-line, .link-row.is-invalid .field-line { border-color: var(--contact-error); }
+.is-invalid .required-mark { color: var(--contact-error); }
+.field-feedback { position: relative; min-height: 20px; }
+.email-suggestion { position: absolute; inset: 0 auto auto 0; max-width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; text-align: left; font-size: 10px; line-height: 18px; color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+.link-tools { display: flex; align-items: center; gap: 18px; margin-top: -3px; }
+.text-action { display: inline-flex; align-items: center; gap: 5px; font: 400 10px/1.6 var(--mono); color: var(--body); }
+.text-action:hover, .skip-call:hover { color: var(--accent); }
+.text-action:disabled { opacity: .4; }
+.text-action svg, .file-details > svg { width: 13px; height: 13px; stroke-width: 1.5; flex: none; }
+.attachment-note { margin-left: auto; font: 400 8px/1.5 var(--mono); color: var(--muted); white-space: nowrap; }
+.file-details { display: flex; align-items: center; gap: 8px; margin-top: 10px; color: var(--accent); font-size: 11px; }
+.file-details > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.icon-button { display: inline-flex; width: 28px; height: 28px; flex: none; align-items: center; justify-content: center; color: var(--body); }
+.icon-button svg { width: 16px; height: 16px; stroke-width: 1.5; }
+.icon-button:hover { color: var(--accent); }
+.icon-button:disabled { opacity: .25; }
+/* El brief crece y ocupa el hueco hasta "What do you need?": sin franja vacía irregular debajo. */
+.brief-field { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; }
+.brief-field .field-line { align-items: flex-start; flex: 1 1 auto; }
+.brief-field .field-line textarea { height: 100%; min-height: 57px; }
+.service-field { margin-top: 0 !important; }
+.brief-field { position: relative; }
+.brief-meta { position: absolute; right: 0; bottom: 0; }
+.field-line textarea { height: 57px; resize: none; padding-top: 8px; }
+.brief-meta { display: flex; justify-content: flex-end; align-items: center; padding-top: 4px; font-size: 9px; line-height: 14px; color: var(--muted); }
+#brief-count { white-space: nowrap; font-family: var(--mono); margin-left: 8px; }
+.form-bottom { grid-column: 2; grid-row: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-end; gap: 20px; min-width: 0; }
+.form-bottom-copy { align-self: stretch; display: flex; flex-direction: column; justify-content: flex-end; }
+#step-caption { font-size: 11px; line-height: 1.8; color: var(--muted); }
+.back-step { margin-bottom: 16px; width: max-content; }
+.circle-cta { display: grid; place-items: center; width: 148.72px; height: 148.72px; border: 0; border-radius: 50%; padding: 0; flex: none; color: var(--bg-d); }
+.circle-cta-inner { display: flex; flex-direction: column; gap: 10.56px; align-items: center; justify-content: center; width: 100%; height: 100%; border-radius: 50%; background: var(--accent); border: 1px solid var(--accent); transition: background .22s, color .22s, border-color .22s; }
+.circle-cta-inner > span { font: 400 11.44px/21.12px var(--ff-mono); }
+.circle-cta-inner svg { width: 24.64px; height: 24.64px; stroke-width: 1.3; }
+.circle-cta:hover .circle-cta-inner, .circle-cta:focus-visible .circle-cta-inner { background: var(--lime400); color: var(--bg-d); border-color: var(--lime400); }
+.circle-cta:disabled { opacity: .55; }
+.circle-cta:disabled .circle-cta-inner { background: var(--accent); color: var(--bg-d); border-color: var(--accent); }
+.submit-feedback { font-size: 11px; line-height: 1.6; color: var(--body); max-width: 240px; }
+.submit-feedback:not(:empty) { margin-top: 7px; }
+.direct-submit { display: inline-flex; width: max-content; gap: 6px; align-items: center; color: var(--accent); font-size: 11px; margin-top: 6px; }
+.direct-submit svg { width: 13px; height: 13px; }
+.schedule-heading { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 26px; gap: 12px; }
+.schedule-heading h2 { font-size: 23px; font-weight: 400; line-height: 1.4; color: var(--body-strong); }
+.schedule-heading p { font-size: 11px; color: var(--muted); line-height: 1.7; margin-top: 7px; }
+.schedule-heading > span { padding-top: 8px; }
+.calendar-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.calendar-heading h3 { font-size: 15px; font-weight: 500; color: var(--body-strong); }
+.calendar-heading > div { display: flex; gap: 10px; }
+.calendar-weekdays, .calendar-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); text-align: center; }
+.calendar-weekdays { font: 400 10px/24px var(--mono); color: var(--muted); margin-bottom: 5px; }
+.calendar-grid { grid-template-rows: repeat(6, 33px); gap: 4px 0; }
+.calendar-day { width: 33px; height: 33px; border-radius: 50%; font: 400 12px/1 var(--mono); justify-self: center; color: var(--body-strong); }
+.calendar-day:disabled { color: var(--border); }
+.calendar-day:not(:disabled):hover { background: #233127; }
+.calendar-day[aria-pressed="true"] { background: var(--accent); color: var(--bg-d); }
+.calendar-day.is-today { text-decoration: underline; text-underline-offset: 5px; }
+.time-field { margin-top: 24px; }
+.time-field legend { margin-bottom: 4px; }
+.timezone-label { color: var(--muted); font: 400 9px/1.5 var(--mono); margin-bottom: 12px; }
+.time-chips { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; min-height: 72px; }
+.time-chip { position: relative; display: flex; }
+.time-chip input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.time-chip > span { width: 100%; height: 32px; display: flex; justify-content: center; align-items: center; border: 1px solid var(--border); border-radius: 99px; color: var(--body); font: 400 11px/1 var(--mono); }
+.time-chip:hover > span { border-color: var(--body); }
+.time-chip input:checked + span { border-color: var(--accent); color: var(--accent); background: #1b2a13; }
+.time-chip input:focus-visible + span { outline: 1px solid var(--accent); outline-offset: 3px; }
+.time-chip input:disabled + span { color: var(--border); }
+.schedule-note { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 10px; line-height: 1.5; }
+.schedule-note svg { width: 13px; height: 13px; }
+.skip-call { display: flex; align-items: center; gap: 6px; margin-top: 17px; font: 400 10px/1.6 var(--mono); color: var(--body); text-decoration: underline; text-underline-offset: 4px; }
+.skip-call svg { width: 13px; height: 13px; }
+.skip-call[aria-pressed="true"] { color: var(--accent); }
+.contact-page .contact-form .sr-only, .contact-page .contact-honeypot { position: absolute; display: block; width: 1px; height: 1px; overflow: hidden; padding: 0; margin: -1px; clip: rect(0,0,0,0); clip-path: inset(50%); white-space: nowrap; border: 0; }
+@media (min-width: 1600px) { .contact-layout { width: 1280px; gap: 96px; } }
+@media (max-width: 1279px) { .contact-layout { width: calc(100% - 96px); gap: 32px; } .contact-detail-row { grid-template-columns: 1fr; gap: 14px; } .contact-email { width: auto; overflow-wrap: anywhere; } .contact-direct { margin-top: 65px; } }
+@media (prefers-reduced-motion: reduce) { .contact-page *, .contact-page *::before, .contact-page *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
+/* Footer del contacto: sin titular ni CTA (la página ya es el CTA). */
+.contact-page .foot > .h7, .contact-page .foot > .foot-btn { display: none; }
+/* Paso 2: sin "Back to your project" ni el texto de apoyo bajo el formulario. */
+.contact-page #back-step, .contact-page #step-caption { display: none !important; }
+/* Redes bajo el correo; en el footer ya no van (ni su línea). */
+.contact-page .contact-socials { margin: 38px 0 0; gap: 32px; }
+.contact-page .foot > .socials, .contact-page .foot > .foot-rule { display: none; }
+/* Sin footer y sin scroll: la página es una sola pantalla. */
+.contact-page .foot { display: none !important; }
+html:has(body.contact-page), body.contact-page { overflow: hidden; height: 100%; }
+.contact-layout { margin-bottom: 0; }
