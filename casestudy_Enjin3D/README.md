@@ -8,6 +8,9 @@ No hay que tocar el HTML. Si un archivo no existe, su hueco muestra el color pla
 Si prefieres otro formato (`.png`, `.jpg`), cambia la extensión en un solo sitio:
 el bloque `9 · ASSETS` al final del `<style>` de la página.
 
+**2026-10-04: la página usa SOLO placeholders** (bloque `9 · ASSETS` vacío); estos archivos quedan listos para cuando se aprueben.
+Degen salió de este caso (ahora es el caso 12, `casestudy_DegenAnimations`): sus 4 webp se movieron a `mono.creative Entries/content generator/Degen Animations/_retirado-de-enjin3d/`.
+
 Generadas (todas menos el hero) desde `RAW images/Eniin Gifs and animations/` con
 `mono.creative Entries/content generator/Enjin 3D/make_assets.py` (fuente y recorte de cada una, ahí).
 Las marcadas **anim.** son WebP animados (loop): el bloque las pinta como `background-image`, sin código extra.
@@ -23,10 +26,8 @@ Tamaño = el de la fuente, sin ampliar (las RAW son de 1080–4000 px). Formato 
 | `04-exploration-3b.webp` | 11.4 Multiverse, fila 3 panel ancho | 540 : 304 desktop · 276 : 260 mobile | 1408 × 792 | 33 KB |
 | `05-card-1.webp` … `05-card-3.webp` | 11.5 Blobby (B12) | 711 : 400 desktop · 360 : 260 mobile | 1600 × 900 · 1846 × 1039 | 43–126 KB |
 | `06-detail-1.webp`, `06-detail-2.webp` | 11.6 Two Styles (B10 modified) · anim. | 516 : 510 | 900 × 890 | 391 / 353 KB |
-| `07-direction-1.webp`, `07-direction-2.webp` | 11.7 Degen (B11), 2-up | 516 : 510 | 1342 × 1326 | 121 / 96 KB |
-| `07-direction-wide.webp` | 11.7 Degen, ancha | 1056 : 611 desktop · 360 : 260 mobile | 2752 × 1592 | 80 KB |
-| `09-closing-scene.webp` | 11.9 Outcome (B02), escena a sangre (desenfocada 8 px) | 1440 : 900 desktop · 360 : 400 mobile | 3200 × 2000 | 68 KB |
-| `09-closing-screen.webp` | 11.9 Outcome, pantalla interior | 744 : 419 | 1880 × 1059 | 48 KB |
+| `08-closing-scene.webp` | 11.8 Outcome (B02), escena a sangre (desenfocada 8 px) | 1440 : 900 desktop · 360 : 400 mobile | ⬜ sin exportar: fuente prevista `Blobby long videos/video_screeshot_blobby3D_fantasy4.png` (portal con espada). Antes era el desierto de Degen, retirado el 2026-10-04 | — |
+| `08-closing-screen.webp` | 11.8 Outcome, pantalla interior | 744 : 419 | 1880 × 1059 | 48 KB |
 
 Las imágenes se pintan con `background-size: cover`: si la proporción mobile es
 distinta, se recorta al centro. Si una pieza necesita versión mobile propia,

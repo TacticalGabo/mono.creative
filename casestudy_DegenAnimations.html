@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <script>/* .js síncrono (antes lo ponía case-study.js, diferido: según qué llegaba antes, el hero se veía, se ocultaba y reaparecía) + tema elegido en el toggle (home o entry); sin elección = light */document.documentElement.classList.add('js');try{localStorage.removeItem('mc-theme');var t=sessionStorage.getItem('mc-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
 <link rel="icon" type="image/svg+xml" href="./assets/logo-favicon-48x29.svg?v=3">
-<title>Enjin 3D Art — Case study · mono.creative</title>
+<title>Degen Animations — Case study · mono.creative</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Enjin 3D Art: 3D scenes and animations that brought Enjin's cross-game items and its mascot to life.">
+<meta name="description" content="Degen Animations: 3D characters, epic scenes and GIFs that carried the Degen NFT launch on Enjin.">
 <!-- (2026-10-04) CARGA: fuentes del propio dominio (./fonts, mismos woff2 de Google:
      variable 200-800, subsets latin + latin-ext con unicode-range) en lugar del CSS de
      Google Fonts, que bloqueaba el render y abría 2 conexiones externas. -->
@@ -32,15 +32,15 @@ if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.
 <x-dc>
 <helmet>
 <!--
-  CASE STUDY 11 · ENJIN 3D ART — página responsive (360 → 1920+)
+  CASE STUDY 12 · DEGEN ANIMATIONS — página responsive (360 → 1920+)
   · Mismo sistema que Jupiter/GVRN: clases cs-*, parcial .sh, --m/--mnav,
     breakpoint único 768, container queries sobre .page (tope 1920).
   · CSS/JS comunes: ./css/case-study.css y ./js/case-study.js (no duplicar aquí).
-  · Contenido GENERADO desde mono.creative Entries/content generator/Enjin 3D/copy.json
+  · Contenido GENERADO desde mono.creative Entries/content generator/Degen Animations/copy.json
     con content generator/build_casestudy.py (copy provisional: editar el JSON y regenerar).
   · Header, CTA y footer = los del home, literal. Viven entre marcadores SHARED y
     se regeneran con:  python "build/sync-shared.py"   (NO editarlos aquí a mano).
-  · Imágenes del caso: carpeta ./casestudy_Enjin3D/ (ver bloque ASSETS tras SHARED:JS-GEOM).
+  · Imágenes del caso: carpeta ./casestudy_DegenAnimations/ (ver bloque ASSETS tras SHARED:JS-GEOM).
 -->
 <!-- SHARED:JS-GEOM -->
 <script>
@@ -90,7 +90,7 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
 <!-- /SHARED:JS-GEOM -->
 <style>
 /* ==========================================================================
-   9 · ASSETS — imágenes del caso en ./casestudy_Enjin3D/
+   9 · ASSETS — imágenes del caso en ./casestudy_DegenAnimations/
        Para cambiar una imagen: reemplaza el archivo con el MISMO nombre.
        Si cambias la extensión (.png/.jpg), cámbiala solo aquí.
        Sin archivo, el hueco muestra el color placeholder (--media).
@@ -441,7 +441,7 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
 <!-- /SHARED:JS-COPY -->
 </helmet>
 <div class="qa-w" data-comp="qa-width-overlay"></div>
-<div class="page" data-screen-label="case study — Enjin 3D Art">
+<div class="page" data-screen-label="case study — Degen Animations">
   <div class="grain"></div>
   <!-- SHARED:GOO -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="goo" x="-60%" y="-140%" width="220%" height="380%" color-interpolation-filters="sRGB"><feGaussianBlur in="SourceGraphic" stdDeviation="6" result="b"></feGaussianBlur><feColorMatrix in="b" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -9" result="g"></feColorMatrix><feComposite in="SourceGraphic" in2="g" operator="atop"></feComposite></filter></svg>
@@ -473,15 +473,15 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
   </header>
 <!-- /SHARED:NAV -->
 
-  <main data-case="enjin-3d">
+  <main data-case="degen-animations">
 
-  <!-- ===== 11.1 Project Hero (B01) ===== -->
-  <section class="cs-hero" data-block="11.1 Project Hero (B01)">
+  <!-- ===== 12.1 Project Hero (B01) ===== -->
+  <section class="cs-hero" data-block="12.1 Project Hero (B01)">
     <div class="wrap">
       <div class="cs-hero__media media" data-asset="hero"></div>
       <div class="cs-hero__body">
         <div class="cs-hero__left">
-          <h1 class="cs-hero__title"><span class="fx-line accent">Enjin</span><span class="fx-line">3D Art</span></h1>
+          <h1 class="cs-hero__title"><span class="fx-line accent">Degen</span><span class="fx-line">Motion</span></h1>
           <div class="cs-hero__meta">
             <div class="meta--year"><span class="meta__label">Year</span><span class="meta__value">2024–2025</span></div>
             <div class="meta--role"><span class="meta__label">Role</span><span class="meta__value">3D Artist</span></div>
@@ -489,95 +489,81 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
           </div>
         </div>
         <div class="cs-hero__right">
-          <p class="cs-hero__lead">3D scenes and animations that brought Enjin's cross-game items and its mascot to life.</p>
-          <p class="cs-hero__intro">Enjin is a Web3 ecosystem built for gaming and NFTs. Two lines of 3D work were produced for it: cross-game Multiverse items staged in animated scenes with visual effects, and Blobby, the mascot, adapted into stickers, GIFs, memes and videos for every channel.</p>
+          <p class="cs-hero__lead">3D characters, epic scenes and GIFs that carried the Degen NFT launch on Enjin.</p>
+          <p class="cs-hero__intro">Degen is an NFT collection launched on Enjin, built around a crew of characters drawn by the collection's artist. For the launch campaign, the crew was rebuilt in 3D and placed in epic scenes with Enjin symbols, then turned into article visuals, Discord posts, GIFs and memes.</p>
           <div class="cs-hero__cols">
-            <div class="cs-hero__col"><h2 class="cs-hero__label">Objective</h2><p class="cs-hero__text">The aim was to take Enjin's items and mascot beyond still images, with 3D scenes and loops that felt true to each item's lore and were easy to share in games and chats.</p></div>
-            <div class="cs-hero__col"><h2 class="cs-hero__label">Outcome</h2><p class="cs-hero__text">A library of 3D scenes, stickers, GIFs and videos, with Multiverse items shown in their own worlds and Blobby ready for any channel in two styles from a single model.</p></div>
+            <div class="cs-hero__col"><h2 class="cs-hero__label">Objective</h2><p class="cs-hero__text">The aim was to give the Degen crew motion and volume for the launch, keeping the artist's look while placing the characters inside the Enjin world on every campaign channel.</p></div>
+            <div class="cs-hero__col"><h2 class="cs-hero__label">Outcome</h2><p class="cs-hero__text">A launch kit of 3D characters, article and Discord visuals, GIFs and memes, with the Degen crew moving through Enjin's world and the artist's style kept in every frame.</p></div>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ===== 11.2 Statement (B06) ===== -->
-  <section class="cs-statement fx" data-block="11.2 Statement (B06)">
+  <!-- ===== 12.2 Statement (B06) ===== -->
+  <section class="cs-statement fx" data-block="12.2 Statement (B06)">
     <div class="wrap">
       <p class="cs-statement__label">The problem</p>
-      <p class="cs-statement__text">Players knew Enjin's items and mascot mostly as still images. To reach them in games, chats and social feeds, each one needed movement, depth and a look that stayed true to its own world and story.</p>
+      <p class="cs-statement__text">The Degen characters existed only as flat 2D art. To launch the collection on Enjin, they needed to move, share scenes with Enjin's symbols and work in articles, Discord and social feeds without losing their style.</p>
     </div>
   </section>
 
-  <!-- ===== 11.3 Constraints (B04) ===== -->
-  <section class="cs-constraints fx" data-block="11.3 Constraints (B04)">
+  <!-- ===== 12.3 Constraints (B04) ===== -->
+  <section class="cs-constraints fx" data-block="12.3 Constraints (B04)">
     <div class="wrap">
-      <div class="sh"><h2 class="sh__title"><span>Challenges</span><span>&amp; constraints</span></h2><p class="sh__desc">Each line of work came with its own source material and audience, so the 3D had to adapt to official item models and to a mascot that fans already knew well.</p></div>
+      <div class="sh"><h2 class="sh__title"><span>Challenges</span><span>&amp; constraints</span></h2><p class="sh__desc">The crew came from another artist's drawings and had to appear in many formats at once, so every step from model to final frame had to protect that look.</p></div>
       <div class="cs-constraints__canvas">
         <svg class="curve curve--h" viewBox="0 0 1057 416" aria-hidden="true"><path d="M-210 38C-140 17 -70 6.4 -17 5C60 3 150 0 230 120C255 150 265 163 287 173C340 195 380 205 420 203C480 200 530 175 569 160C610 143 640 130 670 130C730 130 790 180 851 230C870 245 890 258 908 266"/></svg>
         <svg class="curve curve--v" viewBox="0 0 61 601" preserveAspectRatio="none" aria-hidden="true"><path d="M-30 -46C-22 -36 -7.717 -10.813 0.603 0.446C7.711 10.064 19.216 16.275 24.542 27.4C40.199 60.504 17.344 94.684 24.542 130.946C30.18 159.344 40.132 174.727 45.644 191.606C69.103 263.446 40.603 307.946 13.571 386.944C-7.645 448.946 13.512 483.301 34.103 520.446C55.012 548.801 69.779 569.618 51.395 600.446"/></svg>
         <ol class="cs-constraints__list">
-          <li class="ci"><span class="ci__dot"></span><span class="ci__num">01</span><h3 class="ci__title">Official<br class="br-d"> models as base</h3><p class="ci__text">Multiverse items arrived as official 3D models, so texture, light and scene had to add life without changing their design.</p></li>
-          <li class="ci"><span class="ci__dot"></span><span class="ci__num">02</span><h3 class="ci__title">Scenes true<br class="br-d"> to the lore</h3><p class="ci__text">Every scene had to feel part of the item's world, from dark forests to magic portals, keeping Enjin's story consistent.</p></li>
-          <li class="ci"><span class="ci__dot"></span><span class="ci__num">03</span><h3 class="ci__title">One mascot,<br class="br-d"> many formats</h3><p class="ci__text">Blobby had to work as a sticker, GIF, meme and video, in square and horizontal formats, with or without a background.</p></li>
+          <li class="ci"><span class="ci__dot"></span><span class="ci__num">01</span><h3 class="ci__title">Another<br class="br-d"> artist's style</h3><p class="ci__text">Each character had to keep the proportions, outfits and expressions of the original 2D art once rebuilt as a 3D model.</p></li>
+          <li class="ci"><span class="ci__dot"></span><span class="ci__num">02</span><h3 class="ci__title">Hand-drawn<br class="br-d"> faces in 3D</h3><p class="ci__text">Eyes, brows, beards and mouths had to keep a drawn feel, since a fully sculpted 3D face would break the toon look.</p></li>
+          <li class="ci"><span class="ci__dot"></span><span class="ci__num">03</span><h3 class="ci__title">One crew,<br class="br-d"> many formats</h3><p class="ci__text">The same characters had to work as article covers, Discord posts, square GIFs and meme templates for the campaign.</p></li>
         </ol>
       </div>
     </div>
   </section>
 
-  <!-- ===== 11.4 Multiverse Items (B08) ===== -->
-  <section class="cs-zigzag fx" data-block="11.4 Multiverse Items (B08)">
+  <!-- ===== 12.4 From 2D to 3D (B10 modified) ===== -->
+  <section class="cs-media-2up-captions fx" data-block="12.4 From 2D to 3D (B10 modified)">
     <div class="wrap">
-      <div class="sh"><h2 class="sh__title"><span>Multiverse</span><span class="accent">items</span></h2><p class="sh__desc">Multiverse items are built to travel across games. Each one was textured, lit and placed in an animated 3D scene with visual effects that show it in action.</p></div>
-      <div class="zz">
-        <div class="zz__row"><div class="zz__media media" data-asset="exploration-1"></div><div class="zz__body"><h3 class="zz__title">Scenes from the lore</h3><p class="zz__text">The Mask of U'thuchul was staged in a dark forest, with glowing crystals, soft light and particles that suit its mystic origin.</p></div></div>
-        <div class="zz__row"><div class="zz__media media" data-asset="exploration-2"></div><div class="zz__body"><h3 class="zz__title">Characters with weight</h3><p class="zz__text">Mike the Golem was animated in a night forest, with burning torches and a heavy stance that give it the presence of a game hero.</p></div></div>
-        <div class="zz__row"><div class="zz__media zz__media--split"><div class="media" data-asset="exploration-3a"></div><div class="media" data-asset="exploration-3b"></div></div><div class="zz__body"><h3 class="zz__title">Items in Blobby's hands</h3><p class="zz__text">Blobby, dressed as a wizard, held items like the Shadowsong staff and the Aeonclipse Key, showing how each one could be used.</p></div></div>
+      <div class="sh"><h2 class="sh__title"><span>From 2D art</span><span class="accent">to a 3D crew</span></h2><p class="sh__desc">Each character was modeled in Blender from the artist's 2D designs. Faces were painted as flat textures and animated in After Effects, keeping a drawn look.</p></div>
+      <div class="m2c__grid">
+        <figure class="m2c__item"><div class="m2c__img media" data-asset="detail-1"></div><ul><li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>Turnaround: front, side and back checked against the art</span></li></ul></figure>
+        <figure class="m2c__item"><div class="m2c__img media" data-asset="detail-2"></div><ul><li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>Face: eyes, brows and beard painted as flat textures</span></li></ul></figure>
       </div>
     </div>
   </section>
 
-  <!-- ===== 11.5 Blobby (B12) ===== -->
-  <section class="cs-carousel3 fx" data-block="11.5 Blobby (B12)">
+  <!-- ===== 12.5 Launch Scenes (B08) ===== -->
+  <section class="cs-zigzag fx" data-block="12.5 Launch Scenes (B08)">
     <div class="wrap">
-      <div class="sh"><h2 class="sh__title"><span>Blobby in</span><span class="accent">every channel</span></h2><p class="sh__desc">Blobby, Enjin's mascot, was built as a 3D character and placed in scenes, stickers, GIFs, meme templates and longer videos for social media and chats.</p></div>
+      <div class="sh"><h2 class="sh__title"><span>Scenes from</span><span class="accent">the lore</span></h2><p class="sh__desc">For the launch articles, the crew was placed in epic scenes with Enjin symbols, each one lit and framed to tell a moment from the collection's story.</p></div>
+      <div class="zz">
+        <div class="zz__row"><div class="zz__media media" data-asset="exploration-1"></div><div class="zz__body"><h3 class="zz__title">Planting the Enjin flag</h3><p class="zz__text">On a purple planet, a Degen astronaut planted the Enjin flag while the rest of the crew celebrated in the background.</p></div></div>
+        <div class="zz__row"><div class="zz__media media" data-asset="exploration-2"></div><div class="zz__body"><h3 class="zz__title">A cube in the night sky</h3><p class="zz__text">A giant glowing cube floated over the crew at night, with smaller cubes around it and green light washing over the hills.</p></div></div>
+        <div class="zz__row"><div class="zz__media zz__media--split"><div class="media" data-asset="exploration-3a"></div><div class="media" data-asset="exploration-3b"></div></div><div class="zz__body"><h3 class="zz__title">A storm in the desert</h3><p class="zz__text">The crew crossed a sandstorm toward a stone monument carved with the Enjin logo, shown as a still and as a looping GIF.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 12.6 Discord, GIFs & Memes (B12) ===== -->
+  <section class="cs-carousel3 fx" data-block="12.6 Discord, GIFs &amp; Memes (B12)">
+    <div class="wrap">
+      <div class="sh"><h2 class="sh__title"><span>Discord, GIFs</span><span class="accent">and memes</span></h2><p class="sh__desc">The same 3D crew was reused for the community: Discord posts with an inked, comic finish, short GIFs cut from the launch scenes and meme templates ready to share.</p></div>
     </div>
     <div class="c3__track"><div class="c3__card media" data-asset="card-1"></div><div class="c3__card media" data-asset="card-2"></div><div class="c3__card media" data-asset="card-3"></div></div>
-    <div class="wrap"><p class="c3__caption">From classic meme formats to sci-fi corridors and fantasy forests, Blobby kept the same rounded shape, purple hoodie and expressions, so the mascot stayed recognizable in every format.</p></div>
+    <div class="wrap"><p class="c3__caption">From a neon venue with the Degens sign to the crew hanging out on the front steps and a JOIN US meme, every piece kept the same 3D models, painted faces and colors as the launch visuals.</p></div>
   </section>
 
-  <!-- ===== 11.6 Two Styles (B10 modified) ===== -->
-  <section class="cs-media-2up-captions fx" data-block="11.6 Two Styles (B10 modified)">
+  <!-- ===== 12.7 Outcome (B02) ===== -->
+  <section class="cs-closing-scene fx" data-block="12.7 Outcome (B02)">
     <div class="wrap">
-      <div class="sh"><h2 class="sh__title"><span>Two styles,</span><span class="accent">one model</span></h2><p class="sh__desc">Two looks were developed from the same 3D models: a realistic one with soft materials and light, and a flat one textured to feel like 2D animation.</p></div>
-      <div class="m2c__grid">
-        <figure class="m2c__item"><div class="m2c__img media" data-asset="detail-1"></div><ul><li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>Realistic: soft materials, depth and studio light</span></li></ul></figure>
-        <figure class="m2c__item"><div class="m2c__img media" data-asset="detail-2"></div><ul><li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>Flat: outlines and toon color that mimic 2D frames</span></li></ul></figure>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== 11.7 Tradeoffs (B04) ===== -->
-  <section class="cs-list-numbered fx" data-block="11.7 Tradeoffs (B04)">
-    <div class="wrap ln">
-      <div class="ln__head">
-        <h2 class="sh__title"><span>Production</span><span class="accent">tradeoffs</span></h2>
-        <p class="ln__desc">Many pieces had to ship across two lines of work, so the process leaned on reuse. These two choices kept the output steady without losing character.</p>
-      </div>
-      <ol class="ln__list">
-        <li class="ln__item"><span class="ln__num">01</span><h3 class="ln__title">Reuse over rebuilding</h3><p class="ln__text">Official Multiverse models and the same Blobby model were reused across scenes, putting the effort into texture, light, effects and motion.</p></li>
-        <li class="ln__item"><span class="ln__num">02</span><h3 class="ln__title">Flat look from 3D models</h3><p class="ln__text">The flat style was rendered from 3D models with creative texturing, instead of drawing every frame by hand as in traditional 2D animation.</p></li>
-      </ol>
-    </div>
-  </section>
-
-  <!-- ===== 11.8 Outcome (B02) ===== -->
-  <section class="cs-closing-scene fx" data-block="11.8 Outcome (B02)">
-    <div class="wrap">
-      <div class="sh"><h2 class="sh__title"><span>Project</span><span class="accent">outcome</span></h2><p class="sh__desc">Enjin gained a 3D library ready for every channel, with items shown in their own worlds and a mascot that fans could share as stickers, GIFs and memes.</p></div>
+      <div class="sh"><h2 class="sh__title"><span>Project</span><span class="accent">outcome</span></h2><p class="sh__desc">Enjin launched the Degen collection with a full set of 3D visuals, where the artist's crew moved, posed and joked inside Enjin's world on every channel.</p></div>
       <ul class="csc__bullets">
-        <li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>10 Multiverse items brought to life in animated 3D scenes</span></li>
-        <li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>2 Blobby styles from one model: realistic and flat</span></li>
-        <li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>GIFs on Enjin's GIPHY channel, with 20.4M views overall</span></li>
+        <li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>4 Degen characters rebuilt in 3D from the original 2D art</span></li>
+        <li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>6 article and blog visuals for the launch announcement</span></li>
+        <li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>3 animated GIFs and 2 meme templates for social channels</span></li>
       </ul>
     </div>
     <div class="csc__scene media" data-asset="closing-scene"><div class="csc__inner" data-asset="closing-screen"></div></div>

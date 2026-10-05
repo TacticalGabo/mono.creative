@@ -1386,16 +1386,16 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
     // '' = sin imagen: rectángulo placeholder (--bezel) hasta que haya portada
     var SHOTS=[
       ['./assets/work-enjin-darkmode.webp','./assets/work-jupiter-dtf-v3.webp','./assets/work-bedrock-web.webp','./assets/work-enjin-beam.webp'],
-      ['./assets/work-enjin-beam.webp','','./assets/work-enjin-nfts.webp','./assets/shot-detail-2.webp'],
+      ['./assets/work-enjin-beam.webp','','./assets/work-enjin-nfts.webp',''],
       ['./assets/work-sensive.webp','./assets/work-various-ecommerce-v2.webp','./assets/work-mascota-manyada.webp','./assets/work-panama-convention-center.webp']
     ];
     // Pestanas con proyectos reales: nombre y resto del caption por casilla.
     // null = esa pestana sigue como estaba (relleno con 'Project name').
-    var NOMBRES=[null,['Enjin beam','Enjin 3D Art','enjin',null],['Sensive','various brands','Mascota Manyada','Panama Convention Center']];
-    var METAS=[null,[' · ux/ui Design · 2024',' · 3d animation · 2024–2025',' · nfts & animations · 2025',null],[' · design & illustration · 2020',' · ecommerce · 2025',' · illustration · 2025',' · ux/ui Design · 2025']];
+    var NOMBRES=[null,['Enjin beam','Enjin 3D Art','enjin','Degen Animations'],['Sensive','various brands','Mascota Manyada','Panama Convention Center']];
+    var METAS=[null,[' · ux/ui Design · 2024',' · 3d animation · 2024–2025',' · nfts & animations · 2025',' · 3d animation · 2024–2025'],[' · design & illustration · 2020',' · ecommerce · 2025',' · illustration · 2025',' · ux/ui Design · 2025']];
     // case study que abre cada casilla por pestana (null = la 0 usa el data-case del marcado;
     // casilla sin caso = relleno 'Project name', no enlaza)
-    var CASOS=[null,['./casestudy_EnjinBeam.html','./casestudy_Enjin3D.html','./casestudy_EnjinNFTs.html',null],['./casestudy_Sensive.html','./casestudy_VariousBrands.html','./casestudy_MascotaManyada.html','./casestudy_PanamaConventionCenter.html']], casos=null;
+    var CASOS=[null,['./casestudy_EnjinBeam.html','./casestudy_Enjin3D.html','./casestudy_EnjinNFTs.html','./casestudy_DegenAnimations.html'],['./casestudy_Sensive.html','./casestudy_VariousBrands.html','./casestudy_MascotaManyada.html','./casestudy_PanamaConventionCenter.html']], casos=null;
     function grid(){ return document.querySelector('.grid2'); }
     function figures(){ return document.querySelectorAll('.grid2 .fig'); }
     function remember(){
