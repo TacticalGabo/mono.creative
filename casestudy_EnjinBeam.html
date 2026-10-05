@@ -206,12 +206,13 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
   }
   function tween(st,h){
     if(st.raf)cancelAnimationFrame(st.raf);
-    if(CALM){st.t=h?1:0;draw(st);return;}
+    if(CALM){st.t=h?1:0;draw(st);if(st.done){var cb=st.done;st.done=null;cb();}return;}
     var from=st.t, to=h?1:0, dur=Math.max(120,DUR*Math.max(.35,Math.abs(to-from))), t0=performance.now();
     (function step(now){
       var p=Math.min(1,(now-t0)/dur);
       st.t=from+(to-from)*ease(p); draw(st);
       st.raf=p<1?requestAnimationFrame(step):0;
+      if(p>=1&&st.done){var cb=st.done;st.done=null;cb();}
     })(performance.now());
   }
   function colors(st,h){
@@ -231,6 +232,16 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
     st.al.style.opacity=h?'0':'1'; st.al.style.transform='translateX('+(h?SHIFT:0)+'px)'; st.al.style.transition=h?OUT:INN;
     st.ar.style.opacity=h?'1':'0'; st.ar.style.transform='translateX('+(h?2:2-SHIFT)+'px)'; st.ar.style.transition=h?INN:OUT;
     tween(st,h);
+  }
+  /* clic en un .btn con data-href: se reproduce el cambio de estado (morph a círculo) y en
+     el frame en que termina se salta de página. Si ya está en hover (desktop), salto inmediato. */
+  function go(b){
+    var href=b.getAttribute('data-href'), st=parts(b);
+    function nav(){ window.location.href=href; }
+    if(!st){ nav(); return; }
+    set(b,true);
+    if(!st.raf&&st.t>=1){ nav(); return; }
+    st.done=nav;
   }
   var BLUR=null;
   function goo(b,p,x,y){
@@ -301,7 +312,7 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
     document.addEventListener('click',function(e){
       if(!FINEnow())return;
       var hb=e.target.closest&&e.target.closest('.btn[data-href]');
-      if(hb){ e.preventDefault(); window.location.href=hb.getAttribute('data-href'); }
+      if(hb){ e.preventDefault(); go(hb); }
     });
     // Precarga del destino en cuanto el puntero o el dedo llegan al botón: al
     // hacer clic la página ya está bajada y el salto es inmediato.
@@ -318,7 +329,7 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
     document.addEventListener('keydown',function(e){
       if(e.key!=='Enter'&&e.key!==' ')return;
       var hb=e.target.closest&&e.target.closest('.btn[data-href]');
-      if(hb){ e.preventDefault(); window.location.href=hb.getAttribute('data-href'); }
+      if(hb){ e.preventDefault(); go(hb); }
     });
     document.addEventListener('click',function(e){
       if(FINEnow())return;
@@ -348,7 +359,7 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
       var b=e.target.closest&&e.target.closest('.btn');
       if(!b||b.dataset.tapping)return;
       // enlace a otra página: salto inmediato, sin esperar la animación del tap
-      if(b.getAttribute('data-href')&&!b.getAttribute('data-scroll')){ e.preventDefault(); window.location.href=b.getAttribute('data-href'); return; }
+      if(b.getAttribute('data-href')&&!b.getAttribute('data-scroll')){ e.preventDefault(); go(b); return; }
       e.preventDefault();
       b.dataset.tapping='1';
       set(b,true);
