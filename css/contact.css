@@ -7,7 +7,7 @@
 }
 .contact-layout {
   width: min(1200px, calc(100% - 96px)); margin: auto;
-  display: grid; grid-template-columns: minmax(0, 1fr) max-content; gap: 28px;
+  display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 30px;
   letter-spacing: 0;
 }
 .contact-aside { padding-top: 0; }
@@ -26,9 +26,9 @@
 .contact-direct { margin-top: 82px; align-items: center; }
 .contact-direct .contact-meta { padding-top: 0; }
 .contact-direct .avatars { margin-top: 0; order: 0; }
-.contact-form { min-width: 0; display: grid; grid-template-columns: max-content 148.72px; grid-template-rows: auto; column-gap: 30px; }
+.contact-form { min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr) 148.72px; grid-template-rows: auto; column-gap: 30px; }
 /* Both panels contribute their height; changing steps cannot move the CTA. */
-.form-stage { grid-column: 1; grid-row: 1; display: grid; grid-template-columns: minmax(0, 1fr); width: 385px; max-width: 385px; min-width: 0; font: var(--t-mono-tag); }
+.form-stage { grid-column: 1; grid-row: 1; display: grid; grid-template-columns: minmax(0, 1fr); width: auto; min-width: 0; font: var(--t-mono-tag); }
 .step-panel { grid-area: 1 / 1; align-self: start; height: auto; min-width: 0; overflow: visible; padding: 2px 0 0; }
 .step-panel[data-step="1"] { display: flex; flex-direction: column; align-self: stretch; }
 .contact-page .form-stage .step-panel[hidden] { display: block !important; visibility: hidden; pointer-events: none; }
@@ -138,7 +138,7 @@
    se congela. cqw = ancho de .page (container), que también se congela en 1920. */
 @media (min-width: 768px) { .contact-layout { width: auto; margin-left: var(--mnav); margin-right: var(--mnav); } }
 @media (min-width: 1440px) { .contact-layout { margin-left: min(272.3px, calc(120px + (100cqw - 1440px) * .3172917)); margin-right: min(272.3px, calc(120px + (100cqw - 1440px) * .3172917)); } }
-@media (max-width: 1279px) { .contact-layout { width: calc(100% - 96px); gap: 32px; } .contact-detail-row { grid-template-columns: 1fr; gap: 14px; } .contact-email { width: auto; overflow-wrap: anywhere; } .contact-direct { margin-top: 65px; } }
+@media (max-width: 1279px) { .contact-layout { width: calc(100% - 96px); gap: 30px; } .contact-detail-row { grid-template-columns: 1fr; gap: 14px; } .contact-email { width: auto; overflow-wrap: anywhere; } .contact-direct { margin-top: 65px; } }
 @media (prefers-reduced-motion: reduce) { .contact-page *, .contact-page *::before, .contact-page *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
 /* Footer del contacto: sin titular ni CTA (la página ya es el CTA). */
 .contact-page .foot > .h7, .contact-page .foot > .foot-btn { display: none; }
@@ -154,10 +154,8 @@ html:has(body.contact-page), body.contact-page { overflow: hidden; height: 100%;
 /* Integrantes: círculos +15% (49 → 56,35) */
 .contact-direct .avatar { width: 56.35px; height: 56.35px; }
 .contact-direct .avatar + .avatar { margin-left: -14.95px; }
-/* Con la columna de contenido (--m) a 1440 la izquierda mide ~464 px: el titular y el
-   email bajan de tamaño lo justo para caber en una línea (36 px en cuanto hay sitio). */
-.contact-aside { container-type: inline-size; }
-.contact-aside h1, .contact-email { font-size: min(34px, calc((100cqi - 40px) / 16.3)); }
+/* La columna izquierda mide lo que su contenido (el email); a su derecha, el mismo hueco
+   que entre formulario y CTA (30 px), y el formulario se estira con el espacio sobrante. */
 /* Contenido centrado en vertical en el alto que deja el header (la página no scrollea). */
 .contact-page .page { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }
 .contact-page .nav { flex: none; }
