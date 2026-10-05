@@ -940,7 +940,7 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
 .team-row{display:flex;align-items:center}
 .team-row.r1{margin-left:0;gap:0}
 .team-row.r2{margin-left:0;gap:0}
-.card{height:92px;flex:none;border-radius:57px;border:1.2px solid var(--team-bd);display:flex;align-items:center;gap:24px;padding:24px 40px}
+.card{height:92px;flex:none;border-radius:57px;border:1.2px solid var(--team-bd);display:flex;align-items:center;gap:12px;padding:24px 40px 24px 28px}
 .card{transition:border-color .5s ease}
 @media (hover:hover) and (pointer:fine){
   .card:hover{border-color:#5f8300}
@@ -950,8 +950,8 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
 .set{display:contents}
 .clone{display:none}
 .card-id{display:flex;align-items:center;gap:12px}
-.av{position:relative;width:26px;height:17px;flex:none}
-.av img{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);max-width:none}
+.av{position:relative;width:50px;height:50px;flex:none;border-radius:50%;overflow:hidden}
+.av img{display:block;width:100%;height:100%;object-fit:cover}
 .name{font-size:18px;line-height:40.267px;letter-spacing:-.278px;white-space:nowrap;color:var(--team-name)}
 .slinks{font-family:var(--mono);font-size:13px;line-height:1.49;letter-spacing:.28px;white-space:nowrap;color:var(--link-card)}
 .slinks u{text-decoration:underline}
