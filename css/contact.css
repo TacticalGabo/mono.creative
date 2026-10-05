@@ -429,3 +429,7 @@ body { margin: 0; }
   .circle-cta { top: 0; }
   #skip-call { left: auto; right: calc(128px + 20px); bottom: calc(64px - 10.5px); }
 }
+
+/* (2026-10-05) el símbolo no cambia de color al pasar el cursor: los componentes del header
+   inyectan un "a:hover{color:#fff}" global (su <helmet>) que lo volvía blanco. */
+.contact-page .contact-symbol, .contact-page .contact-symbol:hover { color: var(--accent); }
