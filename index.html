@@ -521,6 +521,7 @@ html.mc-leaving .page{opacity:0;transition:opacity .28s ease-out}
    por eso en ventana normal se veía fluido: el problema solo asoma con DPR
    alto, o sea en el teléfono real. Igual que arriba: la capa no se alterna. */
 .glow{will-change:transform,opacity}
+.grain{will-change:transform}
 /* Mancha lejos del viewport = fuera del pipeline entero: sin pintado, sin capa
    en GPU y sin recomposición cuando el cruce le cambia la opacidad. La marca
    un observer propio (script del __mcGlowIO) sobre CADA mancha, no sobre su
@@ -561,6 +562,7 @@ html.mc-leaving .page{opacity:0;transition:opacity .28s ease-out}
   100%{translate:0 0;scale:1}
 }
 @media (prefers-reduced-motion:reduce){.glow.g-d{animation:none!important}}
+.grain{position:fixed;inset:0;pointer-events:none;z-index:9990;opacity:.16;mix-blend-mode:overlay;background-image:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScyMDAnIGhlaWdodD0nMjAwJz48ZmlsdGVyIGlkPSduJz48ZmVUdXJidWxlbmNlIHR5cGU9J2ZyYWN0YWxOb2lzZScgYmFzZUZyZXF1ZW5jeT0nLjY1JyBudW1PY3RhdmVzPSczJyBzdGl0Y2hUaWxlcz0nc3RpdGNoJy8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9JzIwMCcgaGVpZ2h0PScyMDAnIGZpbHRlcj0ndXJsKCNuKScvPjwvc3ZnPg==");background-size:200px 200px}
 .d-only{display:none}
 
 /* type */
@@ -2285,6 +2287,7 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
 <div class="qa-w" data-comp="qa-width-overlay"></div>
 <div class="page" data-screen-label="home — responsive">
   <div class="bgfade"></div>
+  <div class="grain"></div>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="goo" x="-60%" y="-140%" width="220%" height="380%" color-interpolation-filters="sRGB"><feGaussianBlur in="SourceGraphic" stdDeviation="6" result="b"></feGaussianBlur><feColorMatrix in="b" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -9" result="g"></feColorMatrix><feComposite in="SourceGraphic" in2="g" operator="atop"></feComposite></filter></svg>
 
   <header class="nav" data-comp="nav">
@@ -2601,22 +2604,18 @@ class Component extends DCLogic {
   new MutationObserver(function(){ if(q)return; q=requestAnimationFrame(function(){ q=0; arm(); }); }).observe(document.documentElement,{childList:true,subtree:true});
 })();
 </script>
-<!-- GRAIN-OVERLAY:START — grano del sitio en UNA capa (2026-10-04). Antes eran dos:
-     .grain (ruido SVG al .16) + .grain-overlay (texture-grain.png al .42), cada una con
-     su mezcla a pantalla completa. Ahora assets/grain-{dark,light}.svg traen las dos ya
-     fusionadas con un filtro, y una sola mezcla da el mismo resultado (overlay es lineal
-     sobre fondo oscuro y multiply siempre lo es). Tile de 282px, entero: con 281.6px el
-     navegador reescala dos veces y el grano sale más blando.
-     Light: grain-light.svg va al DOBLE de fuerza, así que su opacity es el mando
-     del grano en light (.5 = lo mismo que las 2 capas viejas; .7 aprobado el 2026-10-04).
-     El PNG viejo va embebido en los SVG (base64); por eso ya no existe como archivo. -->
+<!-- GRAIN-OVERLAY:START — 2a capa de grano sobre el .grain original. Ajuste aprobado 2026-09-20 -->
 <div class="grain-overlay" aria-hidden="true"></div>
-<link rel="prefetch" href="./assets/grain-light.svg">
 <style>
   .grain-overlay{position:fixed;inset:0;pointer-events:none;z-index:2147483000;
-    background:url('./assets/grain-dark.svg') 0 0/282px 282px;
-    mix-blend-mode:overlay;will-change:transform}
-  :root[data-theme="light"] .grain-overlay{background-image:url('./assets/grain-light.svg');mix-blend-mode:multiply;opacity:.7}
+    background-image:url('./assets/texture-grain.png');background-repeat:repeat;
+    background-size:281.6px 281.6px;   /* grano en pantalla 1.1 px */
+    opacity:.42;mix-blend-mode:overlay;will-change:transform}
+  /* light: overlay sobre fondo claro devuelve el mismo fondo y el grano
+     desaparece; multiply lo oscurece en cualquier fondo, al mismo coste.
+     Opacidades calibradas para el mismo contraste (ΔL*) que en dark. */
+  :root[data-theme="light"] .grain{mix-blend-mode:multiply;opacity:.056}
+  :root[data-theme="light"] .grain-overlay{mix-blend-mode:multiply;opacity:.14}
 </style>
 <!-- GRAIN-OVERLAY:END -->
 </body>
