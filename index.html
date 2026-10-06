@@ -1091,7 +1091,18 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
 @media (min-width:571px){
   .oval{margin-top:-1.8px}
 }
-.oval i,.oval b{position:absolute;width:224.03px;height:72.868px;border-radius:50%;border:.775px solid var(--border)}
+.oval i,.oval b{position:absolute;width:224.03px;height:72.868px;border-radius:50%}
+/* los dos trazos del ovalo son SVG (antes border) para dibujarlos al entrar en pantalla, igual
+   que la tarjeta de avatares de los entries (.pcard__ring en css/case-study.css): primero el de
+   delante, luego el de atras, y despues aparece el correo. html.ov-arm lo pone el script
+   "ovalo del correo" solo si hay IntersectionObserver y no hay reduced-motion. */
+.oval svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;fill:none;stroke:var(--border);stroke-width:.775}
+.oval ellipse{stroke-dasharray:1 1;stroke-dashoffset:0}
+html.ov-arm .oval:not(.ov-in) ellipse{stroke-dashoffset:1}
+html.ov-arm .oval:not(.ov-in) span{opacity:0}
+html.ov-arm .oval.ov-in b ellipse{transition:stroke-dashoffset .45s cubic-bezier(.65,0,.35,1)}
+html.ov-arm .oval.ov-in i ellipse{transition:stroke-dashoffset .45s cubic-bezier(.65,0,.35,1) .45s}
+html.ov-arm .oval.ov-in span{transition:color .5s ease,opacity .4s ease .5s}
 .oval i{left:0;top:0;transform:matrix(.998,-.060,.060,.998,0,13.449);transform-origin:0 0}
 .oval b{left:1.988px;top:6.659px;background:var(--bg)}
 .oval span{position:absolute;left:0;top:0;transform:matrix(.998,-.061,.061,.998,30.188,37.313);transform-origin:0 0;font-family:var(--mono);font-size:13.953408px;line-height:1.49;letter-spacing:.217px;white-space:nowrap;width:19.4ch;text-align:center;color:var(--email)}
@@ -1099,7 +1110,7 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
   .cta{margin-top:25.4px;padding-top:88.8px;min-height:264px}
   .cta-b{font-size:15px;line-height:27.2px;max-width:none}
   .oval{width:294.122px;height:111.179px;overflow:hidden}
-  .oval i,.oval b{width:289px;height:94px;border-width:1px}
+  .oval i,.oval b{width:289px;height:94px}
   .oval i{transform:matrix(.998,-.060,.060,.998,0,17.349)}
   .oval b{left:2.563px;top:8.59px}
   .oval span{transform:matrix(.998,-.061,.061,.998,38.941,48.134);font-size:18px;letter-spacing:.28px}
@@ -1875,6 +1886,23 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
 </script>
 <script>
 (function(){
+  // ovalo del correo (seccion .cta): se dibuja al entrar en pantalla, una sola vez
+  if(window.__mcOval)return; window.__mcOval=1;
+  if(!('IntersectionObserver' in window)||(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches))return;
+  document.documentElement.classList.add('ov-arm');
+  function init(){
+    var o=document.querySelector('.oval');
+    if(!o||document.querySelector('x-dc'))return setTimeout(init,120);
+    var io=new IntersectionObserver(function(es){
+      for(var i=0;es.length>i;i++)if(es[i].isIntersecting){es[i].target.classList.add('ov-in');io.unobserve(es[i].target);}
+    },{threshold:.6});
+    io.observe(o);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
+<script>
+(function(){
   if(window.__mcGlowIO)return; window.__mcGlowIO=1;
   function init(){
     var hero=document.querySelector('.hero');
@@ -2586,7 +2614,7 @@ Then we set the base for launch and growth, with clear files, clean rules and <b
         <p class="cta-b">Tell us what you are building and where expert guidance would help.</p>
       </div>
       <div class="oval" data-comp="email-oval">
-        <i></i><b></b>
+        <i><svg viewBox="0 0 224.03 72.868" preserveAspectRatio="none" aria-hidden="true"><ellipse pathLength="1" cx="112.015" cy="36.434" rx="111.627" ry="36.046"/></svg></i><b><svg viewBox="0 0 224.03 72.868" preserveAspectRatio="none" aria-hidden="true"><ellipse pathLength="1" cx="112.015" cy="36.434" rx="111.627" ry="36.046"/></svg></b>
         <span>hello@mono.creative</span>
       </div>
     </div>
