@@ -1895,7 +1895,7 @@ html.ov-arm .oval.ov-in span{transition:color .5s ease,opacity .4s ease .65s}
     if(!o||document.querySelector('x-dc'))return setTimeout(init,120);
     var io=new IntersectionObserver(function(es){
       for(var i=0;es.length>i;i++)if(es[i].isIntersecting){es[i].target.classList.add('ov-in');io.unobserve(es[i].target);}
-    },{threshold:1,rootMargin:'0px 0px -15% 0px'});
+    },{threshold:1,rootMargin:'0px 0px -8% 0px'});
     io.observe(o);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
