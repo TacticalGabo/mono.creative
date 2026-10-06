@@ -1100,9 +1100,9 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
 .oval ellipse{stroke-dasharray:1 1;stroke-dashoffset:0}
 html.ov-arm .oval:not(.ov-in) ellipse{stroke-dashoffset:1}
 html.ov-arm .oval:not(.ov-in) span{opacity:0}
-html.ov-arm .oval.ov-in b ellipse{transition:stroke-dashoffset .45s cubic-bezier(.65,0,.35,1)}
-html.ov-arm .oval.ov-in i ellipse{transition:stroke-dashoffset .45s cubic-bezier(.65,0,.35,1) .45s}
-html.ov-arm .oval.ov-in span{transition:color .5s ease,opacity .4s ease .5s}
+html.ov-arm .oval.ov-in b ellipse{transition:stroke-dashoffset .45s cubic-bezier(.65,0,.35,1) .15s}
+html.ov-arm .oval.ov-in i ellipse{transition:stroke-dashoffset .45s cubic-bezier(.65,0,.35,1) .6s}
+html.ov-arm .oval.ov-in span{transition:color .5s ease,opacity .4s ease .65s}
 .oval i{left:0;top:0;transform:matrix(.998,-.060,.060,.998,0,13.449);transform-origin:0 0}
 .oval b{left:1.988px;top:6.659px;background:var(--bg)}
 .oval span{position:absolute;left:0;top:0;transform:matrix(.998,-.061,.061,.998,30.188,37.313);transform-origin:0 0;font-family:var(--mono);font-size:13.953408px;line-height:1.49;letter-spacing:.217px;white-space:nowrap;width:19.4ch;text-align:center;color:var(--email)}
@@ -1895,7 +1895,7 @@ html.ov-arm .oval.ov-in span{transition:color .5s ease,opacity .4s ease .5s}
     if(!o||document.querySelector('x-dc'))return setTimeout(init,120);
     var io=new IntersectionObserver(function(es){
       for(var i=0;es.length>i;i++)if(es[i].isIntersecting){es[i].target.classList.add('ov-in');io.unobserve(es[i].target);}
-    },{threshold:.6});
+    },{threshold:1,rootMargin:'0px 0px -15% 0px'});
     io.observe(o);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
