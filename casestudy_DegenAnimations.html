@@ -95,6 +95,8 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
        Si cambias la extensión (.png/.jpg), cámbiala solo aquí.
        Sin archivo, el hueco muestra el color placeholder (--media).
    ========================================================================== */
+/* Hero: "Content" solo en mobile (en desktop el titulo queda "Promo") */
+@media (min-width:768px){.cs-hero__mob{display:none}}
 </style>
 
 <!-- SHARED:JS-SBW -->
@@ -581,7 +583,7 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
       <div class="cs-hero__media media" data-asset="hero"></div>
       <div class="cs-hero__body">
         <div class="cs-hero__left">
-          <h1 class="cs-hero__title"><span class="fx-line">Enjin×Degen</span><span class="fx-line accent">Promo Content</span></h1>
+          <h1 class="cs-hero__title"><span class="fx-line">Enjin×Degen</span><span class="fx-line accent">Promo<span class="cs-hero__mob"> Content</span></span></h1>
           <div class="cs-hero__meta">
             <div class="meta--year"><span class="meta__label">Year</span><span class="meta__value">2024–2025</span></div>
             <div class="meta--role"><span class="meta__label">Role</span><span class="meta__value">3D Artist</span></div>
