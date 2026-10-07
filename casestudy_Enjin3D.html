@@ -469,18 +469,18 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
 <script>
 (function(){
   if(window.__mcCopy)return; window.__mcCopy=1;
-  var MAIL='hello@mono.creative';
+  var MAIL='hello.monocreative@gmail.com';
   document.addEventListener('click',function(e){
     var oval=e.target.closest&&e.target.closest('.oval');
     if(!oval)return;
     var span=oval.querySelector('span');
     if(!span||oval.dataset.copied)return;
     oval.dataset.copied='1';
-    var prev=span.textContent;
+    var prev=span.innerHTML;
     try{ if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(MAIL).catch(function(){}); }catch(err){}
     span.textContent='Copied! ✓';
     setTimeout(function(){
-      span.textContent=prev;
+      span.innerHTML=prev;
       delete oval.dataset.copied;
     },1000);
   });
@@ -699,7 +699,7 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
       </div>
       <div class="oval" data-comp="email-oval">
         <i></i><b></b>
-        <span>hello@mono.creative</span>
+        <span>hello.monocreative<br>@gmail.com</span>
       </div>
     </div>
   </section>

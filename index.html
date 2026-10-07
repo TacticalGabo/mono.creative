@@ -1105,7 +1105,7 @@ html.ov-arm .oval.ov-in i ellipse{transition:stroke-dashoffset .45s cubic-bezier
 html.ov-arm .oval.ov-in span{transition:color .5s ease,opacity .4s ease .65s}
 .oval i{left:0;top:0;transform:matrix(.998,-.060,.060,.998,0,13.449);transform-origin:0 0}
 .oval b{left:1.988px;top:6.659px;background:var(--bg)}
-.oval span{position:absolute;left:0;top:0;transform:matrix(.998,-.061,.061,.998,30.188,37.313);transform-origin:0 0;font-family:var(--mono);font-size:13.953408px;line-height:1.49;letter-spacing:.217px;white-space:nowrap;width:19.4ch;text-align:center;color:var(--email)}
+.oval span{position:absolute;left:50%;top:50%;transform:translate(calc(-50% - 2.4px),calc(-50% + 1.7px)) rotate(-3.46deg);transform-origin:50% 50%;font-family:var(--mono);font-size:13.18px;line-height:1.176;letter-spacing:.205px;white-space:nowrap;text-align:center;color:var(--email)}
 @media (min-width:768px){
   .cta{margin-top:25.4px;padding-top:88.8px;min-height:264px}
   .cta-b{font-size:15px;line-height:27.2px;max-width:none}
@@ -1113,7 +1113,7 @@ html.ov-arm .oval.ov-in span{transition:color .5s ease,opacity .4s ease .65s}
   .oval i,.oval b{width:289px;height:94px}
   .oval i{transform:matrix(.998,-.060,.060,.998,0,17.349)}
   .oval b{left:2.563px;top:8.59px}
-  .oval span{transform:matrix(.998,-.061,.061,.998,38.941,48.134);font-size:18px;letter-spacing:.28px}
+  .oval span{transform:translate(calc(-50% - 3.15px),calc(-50% + 2.2px)) rotate(-3.46deg);font-size:17px;letter-spacing:.264px}
 }
 @media (min-width:1100px){
   .cta-inner{flex-direction:row;justify-content:space-between;align-items:flex-start}
@@ -2018,18 +2018,18 @@ html.ov-arm .oval.ov-in span{transition:color .5s ease,opacity .4s ease .65s}
 <script>
 (function(){
   if(window.__mcCopy)return; window.__mcCopy=1;
-  var MAIL='hello@mono.creative';
+  var MAIL='hello.monocreative@gmail.com';
   document.addEventListener('click',function(e){
     var oval=e.target.closest&&e.target.closest('.oval');
     if(!oval)return;
     var span=oval.querySelector('span');
     if(!span||oval.dataset.copied)return;
     oval.dataset.copied='1';
-    var prev=span.textContent;
+    var prev=span.innerHTML;
     try{ if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(MAIL).catch(function(){}); }catch(err){}
     span.textContent='Copied! ✓';
     setTimeout(function(){
-      span.textContent=prev;
+      span.innerHTML=prev;
       delete oval.dataset.copied;
     },1000);
   });
@@ -2615,7 +2615,7 @@ Then we set the base for launch and growth, with clear files, clean rules and <b
       </div>
       <div class="oval" data-comp="email-oval">
         <i><svg viewBox="0 0 224.03 72.868" preserveAspectRatio="none" aria-hidden="true"><ellipse pathLength="1" cx="112.015" cy="36.434" rx="111.627" ry="36.046"/></svg></i><b><svg viewBox="0 0 224.03 72.868" preserveAspectRatio="none" aria-hidden="true"><ellipse pathLength="1" cx="112.015" cy="36.434" rx="111.627" ry="36.046"/></svg></b>
-        <span>hello@mono.creative</span>
+        <span>hello.monocreative<br>@gmail.com</span>
       </div>
     </div>
   </section>
