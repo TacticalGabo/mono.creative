@@ -185,7 +185,6 @@
   --neutral-0:#ffffff; --neutral-50:#eef4f0; --neutral-100:#d9e3dd; --neutral-200:#bec8c2;
   --neutral-400:#87918b; --neutral-600:#414b45; --neutral-900:#232825;
 
-  --bg-constraints:#fefefe;
   --text:var(--neutral-900);
   --text-strong:var(--forest-900);
   --text-hero-plain:var(--neutral-900);
@@ -217,7 +216,6 @@
   --t-mono-tag:    400 13px/1.5 var(--ff-mono);
 }
 :root[data-theme="dark"]{
-  --bg-constraints:var(--forest-900);
   --text:var(--neutral-100);
   --text-strong:var(--neutral-0);
   --text-hero-plain:var(--neutral-0);
@@ -506,7 +504,8 @@ html .page .sc-placeholder::before{display:none}
 
 /* ---- Project Hero (B01) ---- */
 .cs-hero{padding:0 0 56px}
-.cs-hero__media{aspect-ratio:312/306;border-radius:16px}
+/* imagen: 6px a cada lado del viewport (sale del wrap de --m), 360/380 como en Figma 360 */
+.cs-hero__media{width:calc(100cqw - 12px);margin-left:calc(6px - var(--m));aspect-ratio:360/380;border-radius:16px}
 .cs-hero__body{display:flex;flex-direction:column;margin-top:32px}
 .cs-hero__title{font:500 32px/1.1 var(--ff-sans);color:var(--text-hero-plain)}
 .cs-hero__title .fx-line{display:block;--i:0}
@@ -596,7 +595,7 @@ html .page .sc-placeholder::before{display:none}
 .cs-statement__text{font:500 22px/1.5 var(--ff-sans);letter-spacing:-.6px;color:var(--text-title);margin-top:16px}
 
 /* ---- Constraints (B04) ---- */
-.cs-constraints{background:var(--bg-constraints);padding:56px 0}
+.cs-constraints{padding:56px 0}
 .cs-constraints .sh__title span:first-child{color:var(--accent)}
 .cs-constraints .sh__title span:last-child{color:var(--text-strong)}
 .cs-constraints__canvas{position:relative;margin-top:16px}
@@ -801,6 +800,13 @@ html.js.logo-drawn .page .nav :is(.nav-anim,.nav-anim-m){opacity:1}
 .zz__media--split>.media:last-child{border-radius:16px 0 0 16px}
 .zz__title{font:500 20px/1.2 var(--ff-sans);letter-spacing:-.4px;color:var(--text-title)}
 .zz__text{font:var(--t-body-m);margin-top:12px}
+/* variante .zz--inset (Butrich 10.5): en mobile la imagen va dentro del wrap con radio y
+   todo a 16px; desktop = zigzag normal */
+@media (max-width:767.98px){
+  .zz--inset .zz,.zz--inset .zz__row{gap:16px}
+  .zz--inset .zz__media{width:auto;margin-left:0;aspect-ratio:312/310;border-radius:16px}
+  .zz--inset .zz__body{padding:8px 0 16px}
+}
 
 /* ==========================================================================
    8 · CASE STUDY — desktop (≥ 768 = Figma 1440). Grillas en fracciones del
@@ -809,7 +815,7 @@ html.js.logo-drawn .page .nav :is(.nav-anim,.nav-anim-m){opacity:1}
 @media (min-width:768px){
   /* hero */
   .cs-hero{padding:0 0 16px}
-  .cs-hero__media{aspect-ratio:1056/508;border-radius:35px}
+  .cs-hero__media{width:auto;margin-left:0;aspect-ratio:1056/508;border-radius:35px}
   .cs-hero__body{display:grid;grid-template-columns:minmax(0,340fr) minmax(0,700fr);column-gap:16px;margin-top:40px}
   .cs-hero__title{font:var(--t-hero)}
   .cs-hero__meta{margin-top:24px}

@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <script>/* .js síncrono (antes lo ponía case-study.js, diferido: según qué llegaba antes, el hero se veía, se ocultaba y reaparecía) + tema elegido en el toggle (home o entry); sin elección = light */document.documentElement.classList.add('js');try{localStorage.removeItem('mc-theme');var t=sessionStorage.getItem('mc-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
 <link rel="icon" type="image/svg+xml" href="./assets/logo-favicon-48x29.svg?v=3">
-<title>Authored Fashion — Case study · mono.creative</title>
+<title>Butrich Shop — Case study · mono.creative</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Authored Fashion: Online stores for two Peruvian fashion designers with growing international reach.">
+<meta name="description" content="Butrich Shop: An online store for a Peruvian shoe designer with a growing international reach.">
 <!-- (2026-10-04) CARGA: fuentes del propio dominio (./fonts, mismos woff2 de Google:
      variable 200-800, subsets latin + latin-ext con unicode-range) en lugar del CSS de
      Google Fonts, que bloqueaba el render y abría 2 conexiones externas. -->
@@ -16,7 +16,7 @@
 @font-face{font-family:'Plus Jakarta Sans';font-style:italic;font-weight:200 800;font-display:swap;src:url(./fonts/plus-jakarta-sans/webfont/PlusJakartaSans-200-800-italic-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 @font-face{font-family:'Space Mono';font-style:normal;font-weight:400;font-display:swap;src:url(./fonts/space-mono/webfont/SpaceMono-400-normal-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 </style>
-<link rel="stylesheet" href="./css/case-study.css?v=7">
+<link rel="stylesheet" href="./css/case-study.css?v=8">
 <!-- (2026-10-04) CARGA: React desde el propio dominio, igual que el home (mismos bytes,
      sha384 idéntico al SRI de support.js). Además, con window.__resources definido
      support.js NO vuelve a descargar la página entera (fetch(location.href)). -->
@@ -32,7 +32,7 @@ if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.
 <x-dc>
 <helmet>
 <!--
-  CASE STUDY 10 · FASHION SHOPS — página responsive (360 → 1920+)
+  CASE STUDY 10 · BUTRICH SHOP — página responsive (360 → 1920+)
   · Mismo sistema que Jupiter/GVRN: clases cs-*, parcial .sh, --m/--mnav,
     breakpoint único 768, container queries sobre .page (tope 1920).
   · CSS/JS comunes: ./css/case-study.css y ./js/case-study.js (no duplicar aquí).
@@ -96,11 +96,8 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
        Sin archivo, el hueco muestra el color placeholder (--media).
    ========================================================================== */
 [data-asset="hero"]{background-image:url(./casestudy_VariousBrands/01-hero.webp)}
-[data-asset="direction-1"]{background-image:url(./casestudy_VariousBrands/05-direction-1.webp)}
-[data-asset="direction-2"]{background-image:url(./casestudy_VariousBrands/05-direction-2.webp)}
-[data-asset="direction-wide"]{background-image:url(./casestudy_VariousBrands/05-direction-wide.webp)}
-[data-asset="feature-small"]{background-image:url(./casestudy_VariousBrands/06-feature-small.webp)}
-[data-asset="feature-large"]{background-image:url(./casestudy_VariousBrands/06-feature-large.webp)}
+[data-asset="exploration-1"]{background-image:url(./casestudy_VariousBrands/05-exploration-1.webp)}
+[data-asset="exploration-2"]{background-image:url(./casestudy_VariousBrands/05-exploration-2.webp)}
 [data-asset="mobile"]{background-image:url(./casestudy_VariousBrands/07-mobile.webp)}
 [data-asset="closing-scene"]{background-image:url(./casestudy_VariousBrands/09-closing-scene.webp)}
 </style>
@@ -540,7 +537,7 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
 <!-- /SHARED:JS-MENU -->
 </helmet>
 <div class="qa-w" data-comp="qa-width-overlay"></div>
-<div class="page" data-screen-label="case study — Authored Fashion">
+<div class="page" data-screen-label="case study — Butrich Shop">
   <div class="grain"></div>
   <!-- SHARED:GOO -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="goo" x="-60%" y="-140%" width="220%" height="380%" color-interpolation-filters="sRGB"><feGaussianBlur in="SourceGraphic" stdDeviation="6" result="b"></feGaussianBlur><feColorMatrix in="b" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -9" result="g"></feColorMatrix><feComposite in="SourceGraphic" in2="g" operator="atop"></feComposite></filter></svg>
@@ -589,7 +586,7 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
       <div class="cs-hero__media media" data-asset="hero"></div>
       <div class="cs-hero__body">
         <div class="cs-hero__left">
-          <h1 class="cs-hero__title"><span class="fx-line">Authored</span><span class="fx-line accent">Fashion</span></h1>
+          <h1 class="cs-hero__title"><span class="fx-line">Butrich</span><span class="fx-line accent">Shop</span></h1>
           <div class="cs-hero__meta">
             <div class="meta--year"><span class="meta__label">Year</span><span class="meta__value">2025</span></div>
             <div class="meta--role"><span class="meta__label">Role</span><span class="meta__value">UX/UI Designer</span></div>
@@ -597,11 +594,11 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
           </div>
         </div>
         <div class="cs-hero__right">
-          <p class="cs-hero__lead">Online stores for two Peruvian fashion designers with growing international reach.</p>
-          <p class="cs-hero__intro">Butrich, the shoe and accessory brand of Jessica Butrich, and ALL, the label of designer Andrea Llosa, needed online stores that matched their brands. Both e-commerce sites were shaped with each team, from discovery of logistic and technical needs to launch.</p>
+          <p class="cs-hero__lead">An online store for a Peruvian shoe designer with a growing international reach.</p>
+          <p class="cs-hero__intro">Butrich, the shoe and accessory brand of Peruvian designer Jessica Butrich, needed an online store as bold as its collections. The e-commerce site was shaped with the brand's team, from discovery of logistic and technical needs to launch in two languages.</p>
           <div class="cs-hero__cols">
-            <div class="cs-hero__col"><h2 class="cs-hero__label">Objective</h2><p class="cs-hero__text">The aim was to turn each designer's vision into a store that sells, keeping the brand's personality while making browsing, choosing and buying simple.</p></div>
-            <div class="cs-hero__col"><h2 class="cs-hero__label">Outcome</h2><p class="cs-hero__text">Two e-commerce sites with their own personality, one colorful and international, one editorial and minimal, both built to support each brand's growth.</p></div>
+            <div class="cs-hero__col"><h2 class="cs-hero__label">Objective</h2><p class="cs-hero__text">The aim was to turn the designer's vision into a store that sells, keeping the brand's personality while making browsing, choosing and buying simple.</p></div>
+            <div class="cs-hero__col"><h2 class="cs-hero__label">Outcome</h2><p class="cs-hero__text">An e-commerce site with its own personality, colorful, playful and international, built to sell worldwide and to support the brand's steady growth.</p></div>
           </div>
         </div>
       </div>
@@ -612,22 +609,22 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
   <section class="cs-statement fx" data-block="10.2 Statement (B06)">
     <div class="wrap">
       <p class="cs-statement__label">The problem</p>
-      <p class="cs-statement__text">Each brand had a strong identity in its stores and on social media. Its online shop had to carry that identity and also handle catalogs, collections, shipping and payments without feeling like a template.</p>
+      <p class="cs-statement__text">Butrich had a strong identity in stores and on social media. Its online shop had to carry it and handle catalogs, collections, shipping and payments without feeling like a template.</p>
     </div>
   </section>
 
   <!-- ===== 10.3 Constraints (B04) ===== -->
   <section class="cs-constraints fx" data-block="10.3 Constraints (B04)">
     <div class="wrap">
-      <div class="sh"><h2 class="sh__title"><span>Challenges</span><span>encountered</span></h2><p class="sh__desc">Two very different brands shared one challenge: selling online without losing the personality that made their customers fall in love with them.</p></div>
+      <div class="sh"><h2 class="sh__title"><span>Challenges</span><span>encountered</span></h2><p class="sh__desc">A brand known for color and craft had one challenge: selling online without losing the personality that made its customers fall in love with it.</p></div>
       <div class="cs-constraints__canvas">
         <svg class="curve curve--h" viewBox="0 0 1057 416" aria-hidden="true"><path d="M-210 38C-140 17 -70 6.4 -17 5C60 3 150 0 230 120C255 150 265 163 287 173C340 195 380 205 420 203C480 200 530 175 569 160C610 143 640 130 670 130C730 130 790 180 851 230C870 245 890 258 908 266"/></svg>
         <svg class="curve curve--v" viewBox="0 0 61 601" preserveAspectRatio="none" aria-hidden="true"><path d="M-30 -46C-22 -36 -7.717 -10.813 0.603 0.446C7.711 10.064 19.216 16.275 24.542 27.4C40.199 60.504 17.344 94.684 24.542 130.946C30.18 159.344 40.132 174.727 45.644 191.606C69.103 263.446 40.603 307.946 13.571 386.944C-7.645 448.946 13.512 483.301 34.103 520.446C55.012 548.801 69.779 569.618 51.395 600.446"/></svg>
         <ol class="cs-constraints__list">
-          <li class="ci"><span class="ci__dot"></span><span class="ci__num">01</span><h3 class="ci__title">Brand before<br class="br-d"> template</h3><p class="ci__text">Each store had to look and feel like its designer, not like a generic theme with a logo on top of it.</p></li>
+          <li class="ci"><span class="ci__dot"></span><span class="ci__num">01</span><h3 class="ci__title">Brand before<br class="br-d"> template</h3><p class="ci__text">The store had to look and feel like its designer, not like a generic theme with a logo on top of it.</p></li>
           <li class="ci"><span class="ci__dot"></span><span class="ci__num">02</span><h3 class="ci__title">Logistics<br class="br-d"> on the page</h3><p class="ci__text">Shipping rules, regions, currencies and stock had to be clear before checkout, especially for international orders.</p></li>
           <li class="ci"><span class="ci__dot"></span><span class="ci__num">03</span><h3 class="ci__title">Collections<br class="br-d"> that rotate</h3><p class="ci__text">New collections launch often, so banners, menus and product groups had to update without redesigning pages.</p></li>
-          <li class="ci"><span class="ci__dot"></span><span class="ci__num">04</span><h3 class="ci__title">Built with<br class="br-d"> each team</h3><p class="ci__text">Each brand's team had to manage its own store after launch, so structure and tools were chosen together.</p></li>
+          <li class="ci"><span class="ci__dot"></span><span class="ci__num">04</span><h3 class="ci__title">Built with<br class="br-d"> the team</h3><p class="ci__text">The brand's team had to manage its own store after launch, so structure and tools were chosen together.</p></li>
         </ol>
       </div>
     </div>
@@ -638,39 +635,31 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
     <div class="wrap ln">
       <div class="ln__head">
         <h2 class="sh__title"><span>Discovery</span><span class="accent">process</span></h2>
-        <p class="ln__desc">Each project started by listening to the brand's team, mapping how they sell, ship and launch new collections before any screen was designed.</p>
+        <p class="ln__desc">The project started by listening to the brand's team, mapping how they sell, ship and launch new collections before any screen was designed.</p>
       </div>
       <ol class="ln__list">
-        <li class="ln__item"><span class="ln__num">01</span><h3 class="ln__title">Brand vision first</h3><p class="ln__text">Sessions with each designer defined what the store had to express, from Butrich's retro, colorful world to ALL's conceptual minimalism.</p></li>
+        <li class="ln__item"><span class="ln__num">01</span><h3 class="ln__title">Brand vision first</h3><p class="ln__text">Sessions with the designer defined what the store had to express: Butrich's retro, colorful world, its icons and its playful campaigns.</p></li>
         <li class="ln__item"><span class="ln__num">02</span><h3 class="ln__title">Logistics, mapped early</h3><p class="ln__text">Shipping zones, free shipping thresholds, returns and international orders were mapped so the store could explain them clearly.</p></li>
-        <li class="ln__item"><span class="ln__num">03</span><h3 class="ln__title">Technical setup defined</h3><p class="ln__text">Catalog structure, collections, payments and integrations were defined with each team so the store could run and grow after launch.</p></li>
+        <li class="ln__item"><span class="ln__num">03</span><h3 class="ln__title">Technical setup defined</h3><p class="ln__text">Catalog structure, collections, payments and integrations were defined with the team so the store could run and grow after launch.</p></li>
       </ol>
     </div>
   </section>
 
   <!-- ===== 10.5 Butrich (B11) ===== -->
-  <section class="cs-media-2up-wide m2w--2up m2w--cap-end fx" data-block="10.5 Butrich (B11)">
+  <section class="cs-zigzag zz--inset fx" data-block="10.5 Butrich (B11)">
     <div class="wrap">
       <div class="sh"><h2 class="sh__title"><span>Butrich</span><span class="accent">online store</span></h2><p class="sh__desc">The Butrich store puts collections first, with rotating banners, curated product tabs and a menu built around shoes, bags, charms and accessories.</p></div>
-      <div class="m2w__grid"><div class="m2w__img media" data-asset="direction-1"></div><div class="m2w__img media" data-asset="direction-2"></div></div>
-    </div>
-    <div class="m2w__wide media" data-asset="direction-wide"></div>
-    <div class="wrap"><p class="m2w__caption">Desktop and mobile share the same order: collection banners, featured shoes, seasonal campaigns like Charms Season, latest collections and an invitation to join the community and newsletter.</p></div>
-  </section>
-
-  <!-- ===== 10.6 Andrea Llosa (B07) ===== -->
-  <section class="cs-feature-bleed fx" data-block="10.6 Andrea Llosa (B07)">
-    <div class="wrap"><div class="sh"><h2 class="sh__title"><span>Andrea Llosa</span><span class="accent">online store</span></h2><p class="sh__desc">The ALL store lets the photography lead, with full-screen editorial images, minimal type and a simple menu to shop the season or explore past collections.</p></div></div>
-    <div class="fb__row">
-      <div class="fb__left media" data-asset="feature-small"></div>
-      <div class="fb__right media"><div class="fb__screen" data-asset="feature-large"></div></div>
+      <div class="zz">
+        <div class="zz__row"><div class="zz__media media" data-asset="exploration-1"></div><div class="zz__body"><h3 class="zz__title">Custom builds</h3><p class="zz__text">Product pages let shoppers add straps, charms and extras to each piece, using add-on tech our team researched so the price updates live.</p></div></div>
+        <div class="zz__row"><div class="zz__media media" data-asset="exploration-2"></div><div class="zz__body"><h3 class="zz__title">Responsive</h3><p class="zz__text">Every page was designed for desktop, tablet and mobile, so banners, product grids, menus and add-on pickers adapt to each screen while keeping the same order and the brand's look.</p></div></div>
+      </div>
     </div>
   </section>
 
   <!-- ===== 10.7 Mobile (B14) ===== -->
   <section class="cs-media-single fx" data-block="10.7 Mobile (B14)">
     <div class="wrap">
-      <div class="sh"><h2 class="sh__title"><span>Built for</span><span class="accent">small screens</span></h2><p class="sh__desc">Fashion is often discovered and bought from a phone, so menus, product grids, banners and WhatsApp contact were adapted to work first on small screens.</p></div>
+      <div class="sh"><h2 class="sh__title"><span>Clear before</span><span class="accent">checkout</span></h2><p class="sh__desc">The product page shows sizes, add-ons and the running total in one place, with the free shipping threshold and WhatsApp help close at hand.</p></div>
       <div class="ms__img media" data-asset="mobile"></div>
     </div>
   </section>
@@ -680,11 +669,11 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
     <div class="wrap ln">
       <div class="ln__head">
         <h2 class="sh__title"><span>Design</span><span class="accent">tradeoffs</span></h2>
-        <p class="ln__desc">Both stores had to sell like an e-commerce site and still feel like a fashion brand. These two design choices kept that balance in each project.</p>
+        <p class="ln__desc">The store had to sell like an e-commerce site and still feel like a fashion brand. These two design choices kept that balance across the site.</p>
       </div>
       <ol class="ln__list">
-        <li class="ln__item"><span class="ln__num">01</span><h3 class="ln__title">Identity over trends</h3><p class="ln__text">Each store follows its own brand, colorful and playful for Butrich, editorial and quiet for ALL, instead of a shared fashion template.</p></li>
-        <li class="ln__item"><span class="ln__num">02</span><h3 class="ln__title">Flexible over custom</h3><p class="ln__text">Sections were designed to be reused by each team for new collections, trading some one-off layouts for long-term independence.</p></li>
+        <li class="ln__item"><span class="ln__num">01</span><h3 class="ln__title">Identity over trends</h3><p class="ln__text">The store follows the brand's own codes, colorful, retro and playful like its shoes, instead of a polished but generic fashion template.</p></li>
+        <li class="ln__item"><span class="ln__num">02</span><h3 class="ln__title">Flexible over custom</h3><p class="ln__text">Sections were designed to be reused by the team for new collections, trading some one-off layouts for long-term independence.</p></li>
       </ol>
     </div>
   </section>
@@ -692,9 +681,9 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
   <!-- ===== 10.9 Outcome (B02) ===== -->
   <section class="cs-closing-scene fx" data-block="10.9 Outcome (B02)">
     <div class="wrap">
-      <div class="sh"><h2 class="sh__title"><span>Project</span><span class="accent">outcome</span></h2><p class="sh__desc">Both brands now sell online through stores that reflect their designers, supporting Butrich's international growth and the operating goals of ALL.</p></div>
+      <div class="sh"><h2 class="sh__title"><span>Project</span><span class="accent">outcome</span></h2><p class="sh__desc">Butrich now sells online through a store that reflects its designer, supporting the brand's international growth and its day-to-day operations.</p></div>
       <ul class="csc__bullets">
-        <li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>2 fashion brands, each with its own e-commerce site</span></li>
+        <li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>1 store in 2 languages, built on the brand's own codes</span></li>
         <li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>Shipping, regions and currencies clear before checkout</span></li>
         <li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>Desktop and mobile designed for every key page</span></li>
       </ul>
