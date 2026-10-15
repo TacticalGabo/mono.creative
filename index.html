@@ -379,8 +379,7 @@ a:hover{color:var(--lime400)}
 .page{container-type:inline-size;position:relative;max-width:1920px;margin:0 auto;overflow:clip;background:var(--bg)}
 /* al pulsar una entry: fundido inmediato al fondo mientras carga (ver __mcCase) */
 html.mc-leaving .page{opacity:0;transition:opacity .28s ease-out}
-.fade-mark{position:absolute;left:0;right:0;height:0;border-top:1px dashed #ff0000;z-index:9998;pointer-events:none}
-.fade-mark b{position:absolute;left:8px;top:-16px;font-family:var(--mono);font-size:11px;color:#ff0000;background:rgba(0,0,0,.35);padding:1px 4px}
+.fade-mark{position:absolute;left:0;right:0;height:0;pointer-events:none}   /* marca 'swap' invisible: solo la usa el observador del cambio de tema */
 .wrap{padding-inline:var(--m)}
 .qa-w{position:fixed;left:8px;top:8px;z-index:9999;color:#ff0000;font-family:var(--mono);font-size:12px;line-height:1;pointer-events:none;white-space:nowrap}
 .glow{position:absolute;background:#9de14a;border-radius:54% 46% 38% 62%/56% 44% 62% 38%;pointer-events:none}
@@ -2405,15 +2404,14 @@ class Component extends DCLogic {
       if (!anchor) return;
       var pageTop = page.getBoundingClientRect().top + window.pageYOffset;
       var base = anchor.getBoundingClientRect().top + window.pageYOffset;
-      var mk = function(id, top, label){
+      var mk = function(id, top){
         var el = document.getElementById(id);
-        if (!el) { el = document.createElement('div'); el.id = id; el.className = 'fade-mark'; el.appendChild(document.createElement('b')); page.appendChild(el); }
+        if (!el) { el = document.createElement('div'); el.id = id; el.className = 'fade-mark'; page.appendChild(el); }
         el.style.top = (top - pageTop) + 'px';
-        el.querySelector('b').textContent = label + ' ' + Math.round(top);
       };
       // (2026-10-03) un solo punto: 'swap'. Al cruzarlo con el scroll el tema
       // cambia (script __mcSwap). El punto final se retiró.
-      mk('mc-mark-start', base + fs, 'swap');
+      mk('mc-mark-start', base + fs);
       var old_end = document.getElementById('mc-mark-end'); if (old_end) old_end.remove();
       window.__mcSwapY = base + fs;
     };
