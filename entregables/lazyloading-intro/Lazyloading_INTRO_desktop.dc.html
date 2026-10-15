@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/mono-creative-design-system-6daf0c72-ebab-4dae-9c99-637d20555c97/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/mono-creative-design-system-6daf0c72-ebab-4dae-9c99-637d20555c97/tokens/fig-tokens.css">
+<link rel="stylesheet" href="_ds/mono-creative-design-system-6daf0c72-ebab-4dae-9c99-637d20555c97/styles.css">
+<script src="_ds/mono-creative-design-system-6daf0c72-ebab-4dae-9c99-637d20555c97/_ds_bundle.js"></script>
+<style>html,body{margin:0;padding:0;} a{color:#B8FF00;} a:hover{color:#9BD700;}</style>
+</helmet>
+<div data-screen-label="b" onClick="{{ replay }}" style="position:relative;width:1440px;height:712px;overflow:hidden;cursor:pointer;background-color:{{ bg }};transition:background-color 700ms cubic-bezier(.65,0,.35,1);">
+  <svg ref="{{ svgRef }}" width="126.438" height="53.644" viewBox="0 0 716 296" shape-rendering="geometricPrecision" style="position:absolute;left:656.999px;top:299.147px;display:block;overflow:visible;transform-origin:50% 50%;color:{{ fg }};opacity:{{ logoOpacity }};transition:color 700ms cubic-bezier(.65,0,.35,1), opacity 1400ms cubic-bezier(.4,0,.2,1);">
+    <g ref="{{ groupRef }}">
+      <path ref="{{ blobRef }}" d="" fill="currentColor"></path>
+    </g>
+  </svg>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:712},&quot;zoomSpeed&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:10,&quot;min&quot;:0,&quot;max&quot;:10,&quot;step&quot;:0.1,&quot;unit&quot;:&quot;%/s&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;cycleSeconds&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:1.9,&quot;min&quot;:1,&quot;max&quot;:10,&quot;step&quot;:0.1,&quot;unit&quot;:&quot;s&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;swapAt&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:1.2,&quot;min&quot;:0,&quot;max&quot;:8,&quot;step&quot;:0.1,&quot;unit&quot;:&quot;s&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;}}">
+const BLOBS = [
+  { cx: 116, cy: 148, rx: 116, ry: 148, arc: 26, delay: 0.10 },
+  { cx: 302, cy: 148, rx: 116, ry: 148, arc: -18, delay: 0.17 },
+  { cx: 595.5, cy: 148, rx: 120.5, ry: 148, arc: -34, delay: 0.0 }
+];
+const TARGET = { cx: 358, cy: 148, rx: 120.5, ry: 148 };
+const PHASES = [0, 0.6571, 0, 0.3429, 0];
+const GRID = { x0: -200, y0: -120, x1: 920, y1: 416, cell: 4 };
+const K_BLEND = 62, CYCLE = 3.5, FPS = 24, DETAIL = 9;
+const CASES = {
+  1: [['l', 'b']], 2: [['b', 'r']], 3: [['l', 'r']], 4: [['t', 'r']],
+  5: [['l', 't'], ['b', 'r']], 6: [['t', 'b']], 7: [['l', 't']], 8: [['t', 'l']],
+  9: [['t', 'b']], 10: [['t', 'r'], ['l', 'b']], 11: [['t', 'r']], 12: [['l', 'r']],
+  13: [['b', 'r']], 14: [['l', 'b']]
+};
+
+class Component extends DCLogic {
+  state = { dark: false, faded: false };
+  constructor(props) {
+    super(props);
+    this.t0 = null; this.lastFrame = -1;
+    this.nx = Math.round((GRID.x1 - GRID.x0) / GRID.cell) + 1;
+    this.ny = Math.round((GRID.y1 - GRID.y0) / GRID.cell) + 1;
+    this.field = new Float32Array(this.nx * this.ny);
+  }
+  componentDidMount() {
+    // LOADING GATE: el fade-out del logo espera a que la página termine de cargar.
+    // Carga rápida → se ve la secuencia normal (swapAt + 0.7s).
+    // Carga lenta → fondo y logo se quedan en estado 2 y el loop del logo continúa hasta "load";
+    // entonces el logo hace fade-out y entran los contenidos del home.
+    // En producción, llama this.markLoaded() cuando el contenido real del home esté listo.
+    this.pageLoaded = document.readyState === 'complete';
+    this.onLoad = () => this.markLoaded();
+    if (!this.pageLoaded) window.addEventListener('load', this.onLoad);
+    this.loop = this.loop.bind(this); this.raf = requestAnimationFrame(this.loop);
+  }
+  markLoaded() { this.pageLoaded = true; }
+  componentWillUnmount() { cancelAnimationFrame(this.raf); window.removeEventListener('load', this.onLoad); }
+  renderVals() {
+    const set = (k) => (el) => { this[k] = el; };
+    const d = this.state.dark;
+    return {
+      svgRef: set('svg'), groupRef: set('group'), blobRef: set('blob'),
+      bg: d ? '#152B1D' : '#B8FF00',
+      fg: d ? '#B8FF00' : '#264532',
+      logoOpacity: this.state.faded ? 0 : 1,
+      replay: () => { this.fadeAt = null; this.t0 = null; this.lastFrame = -1; this.setState({ dark: false, faded: false }); }
+    };
+  }
+  clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+  spring(p) { return p >= 1 ? 1 : 1 - Math.exp(-6.0 * p) * Math.cos(5.6 * p); }
+  easeInOut(p) { return p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2; }
+  buildField(ovals, k) {
+    const f = this.field, cell = GRID.cell, nx = this.nx, ny = this.ny;
+    for (let j = 0; j < ny; j++) {
+      const y = GRID.y0 + j * cell, row = j * nx;
+      for (let i = 0; i < nx; i++) {
+        const x = GRID.x0 + i * cell;
+        let s = -1e9;
+        for (let o = 0; o < ovals.length; o++) {
+          const v = ovals[o];
+          const dx = (x - v.cx) / v.rx, dy = (y - v.cy) / v.ry;
+          const si = (1 - Math.sqrt(dx * dx + dy * dy)) * (v.rx < v.ry ? v.rx : v.ry);
+          if (k <= 0.01) { if (si > s) s = si; }
+          else { const m = si > s ? si : s; const h = Math.max(k - Math.abs(si - s), 0) / k; s = m + h * h * k * 0.25; }
+        }
+        f[row + i] = s;
+      }
+    }
+  }
+  contours() {
+    const f = this.field, nx = this.nx, ny = this.ny, cell = GRID.cell;
+    const pts = new Map(), adj = new Map(), HK = nx * ny;
+    const ptOn = (key, ax, ay, bx, by, va, vb) => {
+      if (!pts.has(key)) { const t = va / (va - vb); pts.set(key, [ax + (bx - ax) * t, ay + (by - ay) * t]); }
+      return key;
+    };
+    const link = (a, b) => {
+      if (!adj.has(a)) adj.set(a, []);
+      if (!adj.has(b)) adj.set(b, []);
+      adj.get(a).push(b); adj.get(b).push(a);
+    };
+    for (let j = 0; j < ny - 1; j++) {
+      for (let i = 0; i < nx - 1; i++) {
+        const v00 = f[j * nx + i], v10 = f[j * nx + i + 1], v11 = f[(j + 1) * nx + i + 1], v01 = f[(j + 1) * nx + i];
+        const idx = (v00 > 0 ? 8 : 0) | (v10 > 0 ? 4 : 0) | (v11 > 0 ? 2 : 0) | (v01 > 0 ? 1 : 0);
+        if (idx === 0 || idx === 15) continue;
+        const x0 = GRID.x0 + i * cell, y0 = GRID.y0 + j * cell, x1 = x0 + cell, y1 = y0 + cell;
+        const edge = {
+          t: () => ptOn(j * nx + i, x0, y0, x1, y0, v00, v10),
+          b: () => ptOn((j + 1) * nx + i, x0, y1, x1, y1, v01, v11),
+          l: () => ptOn(HK + j * nx + i, x0, y0, x0, y1, v00, v01),
+          r: () => ptOn(HK + j * nx + i + 1, x1, y0, x1, y1, v10, v11)
+        };
+        for (const s of CASES[idx]) link(edge[s[0]](), edge[s[1]]());
+      }
+    }
+    const seen = new Set(), loops = [];
+    for (const start of adj.keys()) {
+      if (seen.has(start)) continue;
+      const loop = []; let cur = start, prev = null;
+      while (cur !== undefined && !seen.has(cur)) {
+        seen.add(cur); loop.push(pts.get(cur));
+        let next;
+        for (const n of adj.get(cur) || []) { if (n !== prev && !seen.has(n)) { next = n; break; } }
+        prev = cur; cur = next;
+      }
+      if (loop.length > 8) loops.push(loop);
+    }
+    return loops;
+  }
+  resample(loop, spacing) {
+    const n = loop.length, seg = []; let total = 0;
+    for (let i = 0; i < n; i++) { const a = loop[i], b = loop[(i + 1) % n]; const len = Math.hypot(b[0] - a[0], b[1] - a[1]); seg.push(len); total += len; }
+    const m = Math.max(24, Math.min(220, Math.round(total / spacing)));
+    const out = []; let si = 0, sacc = 0;
+    for (let i = 0; i < m; i++) {
+      const target = (i / m) * total;
+      while (sacc + seg[si] < target && si < n - 1) { sacc += seg[si]; si++; }
+      const a = loop[si], b = loop[(si + 1) % n]; const t = seg[si] > 0 ? (target - sacc) / seg[si] : 0;
+      out.push([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]);
+    }
+    return out;
+  }
+  curvePath(p) {
+    const n = p.length; if (n < 3) return '';
+    let d = 'M' + p[0][0].toFixed(1) + ' ' + p[0][1].toFixed(1);
+    for (let i = 0; i < n; i++) {
+      const p0 = p[(i - 1 + n) % n], p1 = p[i], p2 = p[(i + 1) % n], p3 = p[(i + 2) % n];
+      d += 'C' + (p1[0] + (p2[0] - p0[0]) / 6).toFixed(1) + ' ' + (p1[1] + (p2[1] - p0[1]) / 6).toFixed(1) +
+        ' ' + (p2[0] - (p3[0] - p1[0]) / 6).toFixed(1) + ' ' + (p2[1] - (p3[1] - p1[1]) / 6).toFixed(1) +
+        ' ' + p2[0].toFixed(1) + ' ' + p2[1].toFixed(1);
+    }
+    return d + 'Z';
+  }
+  toon(p) {
+    const c = 1.4;
+    if (p < 0.5) { const x = 2 * p; return (x * x * ((c + 1) * x - c)) / 2; }
+    const x = 2 * p - 1, a = 0.85;
+    return 0.5 + 0.5 * (a * (1 - Math.pow(1 - x, 5)) + (1 - a) * x);
+  }
+  progress(cycle) {
+    return { t: cycle < 0.5 ? cycle * 2 : 2 - cycle * 2, dir: cycle < 0.5 ? 1 : -1 };
+  }
+  progressOld(cycle) {
+    const [h1, morph, h2, back] = PHASES;
+    if (cycle < h1) return { t: 0, dir: 1 };
+    if (cycle < h1 + morph) return { t: (cycle - h1) / morph, dir: 1 };
+    if (cycle < h1 + morph + h2) return { t: 1, dir: 1 };
+    if (cycle < h1 + morph + h2 + back) return { t: 1 - (cycle - h1 - morph - h2) / back, dir: -1 };
+    return { t: 0, dir: -1 };
+  }
+  loop(now) {
+    this.raf = requestAnimationFrame(this.loop);
+    if (this.t0 === null) this.t0 = now;
+    const elapsed = (now - this.t0) / 1000;
+    const swapAt = this.props.swapAt ?? 1.2;
+    const zoomSpeed = (this.props.zoomSpeed ?? 10) / 100;
+
+    if (this.svg) this.svg.style.transform = 'scale(' + Math.max(0.4, 1.1 - zoomSpeed * elapsed).toFixed(4) + ')';
+    if (!this.state.dark && elapsed >= swapAt) this.setState({ dark: true });
+    if (!this.state.faded && elapsed >= swapAt + 0.7 && this.pageLoaded) { this.fadeAt = elapsed; this.setState({ faded: true }); }
+    if (this.state.faded && this.fadeAt != null && elapsed > this.fadeAt + 1.7) return;
+
+    const frame = Math.floor(elapsed * FPS);
+    if (frame === this.lastFrame) return;
+    this.lastFrame = frame;
+    const bt = frame / FPS;
+    const st = this.progress((bt % (this.props.cycleSeconds ?? 1.9)) / (this.props.cycleSeconds ?? 1.9)), t = st.t, dir = st.dir;
+
+    let overshoot = 0; const ovals = [];
+    for (const b of BLOBS) {
+      const q = this.clamp01((t - b.delay) / (1 - b.delay));
+      const e = this.toon(q);
+      const vel = (this.toon(Math.min(1, q + 0.02)) - this.toon(Math.max(0, q - 0.02))) / 0.04;
+      const sq = Math.min(0.07, Math.abs(vel) * 0.025) * (1 - Math.abs(e - 0.5) * 0.6);
+      overshoot = Math.max(overshoot, e - 1);
+      ovals.push({
+        cx: b.cx + (TARGET.cx - b.cx) * e,
+        cy: b.cy,
+        rx: Math.max(8, (b.rx + (TARGET.rx - b.rx) * e) * (1 + sq)),
+        ry: Math.max(8, (b.ry + (TARGET.ry - b.ry) * e) * (1 - sq * 0.4))
+      });
+    }
+    this.buildField(ovals, K_BLEND * Math.pow(1 - this.clamp01(t), 2));
+    let d = '';
+    for (const lp of this.contours()) d += this.curvePath(this.resample(lp, DETAIL));
+    if (d && this.blob) this.blob.setAttribute('d', d);
+    if (this.group) {
+      const s = overshoot * 0.9;
+      this.group.setAttribute('transform', 'translate(' + TARGET.cx + ' ' + TARGET.cy + ') scale(' + (1 + s).toFixed(4) + ' ' + (1 - s).toFixed(4) + ') translate(' + (-TARGET.cx) + ' ' + (-TARGET.cy) + ')');
+    }
+  }
+}
+</script>
+</body>
+</html>
