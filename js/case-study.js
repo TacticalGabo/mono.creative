@@ -213,9 +213,10 @@
   if(window.__csImg)return; window.__csImg=1;
   var WAIT=350;   /* ms máx. esperando la decodificación antes de animar igualmente */
   function live(q){return [].filter.call(document.querySelectorAll(q),function(el){return !el.closest('x-dc')})}
+  var tries=0;
   function init(){
     var main=live('main[data-case]')[0];
-    if(!main)return setTimeout(init,120);
+    if(!main){if(++tries<250)setTimeout(init,120);return}   /* tope 30 s: contact.html carga este JS y no tiene main[data-case] */
     var io_ok='IntersectionObserver' in window;
     var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -232,6 +233,7 @@
 
     /* ---- radio de la imagen del hero: arranca cuando la página queda libre (mín. 550 ms),
        para que se vea animado y no salte de golpe con el hilo ocupado tras montar ---- */
+    setTimeout(function(){document.documentElement.classList.add('hero-ok')},2500);   /* red de seguridad del aviso del <head> */
     var hero_img=main.querySelector('.cs-hero .media'), fired=0;
     function go_round(){
       if(fired||!hero_img)return; fired=1;
@@ -261,9 +263,14 @@
        como en Figma (su margin-left negativo pasa a scrollLeft) */
     [].forEach.call(main.querySelectorAll('.hs'),function(h){var m=h.firstElementChild,x=m?-parseFloat(getComputedStyle(m).marginLeft):0;
       if(x>0){h.classList.add('hs-on');h.scrollLeft=x}});
-    /* vídeos en bucle solo mientras se ven: fuera de pantalla se pausan (CPU/batería) */
+    /* vídeos con buffer acotado: src (preload metadata) a <=3 pantallas; play solo visibles (+25 %),
+       pausa fuera; a más de 3 pantallas se suelta el src (libera descarga, decodificador y memoria) y
+       se vuelve a pedir al acercarse (caché HTTP). El poster es el fondo del hueco: nunca queda vacío */
     function vplay(v){var p=v.play();if(p&&p.catch)p.catch(function(){})}
-    var vo=io_ok?new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)vplay(e.target);else e.target.pause()})}):null;
+    function vattach(v){if(!v.getAttribute('src')){v.preload='metadata';v.src=v.__src}}
+    function vdetach(v){if(v.getAttribute('src')){v.pause();v.removeAttribute('src');v.load()}}
+    var vo=io_ok?new IntersectionObserver(function(es){es.forEach(function(e){var v=e.target;if(e.isIntersecting){vattach(v);vplay(v)}else v.pause()})},{rootMargin:'25% 0px'}):null;
+    var vf=io_ok?new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)vattach(e.target);else vdetach(e.target)})},{rootMargin:'300% 0px'}):null;
     function load(el){
       if(el.__ready)return el.__ready;
       el.classList.add('ld');[].forEach.call(el.querySelectorAll('[data-asset]'),function(n){n.classList.add('ld')});
@@ -271,8 +278,8 @@
          muted/loop/playsinline van por JS: el runtime de la plantilla no conserva esos atributos */
       [].forEach.call(el.querySelectorAll('video[data-src]'),function(v){
         v.muted=true;v.loop=true;v.playsInline=true;v.setAttribute('playsinline','');
-        v.src=v.getAttribute('data-src');v.removeAttribute('data-src');
-        if(vo)vo.observe(v);else vplay(v);
+        v.__src=v.getAttribute('data-src');v.removeAttribute('data-src');
+        if(vo){vf.observe(v);vo.observe(v)}else{vattach(v);vplay(v)}
       });
       el.__ready=Promise.all(urls(el).map(function(u){var i=new Image();i.src=u;
         return (i.decode?i.decode():new Promise(function(r){i.onload=i.onerror=r})).catch(function(){})}));
@@ -297,7 +304,7 @@
     var io=new IntersectionObserver(function(es){
       es.filter(function(e){return e.isIntersecting})
         .sort(function(a,b){var d=a.boundingClientRect.top-b.boundingClientRect.top;return Math.abs(d)>40?d:a.boundingClientRect.left-b.boundingClientRect.left})
-        .forEach(function(e,i){io.unobserve(e.target);start(e.target,i*.15)});
+        .forEach(function(e,i){io.unobserve(e.target);start(e.target,Math.min(i,4)*.15)});   /* escalonado con tope (.6 s): en grillas largas no se hace esperar */
     },{threshold:.12,rootMargin:'0px 0px -6% 0px'});
     imgs.forEach(function(el){io.observe(el)});
   }
