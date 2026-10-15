@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script>/* .js síncrono (antes lo ponía case-study.js, diferido: según qué llegaba antes, el hero se veía, se ocultaba y reaparecía) + tema elegido en el toggle (home o entry); sin elección = dark */document.documentElement.classList.add('js');try{localStorage.removeItem('mc-theme');var t=sessionStorage.getItem('mc-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
-<link rel="icon" type="image/svg+xml" href="./assets/logo-favicon-48x29.svg?v=3">
+<link rel="icon" type="image/svg+xml" href="./assets/shared/logo-favicon-48x29.svg?v=3">
 <title>Contact · mono.creative</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Tell mono.creative what you are building. Design, direction and a conversation about what comes next.">
@@ -19,7 +19,7 @@
 <!-- (2026-10-05) las dos fuentes del primer pantallazo, pedidas ya con el HTML (sin esperar al CSS) -->
 <link rel="preload" as="font" type="font/woff2" crossorigin href="./fonts/plus-jakarta-sans/webfont/PlusJakartaSans-200-800-normal-latin.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="./fonts/space-mono/webfont/SpaceMono-400-normal-latin.woff2">
-<link rel="stylesheet" href="./css/case-study.css?v=11">
+<link rel="stylesheet" href="./css/case-study.css?v=12">
 <link rel="stylesheet" href="./css/contact.css?v=7">
 <!-- (2026-10-04) CARGA: React desde el propio dominio, igual que el home (mismos bytes,
      sha384 idéntico al SRI de support.js). Además, con window.__resources definido
@@ -30,7 +30,7 @@ if(!r[u+'react@18.3.1/umd/react.production.min.js'])r[u+'react@18.3.1/umd/react.
 if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.1/umd/react-dom.production.min.js']='./vendor/react-dom.production.min.js';})();
 </script>
 <script src="./vendor/support.js"></script>
-<script src="./js/case-study.js?v=7" defer></script>
+<script src="./js/case-study.js?v=8" defer></script>
 <script src="./js/contact-config.js" defer></script>
 <script src="./js/contact-rules.js?v=2" defer></script>
 <script src="./js/contact.js?v=2" defer></script>
@@ -579,9 +579,9 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
               <h1 id="contact-title">Let&rsquo;s bring your<br class="br-m"> ideas to life</h1>
               <a class="contact-email" href="mailto:hello.monocreative@gmail.com">hello.monocreative@gmail.com<i data-lucide="arrow-up-right" aria-hidden="true"></i></a>
               <div class="socials contact-socials" data-comp="social-icons">
-      <div class="ico"><i style="left:.355px;top:.354px;width:16.7684px;height:16.7749px;-webkit-mask-image:url(./assets/social-instagram-frame-17x17.svg);mask-image:url(./assets/social-instagram-frame-17x17.svg)"></i><i style="left:4.435px;top:4.435px;width:8.6178px;height:8.6178px;-webkit-mask-image:url(./assets/social-instagram-lens-9x9.svg);mask-image:url(./assets/social-instagram-lens-9x9.svg)"></i><i style="left:12.735px;top:3.635px;width:2.012px;height:2.012px;-webkit-mask-image:url(./assets/social-instagram-dot-2x2.svg);mask-image:url(./assets/social-instagram-dot-2x2.svg)"></i></div>
-      <div class="ico"><i style="left:1.46px;top:1.46px;width:14.5723px;height:14.5723px;-webkit-mask-image:url(./assets/social-linkedin-15x15.svg);mask-image:url(./assets/social-linkedin-15x15.svg)"></i></div>
-      <div class="ico"><i style="left:-.75px;top:2.55px;width:18.9924px;height:12.3863px;-webkit-mask-image:url(./assets/social-behance-19x12.svg);mask-image:url(./assets/social-behance-19x12.svg)"></i></div>
+      <div class="ico"><i style="left:.355px;top:.354px;width:16.7684px;height:16.7749px;-webkit-mask-image:url(./assets/shared/social-instagram-frame-17x17.svg);mask-image:url(./assets/shared/social-instagram-frame-17x17.svg)"></i><i style="left:4.435px;top:4.435px;width:8.6178px;height:8.6178px;-webkit-mask-image:url(./assets/shared/social-instagram-lens-9x9.svg);mask-image:url(./assets/shared/social-instagram-lens-9x9.svg)"></i><i style="left:12.735px;top:3.635px;width:2.012px;height:2.012px;-webkit-mask-image:url(./assets/shared/social-instagram-dot-2x2.svg);mask-image:url(./assets/shared/social-instagram-dot-2x2.svg)"></i></div>
+      <div class="ico"><i style="left:1.46px;top:1.46px;width:14.5723px;height:14.5723px;-webkit-mask-image:url(./assets/shared/social-linkedin-15x15.svg);mask-image:url(./assets/shared/social-linkedin-15x15.svg)"></i></div>
+      <div class="ico"><i style="left:-.75px;top:2.55px;width:18.9924px;height:12.3863px;-webkit-mask-image:url(./assets/shared/social-behance-19x12.svg);mask-image:url(./assets/shared/social-behance-19x12.svg)"></i></div>
     </div>
               <p class="contact-intro">Big idea. New chapter.<br>Let's give it a shape of its own.</p>
             </div>
@@ -678,7 +678,7 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
 <div class="grain-overlay" aria-hidden="true"></div>
 <style>
   .grain-overlay{position:fixed;inset:0;pointer-events:none;z-index:2147483000;
-    background-image:url('./assets/texture-grain.png');background-repeat:repeat;
+    background-image:url('./assets/shared/texture-grain.png');background-repeat:repeat;
     background-size:281.6px 281.6px;   /* grano en pantalla 1.1 px */
     opacity:.42;mix-blend-mode:overlay;will-change:transform}
   /* light: overlay sobre fondo claro devuelve el mismo fondo y el grano

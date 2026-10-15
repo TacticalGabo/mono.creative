@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <script>/* .js síncrono (antes lo ponía case-study.js, diferido: según qué llegaba antes, el hero se veía, se ocultaba y reaparecía) + tema elegido en el toggle (home o entry); sin elección = light */document.documentElement.classList.add('js');try{localStorage.removeItem('mc-theme');var t=sessionStorage.getItem('mc-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
-<link rel="icon" type="image/svg+xml" href="./assets/logo-favicon-48x29.svg?v=3">
+<link rel="icon" type="image/svg+xml" href="./assets/shared/logo-favicon-48x29.svg?v=3">
 <title>Enjin NFTs — Case study · mono.creative</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Enjin NFTs: Collectible illustrations and animations that gave Enjin's NFT drops a recurring cast.">
@@ -16,10 +16,10 @@
 @font-face{font-family:'Plus Jakarta Sans';font-style:italic;font-weight:200 800;font-display:swap;src:url(./fonts/plus-jakarta-sans/webfont/PlusJakartaSans-200-800-italic-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 @font-face{font-family:'Space Mono';font-style:normal;font-weight:400;font-display:swap;src:url(./fonts/space-mono/webfont/SpaceMono-400-normal-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 </style>
-<link rel="stylesheet" href="./css/case-study.css?v=11">
+<link rel="stylesheet" href="./css/case-study.css?v=12">
 <!-- ASSETS — hero (LCP): precarga solo la del breakpoint activo -->
-<link rel="preload" as="image" href="./casestudy_EnjinNFTs/01-hero.jpg" media="(min-width:768px)" fetchpriority="high">
-<link rel="preload" as="image" href="./casestudy_EnjinNFTs/01-hero-mobile.jpg" media="(max-width:767.98px)" fetchpriority="high">
+<link rel="preload" as="image" href="./assets/casestudy_EnjinNFTs/01-hero.webp" media="(min-width:768px)" fetchpriority="high">
+<link rel="preload" as="image" href="./assets/casestudy_EnjinNFTs/01-hero-mobile.webp" media="(max-width:767.98px)" fetchpriority="high">
 <script>/* hero: avisa (html.hero-ok) cuando la imagen del breakpoint activo está decodificada; el CSS espera a esto para su fade */(function(){var d=document.documentElement,ok=function(){d.classList.add('hero-ok')},l=[].filter.call(document.querySelectorAll('link[rel=preload][as=image]'),function(x){return !x.media||matchMedia(x.media).matches})[0];if(!l)return ok();var i=new Image();i.src=l.href;(i.decode?i.decode():new Promise(function(r){i.onload=i.onerror=r})).then(ok,ok);setTimeout(ok,2500)})()</script>
 <!-- (2026-10-04) CARGA: React desde el propio dominio, igual que el home (mismos bytes,
      sha384 idéntico al SRI de support.js). Además, con window.__resources definido
@@ -30,7 +30,7 @@ if(!r[u+'react@18.3.1/umd/react.production.min.js'])r[u+'react@18.3.1/umd/react.
 if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.1/umd/react-dom.production.min.js']='./vendor/react-dom.production.min.js';})();
 </script>
 <script src="./vendor/support.js"></script>
-<script src="./js/case-study.js?v=7" defer></script>
+<script src="./js/case-study.js?v=8" defer></script>
 </head>
 <body>
 <x-dc>
@@ -44,7 +44,7 @@ if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.
     con content generator/build_casestudy.py (copy provisional: editar el JSON y regenerar).
   · Header, CTA y footer = los del home, literal. Viven entre marcadores SHARED y
     se regeneran con:  python "build/sync-shared.py"   (NO editarlos aquí a mano).
-  · Imágenes del caso: carpeta ./casestudy_EnjinNFTs/ (ver bloque ASSETS tras SHARED:JS-GEOM).
+  · Imágenes del caso: carpeta ./assets/casestudy_EnjinNFTs/ (ver bloque ASSETS tras SHARED:JS-GEOM).
 -->
 <!-- SHARED:JS-GEOM -->
 <script>
@@ -94,60 +94,60 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
 <!-- /SHARED:JS-GEOM -->
 <style>
 /* ==========================================================================
-   9 · ASSETS — imágenes del caso en ./casestudy_EnjinNFTs/
+   9 · ASSETS — imágenes del caso en ./assets/casestudy_EnjinNFTs/
        Para cambiar una imagen: reemplaza el archivo con el MISMO nombre.
        Si cambias la extensión (.png/.jpg), cámbiala solo aquí.
        Sin archivo, el hueco muestra el color placeholder (--media).
    ========================================================================== */
-[data-asset="hero"]{background-image:url(./casestudy_EnjinNFTs/01-hero.jpg)}
-@media (max-width:767.98px){[data-asset="hero"]{background-image:url(./casestudy_EnjinNFTs/01-hero-mobile.jpg)}}
-[data-asset="grid-01"]{background-image:url(./casestudy_EnjinNFTs/03-grid-01-poster.jpg)}
-[data-asset="grid-02"]{background-image:url(./casestudy_EnjinNFTs/03-grid-02-poster.jpg)}
-[data-asset="grid-03"]{background-image:url(./casestudy_EnjinNFTs/03-grid-03-poster.jpg)}
-[data-asset="grid-04"]{background-image:url(./casestudy_EnjinNFTs/03-grid-04-poster.jpg)}
-[data-asset="grid-05"]{background-image:url(./casestudy_EnjinNFTs/03-grid-05-poster.jpg)}
-[data-asset="grid-06"]{background-image:url(./casestudy_EnjinNFTs/03-grid-06.webp)}
-[data-asset="grid-07"]{background-image:url(./casestudy_EnjinNFTs/03-grid-07.webp)}
-[data-asset="grid-08"]{background-image:url(./casestudy_EnjinNFTs/03-grid-08.webp)}
-[data-asset="grid-09"]{background-image:url(./casestudy_EnjinNFTs/03-grid-09.webp)}
-[data-asset="grid-10"]{background-image:url(./casestudy_EnjinNFTs/03-grid-10.webp)}
-[data-asset="grid-11"]{background-image:url(./casestudy_EnjinNFTs/03-grid-11.webp)}
-[data-asset="grid-12"]{background-image:url(./casestudy_EnjinNFTs/03-grid-12.webp)}
-[data-asset="grid-13"]{background-image:url(./casestudy_EnjinNFTs/03-grid-13.webp)}
-[data-asset="grid-14"]{background-image:url(./casestudy_EnjinNFTs/03-grid-14.webp)}
-[data-asset="grid-15"]{background-image:url(./casestudy_EnjinNFTs/03-grid-15.webp)}
-[data-asset="grid-16"]{background-image:url(./casestudy_EnjinNFTs/03-grid-16.webp)}
-[data-asset="grid-17"]{background-image:url(./casestudy_EnjinNFTs/03-grid-17.webp)}
-[data-asset="grid-18"]{background-image:url(./casestudy_EnjinNFTs/03-grid-18.webp)}
-[data-asset="grid-19"]{background-image:url(./casestudy_EnjinNFTs/03-grid-19.webp)}
-[data-asset="grid-20"]{background-image:url(./casestudy_EnjinNFTs/03-grid-20.webp)}
-[data-asset="grid-21"]{background-image:url(./casestudy_EnjinNFTs/03-grid-21.webp)}
-[data-asset="grid-22"]{background-image:url(./casestudy_EnjinNFTs/03-grid-22.webp)}
-[data-asset="grid-23"]{background-image:url(./casestudy_EnjinNFTs/03-grid-23.webp)}
-[data-asset="grid-24"]{background-image:url(./casestudy_EnjinNFTs/03-grid-24.webp)}
-[data-asset="grid-25"]{background-image:url(./casestudy_EnjinNFTs/03-grid-25.webp)}
-[data-asset="grid-26"]{background-image:url(./casestudy_EnjinNFTs/03-grid-26.webp)}
-[data-asset="grid-27"]{background-image:url(./casestudy_EnjinNFTs/03-grid-27-poster.jpg)}
-[data-asset="grid-28"]{background-image:url(./casestudy_EnjinNFTs/03-grid-28-poster.jpg)}
-[data-asset="grid-29"]{background-image:url(./casestudy_EnjinNFTs/03-grid-29-poster.jpg)}
-[data-asset="grid-30"]{background-image:url(./casestudy_EnjinNFTs/03-grid-30-poster.jpg)}
-[data-asset="grid-31"]{background-image:url(./casestudy_EnjinNFTs/05-grid-31-poster.jpg)}
-[data-asset="grid-32"]{background-image:url(./casestudy_EnjinNFTs/05-grid-32-poster.jpg)}
-[data-asset="grid-33"]{background-image:url(./casestudy_EnjinNFTs/05-grid-33-poster.jpg)}
-[data-asset="grid-34"]{background-image:url(./casestudy_EnjinNFTs/05-grid-34-poster.jpg)}
-[data-asset="grid-35"]{background-image:url(./casestudy_EnjinNFTs/05-grid-35.webp)}
-[data-asset="grid-36"]{background-image:url(./casestudy_EnjinNFTs/05-grid-36-poster.jpg)}
-[data-asset="grid-37"]{background-image:url(./casestudy_EnjinNFTs/05-grid-37.webp)}
-[data-asset="grid-38"]{background-image:url(./casestudy_EnjinNFTs/05-grid-38.webp)}
-[data-asset="grid-39"]{background-image:url(./casestudy_EnjinNFTs/05-grid-39.webp)}
-[data-asset="grid-40"]{background-image:url(./casestudy_EnjinNFTs/05-grid-40.webp)}
-[data-asset="grid-41"]{background-image:url(./casestudy_EnjinNFTs/05-grid-41.webp)}
-[data-asset="grid-42"]{background-image:url(./casestudy_EnjinNFTs/05-grid-42.webp)}
-[data-asset="grid-43"]{background-image:url(./casestudy_EnjinNFTs/05-grid-43-poster.jpg)}
-[data-asset="grid-44"]{background-image:url(./casestudy_EnjinNFTs/05-grid-44-poster.jpg)}
-[data-asset="grid-45"]{background-image:url(./casestudy_EnjinNFTs/05-grid-45-poster.jpg)}
-[data-asset="grid-46"]{background-image:url(./casestudy_EnjinNFTs/05-grid-46.webp)}
-[data-asset="grid-47"]{background-image:url(./casestudy_EnjinNFTs/05-grid-47.webp)}
+[data-asset="hero"]{background-image:url(./assets/casestudy_EnjinNFTs/01-hero.webp)}
+@media (max-width:767.98px){[data-asset="hero"]{background-image:url(./assets/casestudy_EnjinNFTs/01-hero-mobile.webp)}}
+[data-asset="grid-01"]{background-image:url(./assets/casestudy_EnjinNFTs/03-grid-01-poster.webp)}
+[data-asset="grid-02"]{background-image:url(./assets/casestudy_EnjinNFTs/03-grid-02-poster.jpg)}
+[data-asset="grid-03"]{background-image:url(./assets/casestudy_EnjinNFTs/03-grid-03-poster.jpg)}
+[data-asset="grid-04"]{background-image:url(./assets/casestudy_EnjinNFTs/03-grid-04-poster.jpg)}
+[data-asset="grid-05"]{background-image:url(./assets/casestudy_EnjinNFTs/03-grid-05-poster.jpg)}
+[data-asset="grid-06"]{background-image:url(./assets/casestudy_EnjinNFTs/03-grid-06.webp)}
+[data-asset="grid-07"]{background-image:url(./assets/casestudy_EnjinNFTs/03-grid-07.webp)}
+[data-asset="grid-08"]{background-image:url(./assets/casestudy_EnjinNFTs/03-grid-08.webp)}
+[data-asset="grid-09"]{background-image:url(./assets/casestudy_EnjinNFTs/03-grid-09.webp)}
+[data-asset="grid-10"]{background-image:url(./assets/casestudy_EnjinNFTs/03-grid-10.webp)}
+[data-asset="grid-11"]{background-image:url(./assets/casestudy_EnjinNFTs/03-grid-11.webp)}
+[data-asset="grid-12"]{background-image:url(./assets/casestudy_EnjinNFTs/03-grid-12.webp)}
+[data-asset="grid-13"]{background-image:url(./assets/casestudy_EnjinNFTs/03-grid-13.webp)}
+[data-asset="grid-14"]{background-image:url(./assets/casestudy_EnjinNFTs/03-grid-14.webp)}
+[data-asset="grid-15"]{background-image:url(./assets/casestudy_EnjinNFTs/03-grid-15.webp)}
+[data-asset="grid-16"]{background-image:url(./assets/casestudy_EnjinNFTs/03-grid-16.webp)}
+[data-asset="grid-17"]{background-image:url(./assets/casestudy_EnjinNFTs/03-grid-17.webp)}
+[data-asset="grid-18"]{background-image:url(./assets/casestudy_EnjinNFTs/03-grid-18.webp)}
+[data-asset="grid-19"]{background-image:url(./assets/casestudy_EnjinNFTs/03-grid-19.webp)}
+[data-asset="grid-20"]{background-image:url(./assets/casestudy_EnjinNFTs/03-grid-20.webp)}
+[data-asset="grid-21"]{background-image:url(./assets/casestudy_EnjinNFTs/03-grid-21.webp)}
+[data-asset="grid-22"]{background-image:url(./assets/casestudy_EnjinNFTs/03-grid-22.webp)}
+[data-asset="grid-23"]{background-image:url(./assets/casestudy_EnjinNFTs/03-grid-23.webp)}
+[data-asset="grid-24"]{background-image:url(./assets/casestudy_EnjinNFTs/03-grid-24.webp)}
+[data-asset="grid-25"]{background-image:url(./assets/casestudy_EnjinNFTs/03-grid-25.webp)}
+[data-asset="grid-26"]{background-image:url(./assets/casestudy_EnjinNFTs/03-grid-26.webp)}
+[data-asset="grid-27"]{background-image:url(./assets/casestudy_EnjinNFTs/03-grid-27-poster.webp)}
+[data-asset="grid-28"]{background-image:url(./assets/casestudy_EnjinNFTs/03-grid-28-poster.webp)}
+[data-asset="grid-29"]{background-image:url(./assets/casestudy_EnjinNFTs/03-grid-29-poster.webp)}
+[data-asset="grid-30"]{background-image:url(./assets/casestudy_EnjinNFTs/03-grid-30-poster.webp)}
+[data-asset="grid-31"]{background-image:url(./assets/casestudy_EnjinNFTs/05-grid-31-poster.webp)}
+[data-asset="grid-32"]{background-image:url(./assets/casestudy_EnjinNFTs/05-grid-32-poster.webp)}
+[data-asset="grid-33"]{background-image:url(./assets/casestudy_EnjinNFTs/05-grid-33-poster.webp)}
+[data-asset="grid-34"]{background-image:url(./assets/casestudy_EnjinNFTs/05-grid-34-poster.webp)}
+[data-asset="grid-35"]{background-image:url(./assets/casestudy_EnjinNFTs/05-grid-35.webp)}
+[data-asset="grid-36"]{background-image:url(./assets/casestudy_EnjinNFTs/05-grid-36-poster.webp)}
+[data-asset="grid-37"]{background-image:url(./assets/casestudy_EnjinNFTs/05-grid-37.webp)}
+[data-asset="grid-38"]{background-image:url(./assets/casestudy_EnjinNFTs/05-grid-38.webp)}
+[data-asset="grid-39"]{background-image:url(./assets/casestudy_EnjinNFTs/05-grid-39.webp)}
+[data-asset="grid-40"]{background-image:url(./assets/casestudy_EnjinNFTs/05-grid-40.webp)}
+[data-asset="grid-41"]{background-image:url(./assets/casestudy_EnjinNFTs/05-grid-41.webp)}
+[data-asset="grid-42"]{background-image:url(./assets/casestudy_EnjinNFTs/05-grid-42.webp)}
+[data-asset="grid-43"]{background-image:url(./assets/casestudy_EnjinNFTs/05-grid-43-poster.webp)}
+[data-asset="grid-44"]{background-image:url(./assets/casestudy_EnjinNFTs/05-grid-44-poster.webp)}
+[data-asset="grid-45"]{background-image:url(./assets/casestudy_EnjinNFTs/05-grid-45-poster.webp)}
+[data-asset="grid-46"]{background-image:url(./assets/casestudy_EnjinNFTs/05-grid-46.webp)}
+[data-asset="grid-47"]{background-image:url(./assets/casestudy_EnjinNFTs/05-grid-47.webp)}
 /* grillas de NFTs (Figma 9. Enjin NFTs: filas de 2 / 3 / 4; en 360 la de 4 pasa a 2×2) */
 .cs-grid{padding:56px 0}
 .cs-grid--b{padding-top:0}
@@ -683,15 +683,15 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
     <div class="wrap">
       <div class="sh"><h2 class="sh__title"><span>Every drop,</span><span class="accent">one mascot</span></h2><p class="sh__desc">Each drop placed the Enjin mascot in a new style, from seasonal sets to partner pieces, always recognizable at a glance.</p></div>
       <div class="ng">
-        <div class="ng__r ng__r--2"><div class="ng__c media vid" data-asset="grid-01"><video muted loop playsinline preload="none" data-src="./casestudy_EnjinNFTs/03-grid-01.mp4"></video></div><div class="ng__c media vid" data-asset="grid-02"><video muted loop playsinline preload="none" data-src="./casestudy_EnjinNFTs/03-grid-02.mp4"></video></div></div>
-        <div class="ng__r ng__r--3"><div class="ng__c media vid" data-asset="grid-03"><video muted loop playsinline preload="none" data-src="./casestudy_EnjinNFTs/03-grid-03.mp4"></video></div><div class="ng__c media vid" data-asset="grid-04"><video muted loop playsinline preload="none" data-src="./casestudy_EnjinNFTs/03-grid-04.mp4"></video></div><div class="ng__c media vid" data-asset="grid-05"><video muted loop playsinline preload="none" data-src="./casestudy_EnjinNFTs/03-grid-05.mp4"></video></div></div>
+        <div class="ng__r ng__r--2"><div class="ng__c media vid" data-asset="grid-01"><video muted loop playsinline preload="none" data-src="./assets/casestudy_EnjinNFTs/03-grid-01.mp4"></video></div><div class="ng__c media vid" data-asset="grid-02"><video muted loop playsinline preload="none" data-src="./assets/casestudy_EnjinNFTs/03-grid-02.mp4"></video></div></div>
+        <div class="ng__r ng__r--3"><div class="ng__c media vid" data-asset="grid-03"><video muted loop playsinline preload="none" data-src="./assets/casestudy_EnjinNFTs/03-grid-03.mp4"></video></div><div class="ng__c media vid" data-asset="grid-04"><video muted loop playsinline preload="none" data-src="./assets/casestudy_EnjinNFTs/03-grid-04.mp4"></video></div><div class="ng__c media vid" data-asset="grid-05"><video muted loop playsinline preload="none" data-src="./assets/casestudy_EnjinNFTs/03-grid-05.mp4"></video></div></div>
         <div class="ng__r ng__r--4"><div class="ng__c media" data-asset="grid-06"></div><div class="ng__c media" data-asset="grid-07"></div><div class="ng__c media" data-asset="grid-08"></div><div class="ng__c media" data-asset="grid-09"></div></div>
         <div class="ng__r ng__r--3"><div class="ng__c media" data-asset="grid-10"></div><div class="ng__c media" data-asset="grid-11"></div><div class="ng__c media" data-asset="grid-12"></div></div>
         <div class="ng__r ng__r--3"><div class="ng__c media" data-asset="grid-13"></div><div class="ng__c media" data-asset="grid-14"></div><div class="ng__c media" data-asset="grid-15"></div></div>
         <div class="ng__r ng__r--3"><div class="ng__c media" data-asset="grid-16"></div><div class="ng__c media" data-asset="grid-17"></div><div class="ng__c media" data-asset="grid-18"></div></div>
         <div class="ng__r ng__r--4"><div class="ng__c media" data-asset="grid-19"></div><div class="ng__c media" data-asset="grid-20"></div><div class="ng__c media" data-asset="grid-21"></div><div class="ng__c media" data-asset="grid-22"></div></div>
         <div class="ng__r ng__r--4"><div class="ng__c media" data-asset="grid-23"></div><div class="ng__c media" data-asset="grid-24"></div><div class="ng__c media" data-asset="grid-25"></div><div class="ng__c media" data-asset="grid-26"></div></div>
-        <div class="ng__r ng__r--4"><div class="ng__c media vid" data-asset="grid-27"><video muted loop playsinline preload="none" data-src="./casestudy_EnjinNFTs/03-grid-27.mp4"></video></div><div class="ng__c media vid" data-asset="grid-28"><video muted loop playsinline preload="none" data-src="./casestudy_EnjinNFTs/03-grid-28.mp4"></video></div><div class="ng__c media vid" data-asset="grid-29"><video muted loop playsinline preload="none" data-src="./casestudy_EnjinNFTs/03-grid-29.mp4"></video></div><div class="ng__c media vid" data-asset="grid-30"><video muted loop playsinline preload="none" data-src="./casestudy_EnjinNFTs/03-grid-30.mp4"></video></div></div>
+        <div class="ng__r ng__r--4"><div class="ng__c media vid" data-asset="grid-27"><video muted loop playsinline preload="none" data-src="./assets/casestudy_EnjinNFTs/03-grid-27.mp4"></video></div><div class="ng__c media vid" data-asset="grid-28"><video muted loop playsinline preload="none" data-src="./assets/casestudy_EnjinNFTs/03-grid-28.mp4"></video></div><div class="ng__c media vid" data-asset="grid-29"><video muted loop playsinline preload="none" data-src="./assets/casestudy_EnjinNFTs/03-grid-29.mp4"></video></div><div class="ng__c media vid" data-asset="grid-30"><video muted loop playsinline preload="none" data-src="./assets/casestudy_EnjinNFTs/03-grid-30.mp4"></video></div></div>
       </div>
     </div>
   </section>
@@ -716,12 +716,12 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
   <section class="cs-grid cs-grid--b fx" data-block="3.6 Final Decision (B10)">
     <div class="wrap">
       <div class="ng">
-        <div class="ng__r ng__r--2"><div class="ng__c media vid" data-asset="grid-31"><video muted loop playsinline preload="none" data-src="./casestudy_EnjinNFTs/05-grid-31.mp4"></video></div><div class="ng__c media vid" data-asset="grid-32"><video muted loop playsinline preload="none" data-src="./casestudy_EnjinNFTs/05-grid-32.mp4"></video></div></div>
-        <div class="ng__r ng__r--2"><div class="ng__c media vid" data-asset="grid-33"><video muted loop playsinline preload="none" data-src="./casestudy_EnjinNFTs/05-grid-33.mp4"></video></div><div class="ng__c media vid" data-asset="grid-34"><video muted loop playsinline preload="none" data-src="./casestudy_EnjinNFTs/05-grid-34.mp4"></video></div></div>
-        <div class="ng__r ng__r--2"><div class="ng__c media" data-asset="grid-35"></div><div class="ng__c media vid" data-asset="grid-36"><video muted loop playsinline preload="none" data-src="./casestudy_EnjinNFTs/05-grid-36.mp4"></video></div></div>
+        <div class="ng__r ng__r--2"><div class="ng__c media vid" data-asset="grid-31"><video muted loop playsinline preload="none" data-src="./assets/casestudy_EnjinNFTs/05-grid-31.mp4"></video></div><div class="ng__c media vid" data-asset="grid-32"><video muted loop playsinline preload="none" data-src="./assets/casestudy_EnjinNFTs/05-grid-32.mp4"></video></div></div>
+        <div class="ng__r ng__r--2"><div class="ng__c media vid" data-asset="grid-33"><video muted loop playsinline preload="none" data-src="./assets/casestudy_EnjinNFTs/05-grid-33.mp4"></video></div><div class="ng__c media vid" data-asset="grid-34"><video muted loop playsinline preload="none" data-src="./assets/casestudy_EnjinNFTs/05-grid-34.mp4"></video></div></div>
+        <div class="ng__r ng__r--2"><div class="ng__c media" data-asset="grid-35"></div><div class="ng__c media vid" data-asset="grid-36"><video muted loop playsinline preload="none" data-src="./assets/casestudy_EnjinNFTs/05-grid-36.mp4"></video></div></div>
         <div class="ng__r ng__r--2"><div class="ng__c media" data-asset="grid-37"></div><div class="ng__c media" data-asset="grid-38"></div></div>
         <div class="ng__r ng__r--4"><div class="ng__c media" data-asset="grid-39"></div><div class="ng__c media" data-asset="grid-40"></div><div class="ng__c media" data-asset="grid-41"></div><div class="ng__c media" data-asset="grid-42"></div></div>
-        <div class="ng__r ng__r--3"><div class="ng__c media vid" data-asset="grid-43"><video muted loop playsinline preload="none" data-src="./casestudy_EnjinNFTs/05-grid-43.mp4"></video></div><div class="ng__c media vid" data-asset="grid-44"><video muted loop playsinline preload="none" data-src="./casestudy_EnjinNFTs/05-grid-44.mp4"></video></div><div class="ng__c media vid" data-asset="grid-45"><video muted loop playsinline preload="none" data-src="./casestudy_EnjinNFTs/05-grid-45.mp4"></video></div></div>
+        <div class="ng__r ng__r--3"><div class="ng__c media vid" data-asset="grid-43"><video muted loop playsinline preload="none" data-src="./assets/casestudy_EnjinNFTs/05-grid-43.mp4"></video></div><div class="ng__c media vid" data-asset="grid-44"><video muted loop playsinline preload="none" data-src="./assets/casestudy_EnjinNFTs/05-grid-44.mp4"></video></div><div class="ng__c media vid" data-asset="grid-45"><video muted loop playsinline preload="none" data-src="./assets/casestudy_EnjinNFTs/05-grid-45.mp4"></video></div></div>
         <div class="ng__r ng__r--2"><div class="ng__c media" data-asset="grid-46"></div><div class="ng__c media" data-asset="grid-47"></div></div>
       </div>
     </div>
@@ -757,9 +757,9 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
       <svg class="btn-arr ar" width="12.22" height="14.67" viewBox="11.9 14.75 10 12" fill="none" overflow="visible" style="color:var(--btn3-arrow)"><path d="M12.3984 20.747H21.3984M17.8726 23.7109L21.3984 20.747L17.8726 17.7832" stroke="currentColor" stroke-width="1.2" vector-effect="non-scaling-stroke"></path></svg>
     </div>
     <div class="socials" data-comp="social-icons">
-      <div class="ico"><i style="left:.355px;top:.354px;width:16.7684px;height:16.7749px;-webkit-mask-image:url(./assets/social-instagram-frame-17x17.svg);mask-image:url(./assets/social-instagram-frame-17x17.svg)"></i><i style="left:4.435px;top:4.435px;width:8.6178px;height:8.6178px;-webkit-mask-image:url(./assets/social-instagram-lens-9x9.svg);mask-image:url(./assets/social-instagram-lens-9x9.svg)"></i><i style="left:12.735px;top:3.635px;width:2.012px;height:2.012px;-webkit-mask-image:url(./assets/social-instagram-dot-2x2.svg);mask-image:url(./assets/social-instagram-dot-2x2.svg)"></i></div>
-      <div class="ico"><i style="left:1.46px;top:1.46px;width:14.5723px;height:14.5723px;-webkit-mask-image:url(./assets/social-linkedin-15x15.svg);mask-image:url(./assets/social-linkedin-15x15.svg)"></i></div>
-      <div class="ico"><i style="left:-.75px;top:2.55px;width:18.9924px;height:12.3863px;-webkit-mask-image:url(./assets/social-behance-19x12.svg);mask-image:url(./assets/social-behance-19x12.svg)"></i></div>
+      <div class="ico"><i style="left:.355px;top:.354px;width:16.7684px;height:16.7749px;-webkit-mask-image:url(./assets/shared/social-instagram-frame-17x17.svg);mask-image:url(./assets/shared/social-instagram-frame-17x17.svg)"></i><i style="left:4.435px;top:4.435px;width:8.6178px;height:8.6178px;-webkit-mask-image:url(./assets/shared/social-instagram-lens-9x9.svg);mask-image:url(./assets/shared/social-instagram-lens-9x9.svg)"></i><i style="left:12.735px;top:3.635px;width:2.012px;height:2.012px;-webkit-mask-image:url(./assets/shared/social-instagram-dot-2x2.svg);mask-image:url(./assets/shared/social-instagram-dot-2x2.svg)"></i></div>
+      <div class="ico"><i style="left:1.46px;top:1.46px;width:14.5723px;height:14.5723px;-webkit-mask-image:url(./assets/shared/social-linkedin-15x15.svg);mask-image:url(./assets/shared/social-linkedin-15x15.svg)"></i></div>
+      <div class="ico"><i style="left:-.75px;top:2.55px;width:18.9924px;height:12.3863px;-webkit-mask-image:url(./assets/shared/social-behance-19x12.svg);mask-image:url(./assets/shared/social-behance-19x12.svg)"></i></div>
     </div>
     <div class="foot-rule"></div>
     <div class="legal-row">
@@ -776,7 +776,7 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
 <div class="grain-overlay" aria-hidden="true"></div>
 <style>
   .grain-overlay{position:fixed;inset:0;pointer-events:none;z-index:2147483000;
-    background-image:url('./assets/texture-grain.png');background-repeat:repeat;
+    background-image:url('./assets/shared/texture-grain.png');background-repeat:repeat;
     background-size:281.6px 281.6px;   /* grano en pantalla 1.1 px */
     opacity:.42;mix-blend-mode:overlay;will-change:transform}
   /* light: overlay sobre fondo claro devuelve el mismo fondo y el grano

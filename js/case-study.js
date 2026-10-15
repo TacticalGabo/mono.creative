@@ -13,7 +13,7 @@
     var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
     /* bloques */
     if('IntersectionObserver' in window){
-      var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('is-in');io.unobserve(e.target)}})},{threshold:.1});
+      var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('is-in');io.unobserve(e.target)}})},{threshold:0,rootMargin:'0px 0px -10% 0px'});   /* por el borde, no por % del bloque: en secciones altas el 10 % eran cientos de px en blanco */
       blocks.forEach(function(b){io.observe(b)});
     } else blocks.forEach(function(b){b.classList.add('is-in')});
     /* barras de acento B09: la de la derecha con 150 ms de relevo; en mobile entran de dos en dos.
@@ -75,6 +75,8 @@
     ph.setAttribute('pathLength','1'); pv.setAttribute('pathLength','1');
     items.forEach(function(it){it.__tx=parseFloat(getComputedStyle(it).getPropertyValue('--tx'))||40});
     var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+    /* la curva solo escucha el scroll cerca de su sección (antes leía su posición en todo el scroll de la página) */
+    var near=true;
 
     /* coloca los puntos sobre la curva vertical */
     var vpts=[];
@@ -123,7 +125,7 @@
           var s=p.el.style; s.setProperty('--py-num',p.c.toFixed(2)+'px'); s.setProperty('--py-title',(p.c*.65).toFixed(2)+'px'); s.setProperty('--py-text',(p.c*.4).toFixed(2)+'px')});
         raf=moving?requestAnimationFrame(tick):0;
       }
-      function scroll(){calc(); if(!raf)raf=requestAnimationFrame(tick)}
+      function scroll(){if(!near)return; calc(); if(!raf)raf=requestAnimationFrame(tick)}
       addEventListener('scroll',scroll,{passive:true});
       measure(); scroll();
       return {
@@ -155,7 +157,7 @@
         items.forEach(function(it,i){if(cur>=marks[i]-.005)it.classList.add('is-on')});
         raf=(cur!==target||tail!==tgt)?requestAnimationFrame(tick):0;
       }
-      function scroll(){calc(); if(!raf)raf=requestAnimationFrame(tick)}
+      function scroll(){if(!near)return; calc(); if(!raf)raf=requestAnimationFrame(tick)}
       addEventListener('scroll',scroll,{passive:true});
       measure(); scroll();
       return {
@@ -175,6 +177,7 @@
     addEventListener('load',pick);
     if(document.fonts&&document.fonts.ready)document.fonts.ready.then(pick);
     pick();
+    if('IntersectionObserver' in window)new IntersectionObserver(function(es){near=es[0].isIntersecting;if(near&&ctl)ctl.resize()},{rootMargin:'100% 0px'}).observe(sec);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
@@ -211,7 +214,7 @@
 /* imágenes: carga diferida + entrada, y hero por partes. Ver el CSS del mismo nombre. */
 (function(){
   if(window.__csImg)return; window.__csImg=1;
-  var WAIT=350;   /* ms máx. esperando la decodificación antes de animar igualmente */
+  var WAIT=500;   /* ms máx. esperando la decodificación antes de animar igualmente */
   function live(q){return [].filter.call(document.querySelectorAll(q),function(el){return !el.closest('x-dc')})}
   var tries=0;
   function init(){
@@ -238,7 +241,7 @@
     function go_round(){
       if(fired||!hero_img)return; fired=1;
       hero_img.classList.add('ir-r');   /* quita el radio 0: el destino es el radio de diseño */
-      if(hero_img.animate&&!reduce)hero_img.animate([{borderRadius:'0px'},{}],{duration:1200,easing:'cubic-bezier(.8,0,.1,1)'});
+      if(hero_img.animate&&!reduce)hero_img.animate([{borderRadius:'0px'},{}],{duration:1000,easing:'cubic-bezier(.8,0,.1,1)'});
     }
     if(hero_img){
       var t_min=Date.now()+550;
@@ -286,7 +289,7 @@
       return el.__ready;
     }
     if(io_ok){
-      var lo=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){load(e.target);lo.unobserve(e.target)}})},{rootMargin:'120% 0px'});
+      var lo=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){load(e.target);lo.unobserve(e.target)}})},{rootMargin:'150% 0px'});
       lazy.forEach(function(el){lo.observe(el)});
     } else lazy.forEach(load);
 
@@ -305,7 +308,7 @@
       es.filter(function(e){return e.isIntersecting})
         .sort(function(a,b){var d=a.boundingClientRect.top-b.boundingClientRect.top;return Math.abs(d)>40?d:a.boundingClientRect.left-b.boundingClientRect.left})
         .forEach(function(e,i){io.unobserve(e.target);start(e.target,Math.min(i,4)*.15)});   /* escalonado con tope (.6 s): en grillas largas no se hace esperar */
-    },{threshold:.12,rootMargin:'0px 0px -6% 0px'});
+    },{threshold:0,rootMargin:'0px 0px -8% 0px'});
     imgs.forEach(function(el){io.observe(el)});
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();

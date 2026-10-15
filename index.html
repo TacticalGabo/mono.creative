@@ -2,7 +2,7 @@
 <html data-theme="dark">
 <head>
 <meta charset="utf-8">
-<link rel="icon" type="image/svg+xml" href="./assets/logo-favicon-48x29.svg?v=3">
+<link rel="icon" type="image/svg+xml" href="./assets/shared/logo-favicon-48x29.svg?v=3">
 <title>mono.creative</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- (2026-10-04) CARGA INICIAL: React se sirve desde el propio dominio (misma
@@ -425,13 +425,7 @@ html.mc-leaving .page{opacity:0;transition:opacity .28s ease-out}
    Solo se pausa la segunda (la lista va en el mismo orden). Pausar las dos
    congelaba la entrada si se bajaba antes de que terminase: la tercera línea
    se quedaba a opacidad 0 y al subir el hero salía incompleto. */
-.idle .h1.accent,.cruzando .h1.accent{animation-play-state:running,paused!important}
-/* Durante el cruce dark->light el hilo principal paga recálculo de todo el
-   árbol MÁS repintado del viewport entero. Ese puñado de frames coincide con
-   la caída de los blobs. Se congelan las animaciones que compiten (manchas
-   desenfocadas y demás) solo mientras dura el cruce. No se toca will-change:
-   crear y destruir capas mientras se scrollea cuesta más que dejarlas. */
-.cruzando .glow,.cruzando .fig,.cruzando .shot,.cruzando .team-row{animation-play-state:paused!important}
+.idle .h1.accent{animation-play-state:running,paused!important}
 /* El cruce ocurre en .about, y aun así cada escritura de --fade-p recalcula el
    estilo de TODO el documento: .team y el pie están a miles de píxeles del
    viewport y se recalculan igual. Son 116 de los 277 nodos estáticos, un 42 %.
@@ -471,8 +465,6 @@ html.mc-leaving .page{opacity:0;transition:opacity .28s ease-out}
      línea: en viewports altos entran en pantalla durante el cruce y deben ir
      al mismo paso que .bgfade. .cta y .foot nunca se ven durante el tramo
      (comprobado hasta 740×1400): quedan estáticos en light.
-   · html.luz — el lienzo (overscroll/rebote) no puede partirse en dos: se
-     conmuta UNA vez por cruce al pasar p de 0,5, no por frame.
    NO tocar desktop aquí: en ≥768px el cruce sigue siendo el de siempre
    (escritura en :root), que allí va sobrado y no muestra costuras. */
 .bgfade{display:none}
@@ -487,7 +479,6 @@ html.mc-leaving .page{opacity:0;transition:opacity .28s ease-out}
      la mascara, los blobs y el desvanecido de .about quedan intactos. */
   .work{z-index:1}
   .foot{position:relative}
-  html.luz,html.luz body{background:var(--bg-l)}
 }
 /* PROBADO Y DESCARTADO (2026-08-13): suavizar el cruce en móvil con
    transiciones CSS por nodo (fondo, color, fill/stroke de las siluetas del
@@ -1050,8 +1041,8 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
 .banner{margin-bottom:24px}
 .grid2b .banner:last-child{margin-bottom:0}
 .banner .shot{aspect-ratio:518/300;border-radius:12.343331337px;background-position:center;background-size:cover}
-.b-1 .shot{background-image:url(./assets/work-sensive.webp)}
-.b-2 .shot{background-image:url(./assets/work-panama-convention-center.webp)}
+.b-1 .shot{background-image:url(./assets/home/work-sensive.webp)}
+.b-2 .shot{background-image:url(./assets/home/work-panama-convention-center.webp)}
 .grid3{margin-top:24px;display:flex;flex-direction:column}
 .grid3 .shot{aspect-ratio:341/229;border-radius:12.343331337px}
 .grid3 .fig:last-child{margin-bottom:0}
@@ -1240,202 +1231,6 @@ html.ov-arm .oval.ov-in span{transition:color .5s ease,opacity .4s ease .65s}
 </script>
 <script>
 (function(){
-  if(window.__mcFade)return; window.__mcFade=1;
-  // DESACTIVADO 2026-10-03: el color ya no cruza con el scroll; el tema lo
-  // pone el toggle del header (data-theme). El código se conserva por si se
-  // recupera. Las marcas rojas de inicio/final las sigue dibujando el
-  // componente data-dc-script del final (fadeAnchor/fadeStart/fadeEnd).
-  return;
-  var ANCHOR='.about', OFF_START=0, OFF_END=420;
-  function init(){
-    var page=document.querySelector('.page');
-    if(!page||document.querySelector('x-dc'))return setTimeout(init,120);
-    var tick=0, last_p=-1, base=null;
-    // Suavizado del cruce. El scroll ya no pinta: fija p_target, y un seguidor
-    // exponencial en rAF lo persigue. TODO el cruce sale de UNA sola escritura
-    // de --fade-p por frame pintado, así que todos los elementos van en bloque.
-    // Eso no es un detalle: el relleno de los blobs es --wb-blob, que es
-    // var(--bg), el mismo color que el fondo. Si el fondo y los blobs no van al
-    // mismo paso se dibujan las siluetas. Por eso la interpolación va aquí y no
-    // en transiciones CSS por nodo (ver la nota PROBADO Y DESCARTADO del CSS).
-    //
-    // El coste está en la escritura, no en el cálculo: cada una invalida los
-    // ~487 nodos y repinta el viewport, y es el 90 % del coste del scroll en
-    // móvil (ver 'errors and incidents.md' §1). Así que en móvil se espacia el
-    // PINTADO a uno cada CAD_MOVIL ms; el seguidor sigue calculando en cada
-    // frame, y como avanza por tiempo real y no por número de frames, saltarse
-    // pintados no deforma la curva ni cambia cuándo termina.
-    // OJO: nada de camelCase pegado a un '=' (ver nota más abajo).
-    // VEL_MAX: cuánto puede moverse --fade-p por segundo. 1/0,20 pone el suelo
-    // del cruce en 200 ms; con la cola exponencial el total queda en ~300 ms.
-    // Es el mando de la DURACIÓN: subirlo acelera, bajarlo alarga.
-    // CAD_MOVIL=0 a propósito: se pinta en TODOS los frames. Espaciar las
-    // escrituras parecía ahorro, pero una cadencia de 25 ms contra una pantalla
-    // de 60 Hz (16,7 ms) hace que unos frames actualicen y otros no, en patrón
-    // irregular — eso es judder por definición, por pequeño que sea el paso.
-    // Lo que se ve fluido es que TODOS los frames muevan algo. El presupuesto
-    // sale del content-visibility de .team y el pie (42 % de nodos menos por
-    // escritura), y de que esto solo dura ~300 ms: el código original ya escribía
-    // en cada frame, y durante un scroll lento por el tramo lo hacía mucho más rato.
-    var SUAVE_MS=140, CAD_MOVIL=0, VEL_MAX=1/0.20;
-    var p_target=0, p_shown=0, raf_suave=0, ts_prev=0, t_ultimo=0;
-    var CALMA=window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches;
-    function movil(){ return window.innerWidth<768; }
-    // ===== Cruce por ámbitos (móvil) =====
-    // En móvil --fade-p YA NO se escribe en :root: cada escritura ahí invalida
-    // el estilo del documento entero, y eso era el 90 % del coste del scroll
-    // (errors and incidents.md §1). Se escribe en línea SOLO a los ámbitos que
-    // pueden verse durante el tramo del cruce: .bgfade, .about, .team y .more.
-    // Sus tokens se re-derivan localmente (regla de selector extendido en el
-    // CSS); el resto de la página queda estático: dark arriba, light abajo.
-    // Los cuatro se escriben en el MISMO frame: el relleno de los blobs es
-    // var(--bg), el mismo color que el fondo, y cualquier desfase dibuja las
-    // siluetas.
-    // OJO nombres: snake_case, nada de camelCase con espacio delante y '='
-    // detras (ni '==': el compilador de plantillas no distingue y reescribe).
-    var raiz=document.documentElement;
-    var ambitos=null, modo_movil=null, ultima_luz=false;
-    function es_movil(){ return window.matchMedia&&window.matchMedia('(max-width:767.98px)').matches; }
-    function blancos(){
-      if(ambitos&&ambitos.length&&ambitos[0].isConnected)return ambitos;
-      ambitos=[];
-      var sels=['.bgfade','.about','.team','.more'];
-      for(var i=0;i<sels.length;i++){ var el=document.querySelector(sels[i]); if(el)ambitos.push(el); }
-      return ambitos;
-    }
-    function ajusta_modo(){
-      // al cruzar los 768 px hay que limpiar el objetivo del otro modo: un
-      // --fade-p en linea olvidado en :root dejaria media pagina a medio color
-      var m=es_movil();
-      if(m===modo_movil)return;
-      modo_movil=m;
-      if(m){
-        raiz.style.removeProperty('--fade-p');
-      } else {
-        var els=blancos();
-        for(var i=0;i<els.length;i++)els[i].style.removeProperty('--fade-p');
-        if(ultima_luz){ ultima_luz=false; raiz.classList.remove('luz'); }
-      }
-      last_p=-1; window.__mcFadeReset=1;
-      onScroll();
-    }
-    function reloj(){ return window.performance&&performance.now?performance.now():+new Date(); }
-    function parar(){ if(raf_suave){cancelAnimationFrame(raf_suave);raf_suave=0;} ts_prev=0; }
-    function anchorTop(){
-      var cfg=window.__mcFadeAnchor||{};
-      var sel=cfg.sel||ANCHOR;
-      var el=document.querySelector(sel);
-      if(!el)return 0;
-      var r=el.getBoundingClientRect();
-      return r.top+window.pageYOffset;
-    }
-    function measure(){ base=anchorTop(); window.__mcFadeBase=base; }
-    function write(p){
-      // a pasos de 1/128: la guarda de abajo deduplica frames y cada escalón
-      // son ~2/255 en oklab, o sea invisible
-      p=Math.round(p*128)/128;
-      if(p===last_p&&!window.__mcFadeReset)return;
-      window.__mcFadeReset=0;
-      last_p=p;
-      // en pleno cruce (0<p<1) se congelan las animaciones que compiten
-      var cruzando=p>0&&p<1;
-      if(cruzando!==window.__mcCruzando){
-        window.__mcCruzando=cruzando;
-        page.classList.toggle('cruzando',cruzando);
-      }
-      var v=p.toFixed(4);
-      if(modo_movil){
-        // movil: escritura por ambitos — cuatro subarboles chicos, no el
-        // documento; .team ademas va con content-visibility fuera de pantalla
-        var els=blancos();
-        for(var i=0;i<els.length;i++)els[i].style.setProperty('--fade-p',v);
-        // el lienzo (overscroll) se conmuta una vez por cruce, no por frame
-        var luz=p>=.5;
-        if(luz!==ultima_luz){ ultima_luz=luz; raiz.classList.toggle('luz',luz); }
-      } else {
-        raiz.style.setProperty('--fade-p',v);
-      }
-    }
-    function follow(ts){
-      raf_suave=0;
-      // dt real y acotado: mismo tiempo de llegada a 25 fps que a 60
-      var dt=ts_prev?Math.min(64,ts-ts_prev):16.7; ts_prev=ts;
-      // Dos frenos, y hacen falta los dos:
-      // · la exponencial da la cola, para no aterrizar en seco;
-      // · el tope de velocidad da la CABEZA. Una exponencial sola se mueve
-      //   proporcionalmente al error, así que da su paso más grande justo al
-      //   empezar, cuando el error es máximo: con SUAVE_MS=200 muestreada a
-      //   40 ms se comía el 54 % del recorrido en la primera escritura y el
-      //   25 % en la segunda. Eso no es un fundido, es un salto con cola, y era
-      //   lo que se veía como choppy. Con el tope el reparto queda parejo.
-      var paso=(p_target-p_shown)*(1-Math.pow(0.02,dt/SUAVE_MS));
-      var tope=VEL_MAX*dt/1000;
-      if(paso>tope)paso=tope; else if(paso<-tope)paso=-tope;
-      p_shown+=paso;
-      var fin=Math.abs(p_target-p_shown)<0.004;
-      if(fin){ p_shown=p_target; ts_prev=0; }
-      // el final SIEMPRE se pinta, aunque caiga dentro de la cadencia: si no,
-      // el tramo se queda a medio color hasta el siguiente scroll
-      var t=reloj();
-      if(fin||t-t_ultimo>=(movil()?CAD_MOVIL:0)){ t_ultimo=t; write(p_shown); }
-      if(!fin)raf_suave=requestAnimationFrame(follow);
-    }
-    function paint(){
-      tick=0;
-      if(base===null)measure();
-      var cfg=window.__mcFadeAnchor||{};
-      var s=base+(cfg.start!=null?cfg.start:OFF_START);
-      var e=base+(cfg.end!=null?cfg.end:OFF_END);
-      var y=window.pageYOffset, p=e>s?(y-s)/(e-s):(y>=e?1:0);
-      p_target=Math.max(0,Math.min(1,p));
-      // con reduced-motion, o tras remedir (el ancla se movió): pegarse al
-      // objetivo sin interpolar
-      if(CALMA||window.__mcFadeReset){ parar(); p_shown=p_target; t_ultimo=reloj(); write(p_shown); return; }
-      // fuera del tramo objetivo===pintado, así que el seguidor ni arranca:
-      // ningún rAF de más mientras se scrollea por el resto de la página
-      if(!raf_suave&&p_shown!==p_target){ ts_prev=0; raf_suave=requestAnimationFrame(follow); }
-    }
-    // Aquí vivía syncBlobs(): en cada frame de scroll leía cinco
-    // getComputedStyle de un elemento sonda JUSTO DESPUÉS de escribir --fade-p
-    // en :root. Como esa escritura invalida el estilo de todo el documento,
-    // cada lectura forzaba un recálculo de estilo síncrono del documento
-    // entero: cinco por frame, más catorce style.setProperty y un
-    // querySelectorAll. Y era redundante: el CSS de .cluster-m y .cluster-d ya
-    // declara --wb-blob:var(--bg), --wb-stroke:var(--border), etc., así que la
-    // cascada resuelve los mismos colores sola. Comprobado en los dos puntos
-    // de corte y a lo largo del cruce: el color calculado de los rellenos,
-    // trazos y etiquetas sale idéntico sin el JS.
-    function onScroll(){ if(!tick)tick=requestAnimationFrame(paint); }
-    // OJO con el nombre: nada de camelCase pegado a un '=' en los scripts del
-    // <helmet>. Este se llamaba en camelCase y el compilador lo reescribia como
-    // 'sc-camel-ancho-prev', asi que ESTE script moria con SyntaxError en su
-    // segunda ejecucion (la que reinyecta el runtime en <head>). Se veia en la
-    // consola y ademas habria hecho abortar el build del standalone.
-    var ancho_prev=window.innerWidth;
-    function remeasure(){
-      var antes=base; measure();
-      if(base===antes)return;   // el RO y el resize saltan por cosas que no mueven el ancla
-      window.__mcFadeReset=1; onScroll(); if(window.__mcFadeMarks)window.__mcFadeMarks();
-    }
-    // en Android la barra de URL dispara resize al empezar a scrollear y solo
-    // cambia el alto: eso no mueve el ancla, así que no hace falta remedir
-    function onResize(){ if(window.innerWidth===ancho_prev)return; ancho_prev=window.innerWidth; ajusta_modo(); remeasure(); }
-    window.addEventListener('scroll',onScroll,{passive:true});
-    window.addEventListener('resize',onResize,{passive:true});
-    if(window.ResizeObserver){
-      var ro=new ResizeObserver(remeasure);
-      ro.observe(page);
-    }
-    if(document.fonts&&document.fonts.ready)document.fonts.ready.then(remeasure);
-    window.addEventListener('load',remeasure);
-    ajusta_modo();
-    remeasure();
-  }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
-})();
-</script>
-<script>
-(function(){
   if(window.__mcChips)return; window.__mcChips=1;
   function init(){
     var chips=document.querySelectorAll('.chip');
@@ -1446,9 +1241,9 @@ html.ov-arm .oval.ov-in span{transition:color .5s ease,opacity .4s ease .65s}
     // cada pestaña muestra otro conjunto de imágenes, como si fueran otros proyectos
     // '' = sin imagen: rectángulo placeholder (--bezel) hasta que haya portada
     var SHOTS=[
-      ['./assets/work-enjin-darkmode.webp','./assets/work-jupiter-dtf-v3.webp','./assets/work-bedrock-web.webp','./assets/work-enjin-beam.webp'],
-      ['./assets/work-enjin-beam.webp','','./assets/work-enjin-nfts.webp',''],
-      ['./assets/work-sensive.webp','./assets/work-various-ecommerce-v3.webp','./assets/work-mascota-manyada.webp','./assets/work-panama-convention-center.webp']
+      ['./assets/home/work-enjin-darkmode.webp','./assets/home/work-jupiter-dtf-v3.webp','./assets/home/work-bedrock-web.webp','./assets/home/work-enjin-beam.webp'],
+      ['./assets/home/work-enjin-beam.webp','','./assets/home/work-enjin-nfts.webp',''],
+      ['./assets/home/work-sensive.webp','./assets/home/work-various-ecommerce-v3.webp','./assets/home/work-mascota-manyada.webp','./assets/home/work-panama-convention-center.webp']
     ];
     // Pestanas con proyectos reales: nombre y resto del caption por casilla.
     // null = esa pestana sigue como estaba (relleno con 'Project name').
@@ -1478,8 +1273,8 @@ html.ov-arm .oval.ov-in span{transition:color .5s ease,opacity .4s ease .65s}
     // la foto. No vale un valor fijo porque las pestañas meten imágenes de
     // aspectos muy distintos (de 1,25 a 1,78), así que se toma el aspecto real
     // de cada imagen. Con la caja al aspecto de la foto, el cover ya no recorta.
-    var BGPOS={'./assets/work-enjin-beam.webp':'center min(calc(50% + 40px),0px)',
-               './assets/work-sensive.webp':'center min(calc(50% + 20px),0px)'};
+    var BGPOS={'./assets/home/work-enjin-beam.webp':'center min(calc(50% + 40px),0px)',
+               './assets/home/work-sensive.webp':'center min(calc(50% + 20px),0px)'};
     function encaja(shot){
       if(window.innerWidth>=768)return;
       var u=(getComputedStyle(shot).backgroundImage||'').match(/url\((['"]?)([\s\S]*?)\1\)/);
@@ -2482,12 +2277,12 @@ html.ov-arm .oval.ov-in span{transition:color .5s ease,opacity .4s ease .65s}
     </div>
     <div class="grid2">
       <div class="col">
-        <figure class="fig f-gvrn" data-project="enjin-darkmode" data-case="./casestudy_EnjinDarkMode.html" role="link" tabindex="0"><div class="shot" style="aspect-ratio:1.7267;background-image:url(./assets/work-enjin-darkmode.webp)"></div><figcaption class="cap"><b>Enjin</b> · Dark Mode · 2023</figcaption></figure>
-        <figure class="fig f-beam" data-project="jupiter-dtf" data-case="./casestudy_JupiterDTF.html" role="link" tabindex="0"><div class="shot" style="aspect-ratio:1.2047;background-image:url(./assets/work-jupiter-dtf-v3.webp)"></div><figcaption class="cap"><b>Jupiter</b> · JUPITER DTF · 2025</figcaption></figure>
+        <figure class="fig f-gvrn" data-project="enjin-darkmode" data-case="./casestudy_EnjinDarkMode.html" role="link" tabindex="0"><div class="shot" style="aspect-ratio:1.7267;background-image:url(./assets/home/work-enjin-darkmode.webp)"></div><figcaption class="cap"><b>Enjin</b> · Dark Mode · 2023</figcaption></figure>
+        <figure class="fig f-beam" data-project="jupiter-dtf" data-case="./casestudy_JupiterDTF.html" role="link" tabindex="0"><div class="shot" style="aspect-ratio:1.2047;background-image:url(./assets/home/work-jupiter-dtf-v3.webp)"></div><figcaption class="cap"><b>Jupiter</b> · JUPITER DTF · 2025</figcaption></figure>
       </div>
       <div class="col">
-        <figure class="fig f-bedrock" data-project="bedrock" data-case="./casestudy_Bedrock.html" role="link" tabindex="0"><div class="shot" style="aspect-ratio:1.2163;background-image:url(./assets/work-bedrock-web.webp)"></div><figcaption class="cap"><b>Bedrock</b> · Web Platform · 2025</figcaption></figure>
-        <figure class="fig f-jupiter" data-project="enjin-beam" data-case="./casestudy_EnjinBeam.html" role="link" tabindex="0"><div class="shot" style="aspect-ratio:1.7433;background-image:url(./assets/work-enjin-beam.webp);background-position:center min(calc(50% + 40px),0px)"></div><figcaption class="cap"><b>Enjin</b> · Beam · 2024</figcaption></figure>
+        <figure class="fig f-bedrock" data-project="bedrock" data-case="./casestudy_Bedrock.html" role="link" tabindex="0"><div class="shot" style="aspect-ratio:1.2163;background-image:url(./assets/home/work-bedrock-web.webp)"></div><figcaption class="cap"><b>Bedrock</b> · Web Platform · 2025</figcaption></figure>
+        <figure class="fig f-jupiter" data-project="enjin-beam" data-case="./casestudy_EnjinBeam.html" role="link" tabindex="0"><div class="shot" style="aspect-ratio:1.7433;background-image:url(./assets/home/work-enjin-beam.webp);background-position:center min(calc(50% + 40px),0px)"></div><figcaption class="cap"><b>Enjin</b> · Beam · 2024</figcaption></figure>
       </div>
     </div>
   </section>
@@ -2496,7 +2291,7 @@ html.ov-arm .oval.ov-in span{transition:color .5s ease,opacity .4s ease .65s}
     <div class="glow g-d" style="width:263.27px;height:145.96px;left:calc(16.6% - 131.635px);top:705.02px;transform:rotate(-170.36deg);opacity:var(--g4);filter:blur(70px)"></div>
     <div class="glow g-m" style="width:190px;height:169px;left:calc(88.3% - 95px);top:-87px;opacity:var(--g10);filter:blur(100px);z-index:5"></div>
     <div class="about-col-left">
-      <h3 class="h3 about-h">A small team with a shared point of view. From idea <span class="accent">to form<span class="logo-h3" style="display:inline-block;background:var(--accent);-webkit-mask:url(./assets/logo-mark-70x29.svg) 0 0 / 100% 100% no-repeat;mask:url(./assets/logo-mark-70x29.svg) 0 0 / 100% 100% no-repeat"></span></span></h3>
+      <h3 class="h3 about-h">A small team with a shared point of view. From idea <span class="accent">to form<span class="logo-h3" style="display:inline-block;background:var(--accent);-webkit-mask:url(./assets/shared/logo-mark-70x29.svg) 0 0 / 100% 100% no-repeat;mask:url(./assets/shared/logo-mark-70x29.svg) 0 0 / 100% 100% no-repeat"></span></span></h3>
   <div data-href="./contact.html" class="btn about-btn" data-comp="button/lime" role="button" tabindex="0">
       <div class="btn-fluid"><svg class="btn-shape" width="147" height="41.5" viewBox="0 0 147 41.5" fill="none"><clipPath class="bclip" id="bclip2"><path d="M33.25 13.65C36.23 5.46 44.03 0 52.75 0L126.25 0C137.71 0 147 9.29 147 20.75C147 32.21 137.71 41.5 126.25 41.5L52.75 41.5C44.13 41.5 36.41 36.17 33.35 28.12L32.9 28.08C29.99 37.48 21.99 42.99 13.89 41.15C5.8 39.32 -0.05 30.67 0 20.62C0.05 10.58 5.99 2.02 14.1 0.3C22.21 -1.41 30.16 4.21 32.97 13.65Z"></path></clipPath><path class="bpath" d="M33.25 13.65C36.23 5.46 44.03 0 52.75 0L126.25 0C137.71 0 147 9.29 147 20.75C147 32.21 137.71 41.5 126.25 41.5L52.75 41.5C44.13 41.5 36.41 36.17 33.35 28.12L32.9 28.08C29.99 37.48 21.99 42.99 13.89 41.15C5.8 39.32 -0.05 30.67 0 20.62C0.05 10.58 5.99 2.02 14.1 0.3C22.21 -1.41 30.16 4.21 32.97 13.65Z" fill="var(--btn2-fill)" stroke="var(--btn2-stroke)" stroke-width="1" clip-path="url(#bclip2)"></path></svg><i class="btn-dot"></i></div>
       <span class="btn-label" style="color:var(--btn2-label)">Let's Talk</span>
@@ -2530,21 +2325,21 @@ Then we set the base for launch and growth, with clear files, clean rules and <b
         <div class="team-row r1">
           <div class="set">
             <div class="card hi" data-comp="team-card/featured">
-              <div class="av"><img src="./assets/team/avatar-1.webp" alt="" width="50" height="50"></div>
+              <div class="av"><img src="./assets/shared/team/avatar-1.webp" alt="" width="50" height="50"></div>
               <div class="card-id"><span class="name">Gabriel Luyo</span><span class="slinks"><a class="slink" href="https://www.behance.net/gabriel_luyo" target="_blank" rel="noopener noreferrer">Be</a>  <a class="slink" href="https://www.linkedin.com/in/gabriel-luyo/" target="_blank" rel="noopener noreferrer">In</a></span></div>
             </div>
             <div class="card" data-comp="team-card">
-              <div class="av"><img src="./assets/team/avatar-2.webp" alt="" width="50" height="50"></div>
+              <div class="av"><img src="./assets/shared/team/avatar-2.webp" alt="" width="50" height="50"></div>
               <div class="card-id"><span class="name">Ale Serruto</span><span class="slinks"><a class="slink" href="https://www.behance.net/AlessandraSerruto" target="_blank" rel="noopener noreferrer">Be</a>  <a class="slink" href="https://www.linkedin.com/in/alessandra-serruto/" target="_blank" rel="noopener noreferrer">In</a>  <a class="slink" data-pending="1">Ig</a></span></div>
             </div>
           </div>
           <div class="set clone" aria-hidden="true">
             <div class="card hi" data-comp="team-card/featured">
-              <div class="av"><img src="./assets/team/avatar-1.webp" alt="" width="50" height="50"></div>
+              <div class="av"><img src="./assets/shared/team/avatar-1.webp" alt="" width="50" height="50"></div>
               <div class="card-id"><span class="name">Gabriel Luyo</span><span class="slinks"><a class="slink" href="https://www.behance.net/gabriel_luyo" target="_blank" rel="noopener noreferrer">Be</a>  <a class="slink" href="https://www.linkedin.com/in/gabriel-luyo/" target="_blank" rel="noopener noreferrer">In</a></span></div>
             </div>
             <div class="card" data-comp="team-card">
-              <div class="av"><img src="./assets/team/avatar-2.webp" alt="" width="50" height="50"></div>
+              <div class="av"><img src="./assets/shared/team/avatar-2.webp" alt="" width="50" height="50"></div>
               <div class="card-id"><span class="name">Ale Serruto</span><span class="slinks"><a class="slink" href="https://www.behance.net/AlessandraSerruto" target="_blank" rel="noopener noreferrer">Be</a>  <a class="slink" href="https://www.linkedin.com/in/alessandra-serruto/" target="_blank" rel="noopener noreferrer">In</a>  <a class="slink" data-pending="1">Ig</a></span></div>
             </div>
           </div>
@@ -2552,21 +2347,21 @@ Then we set the base for launch and growth, with clear files, clean rules and <b
         <div class="team-row r2">
           <div class="set">
             <div class="card c-romina" data-comp="team-card">
-              <div class="av"><img src="./assets/team/avatar-3.webp" alt="" width="50" height="50"></div>
+              <div class="av"><img src="./assets/shared/team/avatar-3.webp" alt="" width="50" height="50"></div>
               <div class="card-id"><span class="name">Romina Veliz </span><span class="slinks"><a class="slink" href="https://www.behance.net/romaveliz" target="_blank" rel="noopener noreferrer">Be</a>  <a class="slink" href="https://www.linkedin.com/in/romina-v-397746b6/" target="_blank" rel="noopener noreferrer">In</a>  <a class="slink" data-pending="1">Ig</a></span></div>
             </div>
             <div class="card c-david" data-comp="team-card">
-              <div class="av"><img src="./assets/team/avatar-4.webp" alt="" width="50" height="50"></div>
+              <div class="av"><img src="./assets/shared/team/avatar-4.webp" alt="" width="50" height="50"></div>
               <div class="card-id"><span class="name">David Chang</span><span class="slinks"><a class="slink" data-pending="1">Be</a>  <a class="slink" href="https://www.linkedin.com/in/david-j-chang/" target="_blank" rel="noopener noreferrer">In</a>  <a class="slink" data-pending="1">Ig</a></span></div>
             </div>
           </div>
           <div class="set clone" aria-hidden="true">
             <div class="card c-romina" data-comp="team-card">
-              <div class="av"><img src="./assets/team/avatar-3.webp" alt="" width="50" height="50"></div>
+              <div class="av"><img src="./assets/shared/team/avatar-3.webp" alt="" width="50" height="50"></div>
               <div class="card-id"><span class="name">Romina Veliz </span><span class="slinks"><a class="slink" href="https://www.behance.net/romaveliz" target="_blank" rel="noopener noreferrer">Be</a>  <a class="slink" href="https://www.linkedin.com/in/romina-v-397746b6/" target="_blank" rel="noopener noreferrer">In</a>  <a class="slink" data-pending="1">Ig</a></span></div>
             </div>
             <div class="card c-david" data-comp="team-card">
-              <div class="av"><img src="./assets/team/avatar-4.webp" alt="" width="50" height="50"></div>
+              <div class="av"><img src="./assets/shared/team/avatar-4.webp" alt="" width="50" height="50"></div>
               <div class="card-id"><span class="name">David Chang</span><span class="slinks"><a class="slink" data-pending="1">Be</a>  <a class="slink" href="https://www.linkedin.com/in/david-j-chang/" target="_blank" rel="noopener noreferrer">In</a>  <a class="slink" data-pending="1">Ig</a></span></div>
             </div>
           </div>
@@ -2586,8 +2381,8 @@ Then we set the base for launch and growth, with clear files, clean rules and <b
     </div>
     <div class="showcase" data-comp="showcase" data-project="gvrn-ai" data-case="./casestudy_GVRN.html" role="link" tabindex="0" aria-label="GVRN Web Platform case study">
       <div class="sc-card">
-        <div class="phone"><video data-src="./assets/gvrn1" muted loop playsinline preload="none" aria-hidden="true"></video></div>
-        <div class="phone"><video data-src="./assets/gvrn2" muted loop playsinline preload="none" aria-hidden="true"></video></div>
+        <div class="phone"><video data-src="./assets/home/gvrn1" muted loop playsinline preload="none" aria-hidden="true"></video></div>
+        <div class="phone"><video data-src="./assets/home/gvrn2" muted loop playsinline preload="none" aria-hidden="true"></video></div>
       </div>
       <p class="cap sc-cap" data-project="gvrn-ai"><em>GVRN</em> · Web Platform · 2026</p>
     </div>
@@ -2596,9 +2391,9 @@ Then we set the base for launch and growth, with clear files, clean rules and <b
       <figure class="fig banner b-2" data-project="panama-convention-center" data-case="./casestudy_PanamaConventionCenter.html" role="link" tabindex="0"><div class="shot"></div><figcaption class="cap"><em>Panama Convention Center</em> · Web Platform · 2025</figcaption></figure>
     </div>
     <div class="grid3">
-      <figure class="fig" data-project="mascota-manyada" data-case="./casestudy_MascotaManyada.html" role="link" tabindex="0"><div class="shot" style="background-image:url(./assets/work-mascota-manyada.webp)"></div><figcaption class="cap"><em>Mascota Manyada</em> · brand &amp; illustration · 2025</figcaption></figure>
-      <figure class="fig" data-project="enjin-nfts" data-case="./casestudy_EnjinNFTs.html" role="link" tabindex="0"><div class="shot" style="background-image:url(./assets/work-enjin-nfts.webp)"></div><figcaption class="cap"><em>Enjin</em> · NFTs &amp; Animations · 2025</figcaption></figure>
-      <figure class="fig" data-project="various-brands-ecommerce" data-case="./casestudy_VariousBrands.html" role="link" tabindex="0"><div class="shot" style="background-image:url(./assets/work-various-ecommerce-v3.webp)"></div><figcaption class="cap"><em>Butrich</em> · shop · 2022</figcaption></figure>
+      <figure class="fig" data-project="mascota-manyada" data-case="./casestudy_MascotaManyada.html" role="link" tabindex="0"><div class="shot" style="background-image:url(./assets/home/work-mascota-manyada.webp)"></div><figcaption class="cap"><em>Mascota Manyada</em> · brand &amp; illustration · 2025</figcaption></figure>
+      <figure class="fig" data-project="enjin-nfts" data-case="./casestudy_EnjinNFTs.html" role="link" tabindex="0"><div class="shot" style="background-image:url(./assets/home/work-enjin-nfts.webp)"></div><figcaption class="cap"><em>Enjin</em> · NFTs &amp; Animations · 2025</figcaption></figure>
+      <figure class="fig" data-project="various-brands-ecommerce" data-case="./casestudy_VariousBrands.html" role="link" tabindex="0"><div class="shot" style="background-image:url(./assets/home/work-various-ecommerce-v3.webp)"></div><figcaption class="cap"><em>Butrich</em> · shop · 2022</figcaption></figure>
     </div>
   </section>
 
@@ -2629,9 +2424,9 @@ Then we set the base for launch and growth, with clear files, clean rules and <b
       <svg class="btn-arr ar" width="12.22" height="14.67" viewBox="11.9 14.75 10 12" fill="none" overflow="visible" style="color:var(--btn3-arrow)"><path d="M12.3984 20.747H21.3984M17.8726 23.7109L21.3984 20.747L17.8726 17.7832" stroke="currentColor" stroke-width="1.2" vector-effect="non-scaling-stroke"></path></svg>
     </div>
     <div class="socials" data-comp="social-icons">
-      <div class="ico"><i style="left:.355px;top:.354px;width:16.7684px;height:16.7749px;-webkit-mask-image:url(./assets/social-instagram-frame-17x17.svg);mask-image:url(./assets/social-instagram-frame-17x17.svg)"></i><i style="left:4.435px;top:4.435px;width:8.6178px;height:8.6178px;-webkit-mask-image:url(./assets/social-instagram-lens-9x9.svg);mask-image:url(./assets/social-instagram-lens-9x9.svg)"></i><i style="left:12.735px;top:3.635px;width:2.012px;height:2.012px;-webkit-mask-image:url(./assets/social-instagram-dot-2x2.svg);mask-image:url(./assets/social-instagram-dot-2x2.svg)"></i></div>
-      <div class="ico"><i style="left:1.46px;top:1.46px;width:14.5723px;height:14.5723px;-webkit-mask-image:url(./assets/social-linkedin-15x15.svg);mask-image:url(./assets/social-linkedin-15x15.svg)"></i></div>
-      <div class="ico"><i style="left:-.75px;top:2.55px;width:18.9924px;height:12.3863px;-webkit-mask-image:url(./assets/social-behance-19x12.svg);mask-image:url(./assets/social-behance-19x12.svg)"></i></div>
+      <div class="ico"><i style="left:.355px;top:.354px;width:16.7684px;height:16.7749px;-webkit-mask-image:url(./assets/shared/social-instagram-frame-17x17.svg);mask-image:url(./assets/shared/social-instagram-frame-17x17.svg)"></i><i style="left:4.435px;top:4.435px;width:8.6178px;height:8.6178px;-webkit-mask-image:url(./assets/shared/social-instagram-lens-9x9.svg);mask-image:url(./assets/shared/social-instagram-lens-9x9.svg)"></i><i style="left:12.735px;top:3.635px;width:2.012px;height:2.012px;-webkit-mask-image:url(./assets/shared/social-instagram-dot-2x2.svg);mask-image:url(./assets/shared/social-instagram-dot-2x2.svg)"></i></div>
+      <div class="ico"><i style="left:1.46px;top:1.46px;width:14.5723px;height:14.5723px;-webkit-mask-image:url(./assets/shared/social-linkedin-15x15.svg);mask-image:url(./assets/shared/social-linkedin-15x15.svg)"></i></div>
+      <div class="ico"><i style="left:-.75px;top:2.55px;width:18.9924px;height:12.3863px;-webkit-mask-image:url(./assets/shared/social-behance-19x12.svg);mask-image:url(./assets/shared/social-behance-19x12.svg)"></i></div>
     </div>
     <div class="foot-rule"></div>
     <div class="legal-row">
@@ -2698,8 +2493,8 @@ class Component extends DCLogic {
 // navegador bajaba 2,9-5,8 MB de vídeo desde el primer milisegundo, compitiendo
 // con React, los componentes y las imágenes de la pantalla de carga (y arm()
 // cambiaba luego a otra variante, que se volvía a pedir). Ahora la src se pone
-// UNA vez: al acercarse a la pantalla, o en segundo plano cuando la carga ya
-// terminó, así que al llegar a la sección siguen listos como antes.
+// UNA vez: al acercarse a la pantalla (1200 px). Ya no se precargan en segundo
+// plano tras la carga: eran 3,6 MB en cada visita aunque nadie bajara hasta aquí.
   function carga(v){
     var base=v.getAttribute('data-src'); if(!base)return;
     // variante pre-escalada al tamaño real en píxeles de pantalla: el navegador
@@ -2721,16 +2516,11 @@ class Component extends DCLogic {
   var io='IntersectionObserver' in window ? new IntersectionObserver(function(es){
     es.forEach(function(e){ var v=e.target; if(e.isIntersecting){ carga(v); var p=v.play(); if(p&&p.catch)p.catch(function(){}); } else v.pause(); });
   }) : null;
-  var listos=0;
-  function todos(){ listos=1; document.querySelectorAll('.phone video').forEach(carga); }
-  function luego(){ setTimeout(function(){ if('requestIdleCallback' in window)requestIdleCallback(todos,{timeout:3000}); else todos(); },1500); }
-  function tras(){ if(document.readyState==='complete')luego(); else addEventListener('load',luego,{once:true}); }
-  if(window.__mcArrancado)tras(); else addEventListener('mc:arranca',tras,{once:true});
   function arm(){
     document.querySelectorAll('.phone video').forEach(function(v){
       if(v.__mc)return; v.__mc=1;
       v.muted=true; v.defaultMuted=true; v.playsInline=true; v.loop=true;
-      if(listos||!cerca)carga(v); else cerca.observe(v);
+      if(!cerca)carga(v); else cerca.observe(v);
       if(io)io.observe(v); else { var p=v.play(); if(p&&p.catch)p.catch(function(){}); }
     });
   }
@@ -2855,7 +2645,7 @@ class Component extends DCLogic {
 <div class="grain-overlay" aria-hidden="true"></div>
 <style>
   .grain-overlay{position:fixed;inset:0;pointer-events:none;z-index:2147483000;
-    background-image:url('./assets/texture-grain.png');background-repeat:repeat;
+    background-image:url('./assets/shared/texture-grain.png');background-repeat:repeat;
     background-size:281.6px 281.6px;   /* grano en pantalla 1.1 px */
     opacity:.42;mix-blend-mode:overlay;will-change:transform}
   /* light: overlay sobre fondo claro devuelve el mismo fondo y el grano

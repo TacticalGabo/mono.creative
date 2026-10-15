@@ -511,7 +511,7 @@ html .page .sc-placeholder::before{display:none}
 /* entrada por bloques */
 @keyframes fx-in-b{from{opacity:0}to{opacity:1}}
 .js .fx{opacity:0}
-.js .fx.is-in{animation:fx-in-b .7s ease .1s both}
+.js .fx.is-in{animation:fx-in-b .6s ease both}
 .js .fx-line{opacity:0}
 .js .is-in .fx-line{animation:fx-in-b .7s ease both;animation-delay:calc(.1s + var(--i) * .3s)}
 @media (prefers-reduced-motion:reduce){.js .fx,.js .fx.is-in,.js .fx-line,.js .is-in .fx-line{opacity:1;animation:none}}
@@ -532,10 +532,10 @@ html .page .sc-placeholder::before{display:none}
 .avatar{width:49px;height:49px;border-radius:50%;background-color:var(--neutral-100);background-size:cover;background-position:center;border:3px solid var(--bg)}
 .avatar+.avatar{margin-left:-13px}
 /* fotos del team (mismas del home): 1 Gabriel, 2 Ale, 3 Romina, 4 David */
-[data-asset="team-1"]{background-image:url(../assets/team/avatar-1.webp)}
-[data-asset="team-2"]{background-image:url(../assets/team/avatar-2.webp)}
-[data-asset="team-3"]{background-image:url(../assets/team/avatar-3.webp)}
-[data-asset="team-4"]{background-image:url(../assets/team/avatar-4.webp)}
+[data-asset="team-1"]{background-image:url(../assets/shared/team/avatar-1.webp)}
+[data-asset="team-2"]{background-image:url(../assets/shared/team/avatar-2.webp)}
+[data-asset="team-3"]{background-image:url(../assets/shared/team/avatar-3.webp)}
+[data-asset="team-4"]{background-image:url(../assets/shared/team/avatar-4.webp)}
 /* avatares → tarjeta mínima (nombre + redes, mismos enlaces que el home). Fuente:
    mono.creative_entry/mono.case_desktop.html y mono.case_mobile.html. Abre con tap/clic
    (.is-open, JS "avatares del team" en js/case-study.js) o con foco; en desktop con ratón,
@@ -695,9 +695,9 @@ html.js main [data-asset]:not(.ld):not([data-asset="hero"]):not(.avatar){backgro
    de intersección en 0 y el IntersectionObserver nunca dispara. */
 html.js main .media:not(.ba__img){opacity:0}
 html.js main .media.ir-in:not(.ba__img){opacity:1;
-  animation:ir-fade 1.3s cubic-bezier(.33,0,.2,1) var(--ir-d,0s) both,
-            ir-pop 1.3s var(--ir-out) var(--ir-d,0s) both,
-            ir-round 1.2s var(--ir-snap) calc(var(--ir-d,0s) + .45s) both}
+  animation:ir-fade 1s cubic-bezier(.33,0,.2,1) var(--ir-d,0s) both,
+            ir-pop 1s var(--ir-out) var(--ir-d,0s) both,
+            ir-round 1s var(--ir-snap) calc(var(--ir-d,0s) + .35s) both}
 html.js main .media.ir-in:not(.ba__img) .csc__inner{
   animation:ir-fade 1.1s cubic-bezier(.33,0,.2,1) calc(var(--ir-d,0s) + .35s) both,
             ir-pop 1.2s var(--ir-out) calc(var(--ir-d,0s) + .35s) both,
@@ -732,8 +732,8 @@ html.js main .cs-hero .fx-line{animation:fx-in-b .7s ease both;animation-delay:c
    en el hilo principal, ocupado justo tras montar: se queda a 0 (cuadrada) hasta que el JS ve
    la página libre y lo anima (clase .ir-r + Web Animations); si no, saltaría de golpe. */
 html.js main .cs-hero .media{opacity:1;
-  animation:ir-fade 1.3s cubic-bezier(.33,0,.2,1) .1s both,
-            ir-pop 1.3s var(--ir-out) .1s both}
+  animation:ir-fade 1s cubic-bezier(.33,0,.2,1) .1s both,
+            ir-pop 1s var(--ir-out) .1s both}
 @media (prefers-reduced-motion:no-preference){html.js main .cs-hero .media:not(.ir-r){border-radius:0}}
 /* el fade del hero espera a que su imagen esté decodificada (html.hero-ok, script del <head>; tope 2,5 s):
    si la imagen llegaba tras el fade, aparecía de golpe */
