@@ -257,11 +257,19 @@
         var m=/url\(["']?([^"')]+)["']?\)/.exec(getComputedStyle(n).backgroundImage||'');if(m)out.push(m[1])});
       return out;
     }
+    /* vídeos en bucle solo mientras se ven: fuera de pantalla se pausan (CPU/batería) */
+    function vplay(v){var p=v.play();if(p&&p.catch)p.catch(function(){})}
+    var vo=io_ok?new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)vplay(e.target);else e.target.pause()})}):null;
     function load(el){
       if(el.__ready)return el.__ready;
       el.classList.add('ld');[].forEach.call(el.querySelectorAll('[data-asset]'),function(n){n.classList.add('ld')});
-      /* vídeos (<video data-src>): src al cargar su hueco; el poster es el fondo del [data-asset] */
-      [].forEach.call(el.querySelectorAll('video[data-src]'),function(v){v.muted=true;v.src=v.getAttribute('data-src');v.removeAttribute('data-src');var p=v.play();if(p&&p.catch)p.catch(function(){})});
+      /* vídeos (<video data-src>): src al cargar su hueco; el poster es el fondo del [data-asset].
+         muted/loop/playsinline van por JS: el runtime de la plantilla no conserva esos atributos */
+      [].forEach.call(el.querySelectorAll('video[data-src]'),function(v){
+        v.muted=true;v.loop=true;v.playsInline=true;v.setAttribute('playsinline','');
+        v.src=v.getAttribute('data-src');v.removeAttribute('data-src');
+        if(vo)vo.observe(v);else vplay(v);
+      });
       el.__ready=Promise.all(urls(el).map(function(u){var i=new Image();i.src=u;
         return (i.decode?i.decode():new Promise(function(r){i.onload=i.onerror=r})).catch(function(){})}));
       return el.__ready;
