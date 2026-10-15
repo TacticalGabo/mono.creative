@@ -16,7 +16,10 @@
 @font-face{font-family:'Plus Jakarta Sans';font-style:italic;font-weight:200 800;font-display:swap;src:url(./fonts/plus-jakarta-sans/webfont/PlusJakartaSans-200-800-italic-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 @font-face{font-family:'Space Mono';font-style:normal;font-weight:400;font-display:swap;src:url(./fonts/space-mono/webfont/SpaceMono-400-normal-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 </style>
-<link rel="stylesheet" href="./css/case-study.css?v=8">
+<link rel="stylesheet" href="./css/case-study.css?v=9">
+<!-- ASSETS — hero (LCP): precarga solo la del breakpoint activo -->
+<link rel="preload" as="image" href="./casestudy_EnjinDarkMode/01-hero.jpg" media="(min-width:768px)" fetchpriority="high">
+<link rel="preload" as="image" href="./casestudy_EnjinDarkMode/01-hero-mobile.jpg" media="(max-width:767.98px)" fetchpriority="high">
 <!-- (2026-10-04) CARGA: React desde el propio dominio, igual que el home (mismos bytes,
      sha384 idéntico al SRI de support.js). Además, con window.__resources definido
      support.js NO vuelve a descargar la página entera (fetch(location.href)). -->
@@ -26,7 +29,7 @@ if(!r[u+'react@18.3.1/umd/react.production.min.js'])r[u+'react@18.3.1/umd/react.
 if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.1/umd/react-dom.production.min.js']='./vendor/react-dom.production.min.js';})();
 </script>
 <script src="./vendor/support.js"></script>
-<script src="./js/case-study.js?v=2" defer></script>
+<script src="./js/case-study.js?v=3" defer></script>
 </head>
 <body>
 <x-dc>
@@ -90,6 +93,33 @@ window.MC_GEOM = G;
 window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEOM); else setTimeout(p, 30); })(); };
 </script>
 <!-- /SHARED:JS-GEOM -->
+<style>
+/* ==========================================================================
+   9 · ASSETS — imágenes del caso en ./casestudy_EnjinDarkMode/
+       Para cambiar una imagen: reemplaza el archivo con el MISMO nombre.
+       Si cambias la extensión (.png/.jpg), cámbiala solo aquí.
+       Sin archivo, el hueco muestra el color placeholder (--media).
+   ========================================================================== */
+[data-asset="hero"]{background-image:url(./casestudy_EnjinDarkMode/01-hero.jpg)}
+@media (max-width:767.98px){[data-asset="hero"]{background-image:url(./casestudy_EnjinDarkMode/01-hero-mobile.jpg)}}
+[data-asset="exploration-1"]{background-image:url(./casestudy_EnjinDarkMode/04-exploration-1.webp)}
+[data-asset="exploration-2"]{background-image:url(./casestudy_EnjinDarkMode/04-exploration-2.webp)}
+[data-asset="exploration-3"]{background-image:url(./casestudy_EnjinDarkMode/04-exploration-3.webp)}
+[data-asset="exploration-4"]{background-image:url(./casestudy_EnjinDarkMode/04-exploration-4.webp)}
+[data-asset="direction"]{background-image:url(./casestudy_EnjinDarkMode/05-direction.webp)}
+[data-asset="color"]{background-image:url(./casestudy_EnjinDarkMode/06-color.webp)}
+[data-asset="closing-scene"]{background-image:url(./casestudy_EnjinDarkMode/09-closing-scene.webp)}
+[data-asset="closing-screen"]{background-image:url(./casestudy_EnjinDarkMode/09-closing-screen.webp)}
+/* tamaños propios de este caso: 2.5 y 2.6 a 1056×650; en 360 recorte fijo de una pieza más ancha */
+.ms--color .ms__caption{margin-top:32px}
+@media (max-width:767.98px){
+  .zz__media{aspect-ratio:360/300}
+  .ms__img{border-radius:0;margin-top:32px}
+  .ms--notes .ms__img{width:calc(100cqw * 547 / 360);aspect-ratio:547/380;margin-left:calc(100cqw * -10 / 360)}
+  .ms--color .ms__img{width:calc(100cqw * 617 / 360);aspect-ratio:617/380;margin-left:calc(100cqw * -257 / 360)}
+}
+@media (min-width:768px){.ms--color .ms__img{aspect-ratio:1056/650}}
+</style>
 
 <!-- SHARED:JS-SBW -->
 <script>
@@ -627,7 +657,7 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
         <div class="zz__row"><div class="zz__media media" data-asset="exploration-1"></div><div class="zz__body"><h3 class="zz__title">Color</h3><p class="zz__text">Purple remained the core brand color, while green was introduced as a complementary accent. Additional supporting colors were added to create more flexibility across different sections and products.</p></div></div>
         <div class="zz__row"><div class="zz__media media" data-asset="exploration-2"></div><div class="zz__body"><h3 class="zz__title">Visual Language</h3><p class="zz__text">The existing geometric 3D assets were replaced with more abstract forms whose colors and treatment could be controlled to better match the visual system.</p></div></div>
         <div class="zz__row"><div class="zz__media media" data-asset="exploration-3"></div><div class="zz__body"><h3 class="zz__title">Atmosphere</h3><p class="zz__text">Glow, blur, gradients, and layered surfaces were introduced to create depth and a more immersive digital environment.</p></div></div>
-        <div class="zz__row"><div class="zz__media zz__media--split"><div class="media" data-asset="exploration-4a"></div><div class="media" data-asset="exploration-4b"></div></div><div class="zz__body"><h3 class="zz__title">Dark Mode</h3><p class="zz__text">Dark surfaces became the primary foundation, allowing the brighter colors and visual effects to carry more contrast and energy.</p></div></div>
+        <div class="zz__row"><div class="zz__media media" data-asset="exploration-4"></div><div class="zz__body"><h3 class="zz__title">Dark Mode</h3><p class="zz__text">Dark surfaces became the primary foundation, allowing the brighter colors and visual effects to carry more contrast and energy.</p></div></div>
       </div>
     </div>
   </section>
@@ -636,31 +666,17 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
   <section class="cs-media-single ms--notes fx" data-block="2.5 Final Direction (B10)">
     <div class="wrap">
       <div class="sh"><h2 class="sh__title"><span>Dark-first</span><span class="accent">direction</span></h2><p class="sh__desc">The final direction moved Enjin toward a dark-first visual system built around deep surfaces, vivid purple and green accents, controlled glow, and abstract visual forms.</p></div>
-      <div class="ms__img media" data-asset="direction"></div>
+      <div class="xc"><div class="ms__img media" data-asset="direction"></div></div>
       <p class="ms__notes">Deep surfaces · Vivid purple and green accents · Controlled glow · Abstract visual forms</p>
       <p class="ms__caption">Rather than relying on recognizable 3D objects, the new visual language uses adaptable abstract forms that can be customized and art-directed to feel more distinctly Enjin.</p>
     </div>
   </section>
-
   <!-- ===== 2.6 Color System (B12) ===== -->
-  <section class="cs-carousel3 fx" data-block="2.6 Color System (B12)">
+  <section class="cs-media-single ms--color fx" data-block="2.6 Color System (B12)">
     <div class="wrap">
       <div class="sh"><h2 class="sh__title"><span>Scalable</span><span class="accent">color system</span></h2><p class="sh__desc">The introduction of dark mode also led to a broader color system for the Enjin ecosystem. A scalable palette was developed to work consistently across both light and dark modes.</p></div>
-    </div>
-    <div class="c3__track"><div class="c3__card media" data-asset="card-1"></div><div class="c3__card media" data-asset="card-2"></div><div class="c3__card media" data-asset="card-3"></div></div>
-    <div class="wrap"><p class="c3__caption">It was structured and automated using Figma Variables, making the system easier to maintain and extend across products.</p></div>
-  </section>
-
-  <!-- ===== 2.7 Before / After (B09) ===== -->
-  <section class="cs-before-after fx" data-block="2.7 Before / After (B09)">
-    <div class="wrap">
-      <div class="sh"><h2 class="sh__title"><span>Before</span><span class="accent">&amp; After</span></h2><p class="sh__desc">Enjin’s previous website relied on a clean, light interface with purple gradients and a collection of 3D geometric assets.</p></div>
-      <div class="ba__grid">
-        <figure class="ba ba--before"><div class="ba__img media" data-asset="before-1"></div><div class="ba__bar"></div><figcaption><span class="ba__label">Before</span><p class="ba__text">While polished, many of these assets came from widely used libraries, making the visual language feel familiar and less ownable.</p></figcaption></figure>
-        <figure class="ba ba--after"><div class="ba__img media" data-asset="after-1"></div><div class="ba__bar"></div><figcaption><span class="ba__label">After</span><p class="ba__text">Abstract forms whose colors and treatment can be controlled and art-directed to feel distinctly Enjin.</p></figcaption></figure>
-        <figure class="ba ba--before"><div class="ba__img media" data-asset="before-2"></div><div class="ba__bar"></div><figcaption><span class="ba__label">Before</span><p class="ba__text">A clean, light interface built on purple gradients.</p></figcaption></figure>
-        <figure class="ba ba--after"><div class="ba__img media" data-asset="after-2"></div><div class="ba__bar"></div><figcaption><span class="ba__label">After</span><p class="ba__text">A dark-first foundation where vivid purple and green accents carry more contrast and energy.</p></figcaption></figure>
-      </div>
+      <div class="xc"><div class="ms__img media" data-asset="color"></div></div>
+      <p class="ms__caption">It was structured and automated using Figma Variables, making the system easier to maintain and extend across products.</p>
     </div>
   </section>
 

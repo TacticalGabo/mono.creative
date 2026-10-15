@@ -16,7 +16,10 @@
 @font-face{font-family:'Plus Jakarta Sans';font-style:italic;font-weight:200 800;font-display:swap;src:url(./fonts/plus-jakarta-sans/webfont/PlusJakartaSans-200-800-italic-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 @font-face{font-family:'Space Mono';font-style:normal;font-weight:400;font-display:swap;src:url(./fonts/space-mono/webfont/SpaceMono-400-normal-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 </style>
-<link rel="stylesheet" href="./css/case-study.css?v=8">
+<link rel="stylesheet" href="./css/case-study.css?v=9">
+<!-- ASSETS — hero (LCP): precarga solo la del breakpoint activo -->
+<link rel="preload" as="image" href="./casestudy_DegenAnimations/01-hero.webp" media="(min-width:768px)" fetchpriority="high">
+<link rel="preload" as="image" href="./casestudy_DegenAnimations/01-hero-mobile.webp" media="(max-width:767.98px)" fetchpriority="high">
 <!-- (2026-10-04) CARGA: React desde el propio dominio, igual que el home (mismos bytes,
      sha384 idéntico al SRI de support.js). Además, con window.__resources definido
      support.js NO vuelve a descargar la página entera (fetch(location.href)). -->
@@ -26,7 +29,7 @@ if(!r[u+'react@18.3.1/umd/react.production.min.js'])r[u+'react@18.3.1/umd/react.
 if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.1/umd/react-dom.production.min.js']='./vendor/react-dom.production.min.js';})();
 </script>
 <script src="./vendor/support.js"></script>
-<script src="./js/case-study.js?v=2" defer></script>
+<script src="./js/case-study.js?v=3" defer></script>
 </head>
 <body>
 <x-dc>
@@ -95,8 +98,34 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
        Si cambias la extensión (.png/.jpg), cámbiala solo aquí.
        Sin archivo, el hueco muestra el color placeholder (--media).
    ========================================================================== */
-/* Hero: "Content" solo en mobile (en desktop el titulo queda "Promo") */
+[data-asset="hero"]{background-image:url(./casestudy_DegenAnimations/01-hero.webp)}
+@media (max-width:767.98px){[data-asset="hero"]{background-image:url(./casestudy_DegenAnimations/01-hero-mobile.webp)}}
+[data-asset="hero"]{background-color:transparent}
 @media (min-width:768px){.cs-hero__mob{display:none}}
+[data-asset="reach"]{background-image:url(./casestudy_DegenAnimations/02-reach-poster.jpg)}
+[data-asset="presence"]{background-image:url(./casestudy_DegenAnimations/02-presence-poster.jpg)}
+[data-asset="outcome-1"]{background-image:url(./casestudy_DegenAnimations/04-outcome-1.webp)}
+[data-asset="outcome-2"]{background-image:url(./casestudy_DegenAnimations/04-outcome-2-poster.jpg)}
+[data-asset="outcome-3"]{background-image:url(./casestudy_DegenAnimations/04-outcome-3.webp)}
+[data-asset="story"]{background-image:url(./casestudy_DegenAnimations/06-story-poster.jpg)}
+[data-asset="keyvisual"]{background-image:url(./casestudy_DegenAnimations/06-keyvisual.webp)}
+/* tamaños y bloques propios de este caso (Figma 12. Degen, 1440 / 360) */
+.csc--oc{padding-bottom:56px}
+.oc{display:flex;flex-direction:column;gap:16px;margin-top:32px}
+.oc__row{display:flex;flex-direction:column;gap:16px}
+.oc .media{width:100cqw;margin-left:calc(-1 * var(--m));aspect-ratio:360/300}
+@media (max-width:767.98px){.zz__media{aspect-ratio:360/300}}
+@media (min-width:768px){
+  .csc--oc{padding-bottom:112px}
+  .oc{gap:24px;margin-top:40px}
+  .oc__row{flex-direction:row;align-items:flex-start;gap:24px}
+  .oc .media{width:auto;margin:0}
+  .oc .oc__a{aspect-ratio:1056/640}
+  .oc .oc__b{flex:664 1 0;min-width:0;aspect-ratio:664/412}
+  .oc .oc__c{flex:368 1 0;min-width:0;aspect-ratio:368/303}
+  .zz__media{aspect-ratio:704/493}
+  .zz__media--kv{aspect-ratio:704/464}
+}
 </style>
 
 <!-- SHARED:JS-SBW -->
@@ -601,13 +630,36 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
       </div>
     </div>
   </section>
+  <!-- ===== 11.4 Multiverse Items (B08) ===== -->
+  <section class="cs-zigzag fx" data-block="11.4 Multiverse Items (B08)">
+    <div class="wrap">
+      <div class="sh"><h2 class="sh__title"><span>Content built</span><span class="accent">to spread</span></h2><p class="sh__desc">Beyond the launch articles, the 3D crew was turned into pieces the community could share, giving Enjin ready-made content that kept the Degen launch visible on every channel.</p></div>
+      <div class="zz">
+        <div class="zz__row"><div class="zz__media media vid" data-asset="reach"><video muted loop playsinline preload="none" data-src="./casestudy_DegenAnimations/02-reach.mp4"></video></div><div class="zz__body"><h3 class="zz__title">Organic reach</h3><p class="zz__text">A JOIN US meme GIF, designed for the community to replicate and spread.</p></div></div>
+        <div class="zz__row"><div class="zz__media media vid" data-asset="presence"><video muted loop playsinline preload="none" data-src="./casestudy_DegenAnimations/02-presence.mp4"></video></div><div class="zz__body"><h3 class="zz__title">Brand presence</h3><p class="zz__text">A Degen plants the Enjin flag on the Moon, putting the brand at the center of the story.</p></div></div>
+      </div>
+    </div>
+  </section>
 
   <!-- ===== 12.2 Statement (B06) ===== -->
   <section class="cs-statement fx" data-block="12.2 Statement (B06)">
     <div class="wrap">
       <p class="cs-statement__label">The problem</p>
-      <p class="cs-statement__text">The Degen characters existed only as flat 2D art. To launch the collection on Enjin, they needed to move, share scenes with Enjin's symbols and work in articles, Discord and social feeds without losing their style.</p>
+      <p class="cs-statement__text">Degen characters existed only as 2D art. To launch on Enjin, they needed to move, share scenes with Enjin's symbols and work in articles, Discord and social feeds without losing their style.</p>
     </div>
+  </section>
+
+  <!-- ===== 12.7 Outcome (B02) ===== -->
+  <section class="cs-closing-scene csc--oc fx" data-block="12.7 Outcome (B02)">
+    <div class="wrap">
+      <div class="sh"><h2 class="sh__title"><span>Project</span><span class="accent">outcome</span></h2><p class="sh__desc">Enjin launched the Degen collection with a full set of 3D visuals, where the artist's crew moved, posed and joked inside Enjin's world on every channel.</p></div>
+      <ul class="csc__bullets">
+        <li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>4 Degen characters rebuilt in 3D from the original 2D art</span></li>
+        <li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>6 article and blog visuals for the launch announcement</span></li>
+        <li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>3 animated GIFs and 2 meme templates for social channels</span></li>
+      </ul>
+    </div>
+    <div class="wrap"><div class="oc"><div class="oc__a media" data-asset="outcome-1"></div><div class="oc__row"><div class="oc__b media vid" data-asset="outcome-2"><video muted loop playsinline preload="none" data-src="./casestudy_DegenAnimations/04-outcome-2.mp4"></video></div><div class="oc__c media" data-asset="outcome-3"></div></div></div></div>
   </section>
 
   <!-- ===== 12.3 Constraints (B04) ===== -->
@@ -625,50 +677,15 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
       </div>
     </div>
   </section>
-
-  <!-- ===== 12.4 From 2D to 3D (B10 modified) ===== -->
-  <section class="cs-media-2up-captions fx" data-block="12.4 From 2D to 3D (B10 modified)">
+  <!-- ===== 11.4 Multiverse Items (B08) ===== -->
+  <section class="cs-zigzag fx" data-block="11.4 Multiverse Items (B08)">
     <div class="wrap">
-      <div class="sh"><h2 class="sh__title"><span>From 2D art</span><span class="accent">to a 3D crew</span></h2><p class="sh__desc">Each character was modeled in Blender from the artist's 2D designs. Faces were painted as flat textures and animated in After Effects, keeping a drawn look.</p></div>
-      <div class="m2c__grid">
-        <figure class="m2c__item"><div class="m2c__img media" data-asset="detail-1"></div><ul><li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>Turnaround: front, side and back checked against the art</span></li></ul></figure>
-        <figure class="m2c__item"><div class="m2c__img media" data-asset="detail-2"></div><ul><li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>Face: eyes, brows and beard painted as flat textures</span></li></ul></figure>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== 12.5 Launch Scenes (B08) ===== -->
-  <section class="cs-zigzag fx" data-block="12.5 Launch Scenes (B08)">
-    <div class="wrap">
-      <div class="sh"><h2 class="sh__title"><span>Scenes from</span><span class="accent">the lore</span></h2><p class="sh__desc">For the launch articles, the crew was placed in epic scenes with Enjin symbols, each one lit and framed to tell a moment from the collection's story.</p></div>
+      <div class="sh"><h2 class="sh__title"><span>Degens in</span><span class="accent">Enjin's world</span></h2><p class="sh__desc">A desert scene showed the Degen crew becoming part of Enjin's universe. The same moment was delivered as an animated GIF and as a still, ready for any channel.</p></div>
       <div class="zz">
-        <div class="zz__row"><div class="zz__media media" data-asset="exploration-1"></div><div class="zz__body"><h3 class="zz__title">Planting the Enjin flag</h3><p class="zz__text">On a purple planet, a Degen astronaut planted the Enjin flag while the rest of the crew celebrated in the background.</p></div></div>
-        <div class="zz__row"><div class="zz__media media" data-asset="exploration-2"></div><div class="zz__body"><h3 class="zz__title">A cube in the night sky</h3><p class="zz__text">A giant glowing cube floated over the crew at night, with smaller cubes around it and green light washing over the hills.</p></div></div>
-        <div class="zz__row"><div class="zz__media zz__media--split"><div class="media" data-asset="exploration-3a"></div><div class="media" data-asset="exploration-3b"></div></div><div class="zz__body"><h3 class="zz__title">A storm in the desert</h3><p class="zz__text">The crew crossed a sandstorm toward a stone monument carved with the Enjin logo, shown as a still and as a looping GIF.</p></div></div>
+        <div class="zz__row"><div class="zz__media media vid" data-asset="story"><video muted loop playsinline preload="none" data-src="./casestudy_DegenAnimations/06-story.mp4"></video></div><div class="zz__body"><h3 class="zz__title">Story in motion</h3><p class="zz__text">The crew crosses a sandstorm and uncovers Enjin's giant gold coin.</p></div></div>
+        <div class="zz__row"><div class="zz__media zz__media--kv media" data-asset="keyvisual"></div><div class="zz__body"><h3 class="zz__title">Campaign key visual</h3><p class="zz__text">The same scene as a static illustration, giving Enjin a key visual to promote the brand.</p></div></div>
       </div>
     </div>
-  </section>
-
-  <!-- ===== 12.6 Discord, GIFs & Memes (B12) ===== -->
-  <section class="cs-carousel3 fx" data-block="12.6 Discord, GIFs &amp; Memes (B12)">
-    <div class="wrap">
-      <div class="sh"><h2 class="sh__title"><span>Discord, GIFs</span><span class="accent">and memes</span></h2><p class="sh__desc">The same 3D crew was reused for the community: Discord posts with an inked, comic finish, short GIFs cut from the launch scenes and meme templates ready to share.</p></div>
-    </div>
-    <div class="c3__track"><div class="c3__card media" data-asset="card-1"></div><div class="c3__card media" data-asset="card-2"></div><div class="c3__card media" data-asset="card-3"></div></div>
-    <div class="wrap"><p class="c3__caption">From a neon venue with the Degens sign to the crew hanging out on the front steps and a JOIN US meme, every piece kept the same 3D models, painted faces and colors as the launch visuals.</p></div>
-  </section>
-
-  <!-- ===== 12.7 Outcome (B02) ===== -->
-  <section class="cs-closing-scene fx" data-block="12.7 Outcome (B02)">
-    <div class="wrap">
-      <div class="sh"><h2 class="sh__title"><span>Project</span><span class="accent">outcome</span></h2><p class="sh__desc">Enjin launched the Degen collection with a full set of 3D visuals, where the artist's crew moved, posed and joked inside Enjin's world on every channel.</p></div>
-      <ul class="csc__bullets">
-        <li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>4 Degen characters rebuilt in 3D from the original 2D art</span></li>
-        <li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>6 article and blog visuals for the launch announcement</span></li>
-        <li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>3 animated GIFs and 2 meme templates for social channels</span></li>
-      </ul>
-    </div>
-    <div class="csc__scene media" data-asset="closing-scene"><div class="csc__inner" data-asset="closing-screen"></div></div>
   </section>
 
   </main>

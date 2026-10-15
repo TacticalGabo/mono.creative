@@ -16,7 +16,10 @@
 @font-face{font-family:'Plus Jakarta Sans';font-style:italic;font-weight:200 800;font-display:swap;src:url(./fonts/plus-jakarta-sans/webfont/PlusJakartaSans-200-800-italic-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 @font-face{font-family:'Space Mono';font-style:normal;font-weight:400;font-display:swap;src:url(./fonts/space-mono/webfont/SpaceMono-400-normal-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 </style>
-<link rel="stylesheet" href="./css/case-study.css?v=8">
+<link rel="stylesheet" href="./css/case-study.css?v=9">
+<!-- ASSETS — hero (LCP): precarga solo la del breakpoint activo -->
+<link rel="preload" as="image" href="./casestudy_GVRN/01-hero.jpg" media="(min-width:768px)" fetchpriority="high">
+<link rel="preload" as="image" href="./casestudy_GVRN/01-hero-mobile.jpg" media="(max-width:767.98px)" fetchpriority="high">
 <!-- (2026-10-04) CARGA: React desde el propio dominio, igual que el home (mismos bytes,
      sha384 idéntico al SRI de support.js). Además, con window.__resources definido
      support.js NO vuelve a descargar la página entera (fetch(location.href)). -->
@@ -26,7 +29,7 @@ if(!r[u+'react@18.3.1/umd/react.production.min.js'])r[u+'react@18.3.1/umd/react.
 if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.1/umd/react-dom.production.min.js']='./vendor/react-dom.production.min.js';})();
 </script>
 <script src="./vendor/support.js"></script>
-<script src="./js/case-study.js?v=2" defer></script>
+<script src="./js/case-study.js?v=3" defer></script>
 </head>
 <body>
 <x-dc>
@@ -91,6 +94,32 @@ window.MC_GEOM = G;
 window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEOM); else setTimeout(p, 30); })(); };
 </script>
 <!-- /SHARED:JS-GEOM -->
+<style>
+/* ==========================================================================
+   9 · ASSETS — imágenes del caso en ./casestudy_GVRN/
+       Para cambiar una imagen: reemplaza el archivo con el MISMO nombre.
+       Si cambias la extensión (.png/.jpg), cámbiala solo aquí.
+       Sin archivo, el hueco muestra el color placeholder (--media).
+   ========================================================================== */
+[data-asset="hero"]{background-image:url(./casestudy_GVRN/01-hero.jpg)}
+@media (max-width:767.98px){[data-asset="hero"]{background-image:url(./casestudy_GVRN/01-hero-mobile.jpg)}}
+[data-asset="exploration-1"]{background-image:url(./casestudy_GVRN/04-exploration-1.webp)}
+[data-asset="exploration-2"]{background-image:url(./casestudy_GVRN/04-exploration-2.webp)}
+[data-asset="exploration-3a"]{background-image:url(./casestudy_GVRN/04-exploration-3a.webp)}
+[data-asset="exploration-3b"]{background-image:url(./casestudy_GVRN/04-exploration-3b.webp)}
+[data-asset="direction-1"]{background-image:url(./casestudy_GVRN/05-direction-1.webp)}
+[data-asset="direction-2"]{background-image:url(./casestudy_GVRN/05-direction-2.webp)}
+[data-asset="direction-wide"]{background-image:url(./casestudy_GVRN/05-direction-wide.webp)}
+/* tamaños propios de este caso (Figma 6. GVRN, 1440 / 360) */
+@media (max-width:767.98px){
+  .zz__media:not(.zz__media--split){aspect-ratio:360/230}
+  .m2w__img{aspect-ratio:312/230}
+  .m2w__wide{aspect-ratio:360/170}
+  .csc__scene{aspect-ratio:360/225}
+  .csc__inner{width:77.78%;aspect-ratio:280/158}
+}
+@media (min-width:768px){.m2w__img{aspect-ratio:516/380}}
+</style>
 
 <!-- SHARED:JS-SBW -->
 <script>
@@ -599,7 +628,7 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
   <section class="cs-statement fx" data-block="6.2 Statement (B06)">
     <div class="wrap">
       <p class="cs-statement__label">The problem</p>
-      <p class="cs-statement__text">On the previous site, founders could not tell what GVRN was or how to start. Booking a call was the only clear action, the productized offer stayed hidden and the team’s expertise did not come through.</p>
+      <p class="cs-statement__text">On the old site, founders couldn't tell what GVRN was or how to start. A call was the only clear action, the productized offer stayed hidden and the team’s expertise didn't show.</p>
     </div>
   </section>
 
@@ -626,9 +655,8 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
       <div class="sh"><h2 class="sh__title"><span>Months of</span><span class="accent">exploration</span></h2><p class="sh__desc">Several months went into exploring how a legal service could feel tangible, testing maps, 3D forms and data textures before the final system was set.</p></div>
       <div class="zz">
         <div class="zz__row"><div class="zz__media media" data-asset="exploration-1"></div><div class="zz__body"><h3 class="zz__title">Jurisdiction map</h3><p class="zz__text">An interactive world map was explored so founders could compare jurisdictions visually, with filters, markers and package details in one view.</p></div></div>
-        <div class="zz__row"><div class="zz__media media" data-asset="exploration-2"></div><div class="zz__body"><h3 class="zz__title">3D globe</h3><p class="zz__text">A rotating 3D globe introduced incorporation on the homepage, pinning key jurisdictions to make a global offer feel concrete.</p></div></div>
-        <div class="zz__row"><div class="zz__media media" data-asset="exploration-3"></div><div class="zz__body"><h3 class="zz__title">Isometric forms</h3><p class="zz__text">Isometric cubes and 3D icons, modeled in Blender, became a visual language for structure, layers and legal building blocks.</p></div></div>
-        <div class="zz__row"><div class="zz__media zz__media--split"><div class="media" data-asset="exploration-4a"></div><div class="media" data-asset="exploration-4b"></div></div><div class="zz__body"><h3 class="zz__title">Data textures</h3><p class="zz__text">Animated grids and tectonic textures were tested to give numbers and proof points a sense of solidity and precision.</p></div></div>
+        <div class="zz__row"><div class="zz__media media" data-asset="exploration-2"></div><div class="zz__body"><h3 class="zz__title">Isometric forms</h3><p class="zz__text">Isometric cubes and 3D icons, modeled in Blender, became a visual language for structure, layers and legal building blocks.</p></div></div>
+        <div class="zz__row"><div class="zz__media zz__media--split"><div class="media" data-asset="exploration-3a"></div><div class="media" data-asset="exploration-3b"></div></div><div class="zz__body"><h3 class="zz__title">Data textures</h3><p class="zz__text">Animated grids and tectonic textures were tested to give numbers and proof points a sense of solidity and precision.</p></div></div>
       </div>
     </div>
   </section>
@@ -641,15 +669,6 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
     </div>
     <div class="m2w__wide media" data-asset="direction-wide"></div>
     <div class="wrap"><p class="m2w__caption">Each path keeps its own primary action. Start setup leads to the jurisdiction explorer, package configurator and checkout, while Book a Call opens a scoped advisory with a named expert.</p></div>
-  </section>
-
-  <!-- ===== 6.6 Design System (B12) ===== -->
-  <section class="cs-carousel3 fx" data-block="6.6 Design System (B12)">
-    <div class="wrap">
-      <div class="sh"><h2 class="sh__title"><span>Scalable</span><span class="accent">design system</span></h2><p class="sh__desc">A design system was built in Figma to keep every page consistent, from marketing and service pages to the package configurator and checkout.</p></div>
-    </div>
-    <div class="c3__track"><div class="c3__card media" data-asset="card-1"></div><div class="c3__card media" data-asset="card-2"></div><div class="c3__card media" data-asset="card-3"></div></div>
-    <div class="wrap"><p class="c3__caption">Primitive and semantic color tokens, 31 text styles and a standardized button system were set up in Figma, giving designers and the dev team one shared source for every page and flow.</p></div>
   </section>
 
   <!-- ===== 6.7 Before / After (B09) ===== -->
@@ -677,14 +696,6 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
         <li class="ln__item"><span class="ln__num">02</span><h3 class="ln__title">Product, not software</h3><p class="ln__text">Packages and checkout made known work feel like a product, while named experts and in-house filings kept it clearly a legal team.</p></li>
         <li class="ln__item"><span class="ln__num">03</span><h3 class="ln__title">Less said, more weight</h3><p class="ln__text">The first screens avoid long legal explanations, leaving the detail to jurisdiction pages, service pages and the Academy.</p></li>
       </ol>
-    </div>
-  </section>
-
-  <!-- ===== 6.9 Mobile (B14) ===== -->
-  <section class="cs-media-single fx" data-block="6.9 Mobile (B14)">
-    <div class="wrap">
-      <div class="sh"><h2 class="sh__title"><span>Built for</span><span class="accent">small screens</span></h2><p class="sh__desc">Founders often explore jurisdictions and services from a phone, so menus, the jurisdiction map and the package configurator were adapted for small screens.</p></div>
-      <div class="ms__img media" data-asset="mobile"></div>
     </div>
   </section>
 

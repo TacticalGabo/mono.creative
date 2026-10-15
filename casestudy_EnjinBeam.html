@@ -16,7 +16,10 @@
 @font-face{font-family:'Plus Jakarta Sans';font-style:italic;font-weight:200 800;font-display:swap;src:url(./fonts/plus-jakarta-sans/webfont/PlusJakartaSans-200-800-italic-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 @font-face{font-family:'Space Mono';font-style:normal;font-weight:400;font-display:swap;src:url(./fonts/space-mono/webfont/SpaceMono-400-normal-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 </style>
-<link rel="stylesheet" href="./css/case-study.css?v=8">
+<link rel="stylesheet" href="./css/case-study.css?v=9">
+<!-- ASSETS — hero (LCP): precarga solo la del breakpoint activo -->
+<link rel="preload" as="image" href="./casestudy_EnjinBeam/01-hero.webp" media="(min-width:768px)" fetchpriority="high">
+<link rel="preload" as="image" href="./casestudy_EnjinBeam/01-hero-mobile.webp" media="(max-width:767.98px)" fetchpriority="high">
 <!-- (2026-10-04) CARGA: React desde el propio dominio, igual que el home (mismos bytes,
      sha384 idéntico al SRI de support.js). Además, con window.__resources definido
      support.js NO vuelve a descargar la página entera (fetch(location.href)). -->
@@ -26,7 +29,7 @@ if(!r[u+'react@18.3.1/umd/react.production.min.js'])r[u+'react@18.3.1/umd/react.
 if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.1/umd/react-dom.production.min.js']='./vendor/react-dom.production.min.js';})();
 </script>
 <script src="./vendor/support.js"></script>
-<script src="./js/case-study.js?v=2" defer></script>
+<script src="./js/case-study.js?v=3" defer></script>
 </head>
 <body>
 <x-dc>
@@ -91,6 +94,67 @@ window.MC_GEOM = G;
 window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEOM); else setTimeout(p, 30); })(); };
 </script>
 <!-- /SHARED:JS-GEOM -->
+<style>
+/* ==========================================================================
+   9 · ASSETS — imágenes del caso en ./casestudy_EnjinBeam/
+       Para cambiar una imagen: reemplaza el archivo con el MISMO nombre.
+       Si cambias la extensión (.png/.jpg), cámbiala solo aquí.
+       Sin archivo, el hueco muestra el color placeholder (--media).
+   ========================================================================== */
+[data-asset="hero"]{background-image:url(./casestudy_EnjinBeam/01-hero.webp)}
+@media (max-width:767.98px){[data-asset="hero"]{background-image:url(./casestudy_EnjinBeam/01-hero-mobile.webp)}}
+[data-asset="before"]{background-image:url(./casestudy_EnjinBeam/05-before.webp)}
+[data-asset="after"]{background-image:url(./casestudy_EnjinBeam/05-after.webp)}
+[data-asset="decision"]{background-image:url(./casestudy_EnjinBeam/06-decision-poster.jpg)}
+[data-asset="decision-wide"]{background-image:url(./casestudy_EnjinBeam/06-decision-wide.webp)}
+[data-asset="access-left"]{background-image:url(./casestudy_EnjinBeam/07-access-left.webp)}
+[data-asset="access-right"]{background-image:url(./casestudy_EnjinBeam/07-access-right.webp)}
+[data-asset="impact"]{background-image:url(./casestudy_EnjinBeam/08-impact-poster.jpg)}
+/* bloques propios de este caso (Figma 3. Beam, 1440 / 360) */
+.cs-decision,.cs-access,.cs-impact{padding:56px 0}
+.dc__col,.im__col{margin-top:32px}
+.dc__vid{aspect-ratio:348/250;border-radius:16px;width:calc(100cqw - 12px);margin-left:calc(6px - var(--m))}
+.dc__cap{font:var(--t-body-s);text-align:center;margin-top:10px}
+.dc__band{margin-top:16px;padding:8px;background:var(--bezel);overflow-x:auto;scrollbar-width:none;overscroll-behavior-x:contain}
+.dc__band::-webkit-scrollbar{display:none}
+.dc__wide{flex:none;width:calc(100cqw * 622 / 360);aspect-ratio:622/356;border-radius:10px}
+.acc__list{display:flex;flex-direction:column;gap:24px;margin-top:32px}
+.acc__item{display:flex;gap:8px;align-items:flex-start;font:var(--t-body-s)}
+.acc__ic{flex:none;width:42px;height:43px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.acc__ic rect{stroke:var(--accent);stroke-width:1}
+.acc__ic path{stroke:var(--accent-mono)}
+.acc__t{display:block;font-weight:400;color:var(--accent-mono)}
+.acc__row{display:flex;flex-direction:column;gap:16px;margin-top:32px}
+.acc__fig{display:flex;flex-direction:column;gap:4px}
+.acc__lbl{display:flex;gap:8px;align-items:center;font:400 14px/24px var(--ff-sans);color:#7567ce;padding-left:var(--m)}
+:root[data-theme="dark"] .acc__lbl{color:#a99cf5}
+.acc__lbl .bullet__ic{flex:0 0 10px;margin:0;color:currentColor}
+.acc__left{width:calc(100cqw * 710 / 360);aspect-ratio:710/460;margin-left:calc(100cqw * -40 / 360)}
+.acc__right{width:100cqw;aspect-ratio:360/420}
+.im__vid{aspect-ratio:360/250;width:100cqw;margin-left:calc(-1 * var(--m))}
+.im__col .csc__bullets{margin-top:32px}
+.ba__img{aspect-ratio:312/308}
+@media (min-width:768px){
+  .cs-decision,.cs-access,.cs-impact{padding:112px 0}
+  .ba__img{aspect-ratio:516/510}
+  .dc__col{width:calc(100% * 718 / 1056);margin:32px auto 0}
+  .dc__vid{width:100%;margin:0;aspect-ratio:718/516;border-radius:22px}
+  .dc__cap{font:var(--t-body-m);margin-top:24px}
+  .dc__band{margin-top:40px;padding:calc(100cqw * 20 / 1440);overflow:visible}
+  .dc__wide{width:100%;aspect-ratio:1400/802;border-radius:31px}
+  .acc__list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+  .acc__row{flex-direction:row;gap:24px;margin-top:40px}
+  .acc__fig{position:relative;display:block;flex:930 1 0;min-width:0}
+  .acc__fig+.acc__fig{flex:486 1 0}
+  .acc__lbl{position:absolute;z-index:1;top:calc(100cqw * 59 / 1440);left:calc(100cqw * 101 / 1440);padding:0}
+  .acc__fig+.acc__fig .acc__lbl{left:calc(100cqw * 51 / 1440)}
+  .acc__left{width:auto;margin:0;aspect-ratio:930/601;border-radius:0 30px 30px 0}
+  .acc__right{width:auto;aspect-ratio:486/601;border-radius:30px 0 0 30px}
+  .im__col{width:calc(100% * 718 / 1056);margin:40px auto 0}
+  .im__vid{width:100%;margin:0;aspect-ratio:718/409;border-radius:30px}
+  .im__col .csc__bullets{max-width:none;margin-top:40px}
+}
+</style>
 
 <!-- SHARED:JS-SBW -->
 <script>
@@ -599,7 +663,7 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
   <section class="cs-statement fx" data-block="3.2 Statement (B06)">
     <div class="wrap">
       <p class="cs-statement__label">Problem</p>
-      <p class="cs-statement__text">The original workflow relied on manual operations and exposed usability issues once it became customer-facing. Growing adoption also increased automated abuse, with campaigns claimed before their intended audience could participate.</p>
+      <p class="cs-statement__text">The manual workflow exposed usability issues once it became customer-facing, and growing adoption brought bots that claimed campaigns before their audience could.</p>
     </div>
   </section>
 
@@ -641,22 +705,29 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
     <div class="wrap">
       <div class="sh"><h2 class="sh__title"><span>Explored</span><span class="accent">options</span></h2><p class="sh__desc">Multiple wizard navigation patterns and campaign management layouts were explored.</p></div>
       <div class="ba__grid">
-        <figure class="ba ba--before"><div class="ba__img media" data-asset="explored-1"></div><div class="ba__bar"></div><figcaption><span class="ba__label">Explored</span><p class="ba__text">A horizontal wizard created unnecessary visual competition, and simple progress indicators lacked navigation flexibility.</p></figcaption></figure>
-        <figure class="ba ba--after"><div class="ba__img media" data-asset="chosen-1"></div><div class="ba__bar"></div><figcaption><span class="ba__label">Chosen</span><p class="ba__text">Sidebar navigation reduced screen clutter while maintaining visibility and reviewability.</p></figcaption></figure>
-        <figure class="ba ba--before"><div class="ba__img media" data-asset="explored-2"></div><div class="ba__bar"></div><figcaption><span class="ba__label">Explored</span><p class="ba__text">Card layouts prioritized visual presentation.</p></figcaption></figure>
-        <figure class="ba ba--after"><div class="ba__img media" data-asset="chosen-2"></div><div class="ba__bar"></div><figcaption><span class="ba__label">Chosen</span><p class="ba__text">Table layouts improved comparison and management for large-scale campaigns.</p></figcaption></figure>
+        <figure class="ba ba--before"><div class="ba__img media" data-asset="before"></div><div class="ba__bar"></div><figcaption><span class="ba__label">Before</span><p class="ba__text">The original claim page was a QR code and text, with no preview of the reward, its deadline or remaining stock.</p></figcaption></figure>
+        <figure class="ba ba--after"><div class="ba__img media" data-asset="after"></div><div class="ba__bar"></div><figcaption><span class="ba__label">After</span><p class="ba__text">A visual claim card shows the NFT, countdown and stock, so recipients know what they get and claim in one click.</p></figcaption></figure>
       </div>
     </div>
   </section>
-
   <!-- ===== 3.6 Final Decision (B10) ===== -->
-  <section class="cs-media-2up-wide m2w--2up fx" data-block="3.6 Final Decision (B10)">
+  <section class="cs-decision fx" data-block="3.6 Final Decision (B10)">
     <div class="wrap">
       <div class="sh"><h2 class="sh__title"><span>Final workflow</span><span class="accent">decision</span></h2><p class="sh__desc">The final solution focused on guided, step-by-step campaign creation built on familiar Marketplace interaction patterns.</p></div>
-      <div class="m2w__grid"><div class="m2w__img media" data-asset="decision-1"></div><div class="m2w__img media" data-asset="decision-2"></div></div>
-      <p class="m2w__caption m2w__caption--s">Guided step-by-step campaign creation · Familiar Marketplace interaction patterns · Configurable claim conditions to reduce abuse · Persistent asset visibility for large NFT selections · Table-based management dashboards for scalability</p>
+      <div class="dc__col"><div class="dc__vid media vid" data-asset="decision"><video muted loop playsinline preload="none" data-src="./casestudy_EnjinBeam/06-decision.mp4"></video></div><p class="dc__cap">Guided step-by-step campaign creation · Familiar Marketplace interaction patterns · Configurable claim conditions to reduce abuse · Persistent asset visibility for large NFT selections · Table-based management dashboards for scalability</p></div>
     </div>
-    <div class="m2w__wide media" data-asset="decision-wide"></div>
+    <div class="dc__band"><div class="dc__wide media" data-asset="decision-wide"></div></div>
+  </section>
+  <!-- ===== 4.4 Exploration (B07) ===== -->
+  <section class="cs-access fx" data-block="4.4 Exploration (B07)">
+    <div class="wrap">
+      <div class="sh"><h2 class="sh__title"><span>Flexible</span><span class="accent">distribution</span></h2><p class="sh__desc">Protection stays optional: creators share one multi-use QR code or many single-use codes, then add region, holder or per-wallet limits only when a campaign truly needs them.</p></div>
+      <ul class="acc__list"><li class="acc__item"><svg class="acc__ic" viewBox="0 0 42 43" aria-hidden="true"><rect x="0.5" y="0.5" width="41" height="42" rx="9.5"/><path d="M25.5 20.5L27.5 22.5L31.5 18.5"/><path d="M25.5 30.5V28.5C25.5 27.4391 25.0786 26.4217 24.3284 25.6716C23.5783 24.9214 22.5609 24.5 21.5 24.5H15.5C14.4391 24.5 13.4217 24.9214 12.6716 25.6716C11.9214 26.4217 11.5 27.4391 11.5 28.5V30.5"/><path d="M18.5 20.5C20.7091 20.5 22.5 18.7091 22.5 16.5C22.5 14.2909 20.7091 12.5 18.5 12.5C16.2909 12.5 14.5 14.2909 14.5 16.5C14.5 18.7091 16.2909 20.5 18.5 20.5Z"/></svg><span><b class="acc__t">Community Access</b>Use a whitelist or community access when needed</span></li><li class="acc__item"><svg class="acc__ic" viewBox="0 0 42 43" aria-hidden="true"><rect x="0.5" y="0.5" width="41" height="42" rx="9.5"/><path d="M22.101 31.2991C23.961 29.6931 29.5 24.4931 29.5 19.5001C29.5 17.3784 28.6571 15.3436 27.1569 13.8433C25.6566 12.343 23.6217 11.5001 21.5 11.5001C19.3783 11.5001 17.3434 12.343 15.8431 13.8433C14.3429 15.3436 13.5 17.3784 13.5 19.5001C13.5 24.4931 19.039 29.6931 20.899 31.2991C21.0723 31.4294 21.2832 31.4999 21.5 31.4999C21.7168 31.4999 21.9277 31.4294 22.101 31.2991Z"/><path d="M21.5 22.5001C23.1569 22.5001 24.5 21.157 24.5 19.5001C24.5 17.8433 23.1569 16.5001 21.5 16.5001C19.8431 16.5001 18.5 17.8433 18.5 19.5001C18.5 21.157 19.8431 22.5001 21.5 22.5001Z"/></svg><span><b class="acc__t">Region Controls</b>Restrict regions when suspicious activity was concentrated</span></li><li class="acc__item"><svg class="acc__ic" viewBox="0 0 42 43" aria-hidden="true"><rect x="0.5" y="0.5" width="41" height="42" rx="9.5"/><path d="M11.5 30.7071L21.1 21.1071"/><path d="M17 25.2071L19.3 27.5071C19.4832 27.694 19.5859 27.9453 19.5859 28.2071C19.5859 28.4688 19.4832 28.7202 19.3 28.9071L17.2 31.0071C17.0131 31.1903 16.7618 31.2929 16.5 31.2929C16.2382 31.2929 15.9869 31.1903 15.8 31.0071L13.5 28.7071"/><path d="M25 22.7071C28.0376 22.7071 30.5 20.2447 30.5 17.2071C30.5 14.1695 28.0376 11.7071 25 11.7071C21.9624 11.7071 19.5 14.1695 19.5 17.2071C19.5 20.2447 21.9624 22.7071 25 22.7071Z"/></svg><span><b class="acc__t">Holder Access</b>Limit claims to specific asset holders</span></li><li class="acc__item"><svg class="acc__ic" viewBox="0 0 42 43" aria-hidden="true"><rect x="0.5" y="0.5" width="41" height="42" rx="9.5"/><path d="M25.5 30.5V28.5C25.5 27.4391 25.0786 26.4217 24.3284 25.6716C23.5783 24.9214 22.5609 24.5 21.5 24.5H15.5C14.4391 24.5 13.4217 24.9214 12.6716 25.6716C11.9214 26.4217 11.5 27.4391 11.5 28.5V30.5"/><path d="M18.5 20.5C20.7091 20.5 22.5 18.7091 22.5 16.5C22.5 14.2909 20.7091 12.5 18.5 12.5C16.2909 12.5 14.5 14.2909 14.5 16.5C14.5 18.7091 16.2909 20.5 18.5 20.5Z"/><path d="M26.5 17.5L31.5 22.5"/><path d="M31.5 17.5L26.5 22.5"/></svg><span><b class="acc__t">Per-person Limits</b>Limit repeat claims per wallet</span></li></ul>
+    </div>
+    <div class="acc__row">
+      <div class="acc__fig"><span class="acc__lbl"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg>Unique QR Codes</span><div class="hs"><div class="acc__left media" data-asset="access-left"></div></div></div>
+      <div class="acc__fig"><span class="acc__lbl"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg>Mass Share QR Codes</span><div class="acc__right media" data-asset="access-right"></div></div>
+    </div>
   </section>
 
   <!-- ===== 3.7 Tradeoffs (B04) ===== -->
@@ -672,12 +743,12 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
       </ol>
     </div>
   </section>
-
   <!-- ===== 3.8 Impact (B14) ===== -->
-  <section class="cs-media-single fx" data-block="3.8 Impact (B14)">
+  <section class="cs-impact fx" data-block="3.8 Impact (B14)">
     <div class="wrap">
-      <div class="sh sh--bullets"><h2 class="sh__title"><span>Measured</span><span class="accent">impact</span></h2>
-        <ul class="sh__bullets">
+      <div class="sh"><h2 class="sh__title"><span>Measured</span><span class="accent">impact</span></h2><p class="sh__desc">Creators began launching and running campaigns on their own, clearing the operational bottleneck that started the project.</p></div>
+      <div class="im__col"><div class="im__vid media vid" data-asset="impact"><video muted loop playsinline preload="none" data-src="./casestudy_EnjinBeam/08-impact.mp4"></video></div>
+        <ul class="csc__bullets">
           <li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>214% growth in accounts by month four</span></li>
           <li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>35% increase in active users</span></li>
           <li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>Significant reduction in reported bot abuse</span></li>
@@ -685,7 +756,6 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
         </ul>
       </div>
     </div>
-    <div class="ms__img ms__img--bleed media" data-asset="impact"></div>
   </section>
 
   </main>

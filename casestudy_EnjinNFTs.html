@@ -16,7 +16,10 @@
 @font-face{font-family:'Plus Jakarta Sans';font-style:italic;font-weight:200 800;font-display:swap;src:url(./fonts/plus-jakarta-sans/webfont/PlusJakartaSans-200-800-italic-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 @font-face{font-family:'Space Mono';font-style:normal;font-weight:400;font-display:swap;src:url(./fonts/space-mono/webfont/SpaceMono-400-normal-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 </style>
-<link rel="stylesheet" href="./css/case-study.css?v=8">
+<link rel="stylesheet" href="./css/case-study.css?v=9">
+<!-- ASSETS — hero (LCP): precarga solo la del breakpoint activo -->
+<link rel="preload" as="image" href="./casestudy_EnjinNFTs/01-hero.jpg" media="(min-width:768px)" fetchpriority="high">
+<link rel="preload" as="image" href="./casestudy_EnjinNFTs/01-hero-mobile.jpg" media="(max-width:767.98px)" fetchpriority="high">
 <!-- (2026-10-04) CARGA: React desde el propio dominio, igual que el home (mismos bytes,
      sha384 idéntico al SRI de support.js). Además, con window.__resources definido
      support.js NO vuelve a descargar la página entera (fetch(location.href)). -->
@@ -26,7 +29,7 @@ if(!r[u+'react@18.3.1/umd/react.production.min.js'])r[u+'react@18.3.1/umd/react.
 if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.1/umd/react-dom.production.min.js']='./vendor/react-dom.production.min.js';})();
 </script>
 <script src="./vendor/support.js"></script>
-<script src="./js/case-study.js?v=2" defer></script>
+<script src="./js/case-study.js?v=3" defer></script>
 </head>
 <body>
 <x-dc>
@@ -95,17 +98,73 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
        Si cambias la extensión (.png/.jpg), cámbiala solo aquí.
        Sin archivo, el hueco muestra el color placeholder (--media).
    ========================================================================== */
-[data-asset="hero"]{background-image:url(./casestudy_EnjinNFTs/01-hero.webp)}
-[data-asset="exploration-1"]{background-image:url(./casestudy_EnjinNFTs/04-exploration-1.webp)}
-[data-asset="exploration-2"]{background-image:url(./casestudy_EnjinNFTs/04-exploration-2.webp)}
-[data-asset="exploration-3"]{background-image:url(./casestudy_EnjinNFTs/04-exploration-3.webp)}
-[data-asset="exploration-4a"]{background-image:url(./casestudy_EnjinNFTs/04-exploration-4a.webp)}
-[data-asset="exploration-4b"]{background-image:url(./casestudy_EnjinNFTs/04-exploration-4b.webp)}
-[data-asset="card-1"]{background-image:url(./casestudy_EnjinNFTs/05-card-1.webp)}
-[data-asset="card-2"]{background-image:url(./casestudy_EnjinNFTs/05-card-2.webp)}
-[data-asset="card-3"]{background-image:url(./casestudy_EnjinNFTs/05-card-3.webp)}
-[data-asset="media"]{background-image:url(./casestudy_EnjinNFTs/06-media.webp)}
-[data-asset="closing-scene"]{background-image:url(./casestudy_EnjinNFTs/08-closing-scene.webp)}
+[data-asset="hero"]{background-image:url(./casestudy_EnjinNFTs/01-hero.jpg)}
+@media (max-width:767.98px){[data-asset="hero"]{background-image:url(./casestudy_EnjinNFTs/01-hero-mobile.jpg)}}
+[data-asset="grid-01"]{background-image:url(./casestudy_EnjinNFTs/03-grid-01-poster.jpg)}
+[data-asset="grid-02"]{background-image:url(./casestudy_EnjinNFTs/03-grid-02-poster.jpg)}
+[data-asset="grid-03"]{background-image:url(./casestudy_EnjinNFTs/03-grid-03-poster.jpg)}
+[data-asset="grid-04"]{background-image:url(./casestudy_EnjinNFTs/03-grid-04-poster.jpg)}
+[data-asset="grid-05"]{background-image:url(./casestudy_EnjinNFTs/03-grid-05-poster.jpg)}
+[data-asset="grid-06"]{background-image:url(./casestudy_EnjinNFTs/03-grid-06.webp)}
+[data-asset="grid-07"]{background-image:url(./casestudy_EnjinNFTs/03-grid-07.webp)}
+[data-asset="grid-08"]{background-image:url(./casestudy_EnjinNFTs/03-grid-08.webp)}
+[data-asset="grid-09"]{background-image:url(./casestudy_EnjinNFTs/03-grid-09.webp)}
+[data-asset="grid-10"]{background-image:url(./casestudy_EnjinNFTs/03-grid-10.webp)}
+[data-asset="grid-11"]{background-image:url(./casestudy_EnjinNFTs/03-grid-11.webp)}
+[data-asset="grid-12"]{background-image:url(./casestudy_EnjinNFTs/03-grid-12.webp)}
+[data-asset="grid-13"]{background-image:url(./casestudy_EnjinNFTs/03-grid-13.webp)}
+[data-asset="grid-14"]{background-image:url(./casestudy_EnjinNFTs/03-grid-14.webp)}
+[data-asset="grid-15"]{background-image:url(./casestudy_EnjinNFTs/03-grid-15.webp)}
+[data-asset="grid-16"]{background-image:url(./casestudy_EnjinNFTs/03-grid-16.webp)}
+[data-asset="grid-17"]{background-image:url(./casestudy_EnjinNFTs/03-grid-17.webp)}
+[data-asset="grid-18"]{background-image:url(./casestudy_EnjinNFTs/03-grid-18.webp)}
+[data-asset="grid-19"]{background-image:url(./casestudy_EnjinNFTs/03-grid-19.webp)}
+[data-asset="grid-20"]{background-image:url(./casestudy_EnjinNFTs/03-grid-20.webp)}
+[data-asset="grid-21"]{background-image:url(./casestudy_EnjinNFTs/03-grid-21.webp)}
+[data-asset="grid-22"]{background-image:url(./casestudy_EnjinNFTs/03-grid-22.webp)}
+[data-asset="grid-23"]{background-image:url(./casestudy_EnjinNFTs/03-grid-23.webp)}
+[data-asset="grid-24"]{background-image:url(./casestudy_EnjinNFTs/03-grid-24.webp)}
+[data-asset="grid-25"]{background-image:url(./casestudy_EnjinNFTs/03-grid-25.webp)}
+[data-asset="grid-26"]{background-image:url(./casestudy_EnjinNFTs/03-grid-26.webp)}
+[data-asset="grid-27"]{background-image:url(./casestudy_EnjinNFTs/03-grid-27-poster.jpg)}
+[data-asset="grid-28"]{background-image:url(./casestudy_EnjinNFTs/03-grid-28-poster.jpg)}
+[data-asset="grid-29"]{background-image:url(./casestudy_EnjinNFTs/03-grid-29-poster.jpg)}
+[data-asset="grid-30"]{background-image:url(./casestudy_EnjinNFTs/03-grid-30-poster.jpg)}
+[data-asset="grid-31"]{background-image:url(./casestudy_EnjinNFTs/05-grid-31-poster.jpg)}
+[data-asset="grid-32"]{background-image:url(./casestudy_EnjinNFTs/05-grid-32-poster.jpg)}
+[data-asset="grid-33"]{background-image:url(./casestudy_EnjinNFTs/05-grid-33-poster.jpg)}
+[data-asset="grid-34"]{background-image:url(./casestudy_EnjinNFTs/05-grid-34-poster.jpg)}
+[data-asset="grid-35"]{background-image:url(./casestudy_EnjinNFTs/05-grid-35.webp)}
+[data-asset="grid-36"]{background-image:url(./casestudy_EnjinNFTs/05-grid-36-poster.jpg)}
+[data-asset="grid-37"]{background-image:url(./casestudy_EnjinNFTs/05-grid-37.webp)}
+[data-asset="grid-38"]{background-image:url(./casestudy_EnjinNFTs/05-grid-38.webp)}
+[data-asset="grid-39"]{background-image:url(./casestudy_EnjinNFTs/05-grid-39.webp)}
+[data-asset="grid-40"]{background-image:url(./casestudy_EnjinNFTs/05-grid-40.webp)}
+[data-asset="grid-41"]{background-image:url(./casestudy_EnjinNFTs/05-grid-41.webp)}
+[data-asset="grid-42"]{background-image:url(./casestudy_EnjinNFTs/05-grid-42.webp)}
+[data-asset="grid-43"]{background-image:url(./casestudy_EnjinNFTs/05-grid-43-poster.jpg)}
+[data-asset="grid-44"]{background-image:url(./casestudy_EnjinNFTs/05-grid-44-poster.jpg)}
+[data-asset="grid-45"]{background-image:url(./casestudy_EnjinNFTs/05-grid-45-poster.jpg)}
+[data-asset="grid-46"]{background-image:url(./casestudy_EnjinNFTs/05-grid-46.webp)}
+[data-asset="grid-47"]{background-image:url(./casestudy_EnjinNFTs/05-grid-47.webp)}
+/* grillas de NFTs (Figma 9. Enjin NFTs: filas de 2 / 3 / 4; en 360 la de 4 pasa a 2×2) */
+.cs-grid{padding:56px 0}
+.cs-grid--b{padding-top:0}
+.ng{display:flex;flex-direction:column;gap:8px;margin-top:32px}
+.cs-grid--b .ng{margin-top:0}
+.ng__r{display:grid;gap:8px;grid-template-columns:repeat(2,minmax(0,1fr))}
+.ng__r--3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.ng__c{aspect-ratio:152/148;border-radius:3px}
+.ng__r--3 .ng__c{aspect-ratio:99/98}
+.ng__r--4 .ng__c{aspect-ratio:152/150;border-radius:6px}
+@media (min-width:768px){
+  .cs-grid{padding:112px 0}
+  .ng{margin-top:40px}
+  .ng__r--4{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .ng__c,.ng__r--4 .ng__c{aspect-ratio:524/510;border-radius:10px}
+  .ng__r--3 .ng__c{aspect-ratio:347/343}
+  .ng__r--4 .ng__c{aspect-ratio:258/255}
+}
 </style>
 
 <!-- SHARED:JS-SBW -->
@@ -618,6 +677,23 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
       <p class="cs-statement__text">NFT drops come out fast and compete for attention in crowded feeds. Each one needed artwork worth keeping, ready on short timelines, while still building one recognizable world for the Enjin community.</p>
     </div>
   </section>
+  <!-- ===== 3.6 Final Decision (B10) ===== -->
+  <section class="cs-grid fx" data-block="3.6 Final Decision (B10)">
+    <div class="wrap">
+      <div class="sh"><h2 class="sh__title"><span>Final workflow</span><span class="accent">decision</span></h2><p class="sh__desc">The final solution focused on guided, step-by-step campaign creation built on familiar Marketplace interaction patterns.</p></div>
+      <div class="ng">
+        <div class="ng__r ng__r--2"><div class="ng__c media vid" data-asset="grid-01"><video muted loop playsinline preload="none" data-src="./casestudy_EnjinNFTs/03-grid-01.mp4"></video></div><div class="ng__c media vid" data-asset="grid-02"><video muted loop playsinline preload="none" data-src="./casestudy_EnjinNFTs/03-grid-02.mp4"></video></div></div>
+        <div class="ng__r ng__r--3"><div class="ng__c media vid" data-asset="grid-03"><video muted loop playsinline preload="none" data-src="./casestudy_EnjinNFTs/03-grid-03.mp4"></video></div><div class="ng__c media vid" data-asset="grid-04"><video muted loop playsinline preload="none" data-src="./casestudy_EnjinNFTs/03-grid-04.mp4"></video></div><div class="ng__c media vid" data-asset="grid-05"><video muted loop playsinline preload="none" data-src="./casestudy_EnjinNFTs/03-grid-05.mp4"></video></div></div>
+        <div class="ng__r ng__r--4"><div class="ng__c media" data-asset="grid-06"></div><div class="ng__c media" data-asset="grid-07"></div><div class="ng__c media" data-asset="grid-08"></div><div class="ng__c media" data-asset="grid-09"></div></div>
+        <div class="ng__r ng__r--3"><div class="ng__c media" data-asset="grid-10"></div><div class="ng__c media" data-asset="grid-11"></div><div class="ng__c media" data-asset="grid-12"></div></div>
+        <div class="ng__r ng__r--3"><div class="ng__c media" data-asset="grid-13"></div><div class="ng__c media" data-asset="grid-14"></div><div class="ng__c media" data-asset="grid-15"></div></div>
+        <div class="ng__r ng__r--3"><div class="ng__c media" data-asset="grid-16"></div><div class="ng__c media" data-asset="grid-17"></div><div class="ng__c media" data-asset="grid-18"></div></div>
+        <div class="ng__r ng__r--4"><div class="ng__c media" data-asset="grid-19"></div><div class="ng__c media" data-asset="grid-20"></div><div class="ng__c media" data-asset="grid-21"></div><div class="ng__c media" data-asset="grid-22"></div></div>
+        <div class="ng__r ng__r--4"><div class="ng__c media" data-asset="grid-23"></div><div class="ng__c media" data-asset="grid-24"></div><div class="ng__c media" data-asset="grid-25"></div><div class="ng__c media" data-asset="grid-26"></div></div>
+        <div class="ng__r ng__r--4"><div class="ng__c media vid" data-asset="grid-27"><video muted loop playsinline preload="none" data-src="./casestudy_EnjinNFTs/03-grid-27.mp4"></video></div><div class="ng__c media vid" data-asset="grid-28"><video muted loop playsinline preload="none" data-src="./casestudy_EnjinNFTs/03-grid-28.mp4"></video></div><div class="ng__c media vid" data-asset="grid-29"><video muted loop playsinline preload="none" data-src="./casestudy_EnjinNFTs/03-grid-29.mp4"></video></div><div class="ng__c media vid" data-asset="grid-30"><video muted loop playsinline preload="none" data-src="./casestudy_EnjinNFTs/03-grid-30.mp4"></video></div></div>
+      </div>
+    </div>
+  </section>
 
   <!-- ===== 9.3 Constraints (B04) ===== -->
   <section class="cs-constraints fx" data-block="9.3 Constraints (B04)">
@@ -635,62 +711,19 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
       </div>
     </div>
   </section>
-
-  <!-- ===== 9.4 Drops & Collections (B08) ===== -->
-  <section class="cs-zigzag fx" data-block="9.4 Drops &amp; Collections (B08)">
+  <!-- ===== 3.6 Final Decision (B10) b ===== -->
+  <section class="cs-grid cs-grid--b fx" data-block="3.6 Final Decision (B10)">
     <div class="wrap">
-      <div class="sh"><h2 class="sh__title"><span>Drops and</span><span class="accent">collections</span></h2><p class="sh__desc">The series covered several kinds of drops, each with its own purpose, from seasonal celebrations to partner campaigns and profile picture collections.</p></div>
-      <div class="zz">
-        <div class="zz__row"><div class="zz__media media" data-asset="exploration-1"></div><div class="zz__body"><h3 class="zz__title">Seasonal drops</h3><p class="zz__text">Halloween, Valentine's Day, Lunar New Year, St. Patrick's Day and winter drops gave the community a reason to collect all year.</p></div></div>
-        <div class="zz__row"><div class="zz__media media" data-asset="exploration-2"></div><div class="zz__body"><h3 class="zz__title">The Enjin mascot</h3><p class="zz__text">A rounded purple mascot appeared as a chef, a ninja, a jester and more, turning the brand into a character people could collect.</p></div></div>
-        <div class="zz__row"><div class="zz__media media" data-asset="exploration-3"></div><div class="zz__body"><h3 class="zz__title">Partner campaigns</h3><p class="zz__text">Joint drops, such as a piece with OKCoin Japan, adapted the cast to each partner's culture while keeping the Enjin coin present.</p></div></div>
-        <div class="zz__row"><div class="zz__media zz__media--split"><div class="media" data-asset="exploration-4a"></div><div class="media" data-asset="exploration-4b"></div></div><div class="zz__body"><h3 class="zz__title">Profile collections</h3><p class="zz__text">Sets of bears, apes and sci-fi characters were built on shared bases with swappable outfits, ready to work as profile pictures.</p></div></div>
+      <div class="ng">
+        <div class="ng__r ng__r--2"><div class="ng__c media vid" data-asset="grid-31"><video muted loop playsinline preload="none" data-src="./casestudy_EnjinNFTs/05-grid-31.mp4"></video></div><div class="ng__c media vid" data-asset="grid-32"><video muted loop playsinline preload="none" data-src="./casestudy_EnjinNFTs/05-grid-32.mp4"></video></div></div>
+        <div class="ng__r ng__r--2"><div class="ng__c media vid" data-asset="grid-33"><video muted loop playsinline preload="none" data-src="./casestudy_EnjinNFTs/05-grid-33.mp4"></video></div><div class="ng__c media vid" data-asset="grid-34"><video muted loop playsinline preload="none" data-src="./casestudy_EnjinNFTs/05-grid-34.mp4"></video></div></div>
+        <div class="ng__r ng__r--2"><div class="ng__c media" data-asset="grid-35"></div><div class="ng__c media vid" data-asset="grid-36"><video muted loop playsinline preload="none" data-src="./casestudy_EnjinNFTs/05-grid-36.mp4"></video></div></div>
+        <div class="ng__r ng__r--2"><div class="ng__c media" data-asset="grid-37"></div><div class="ng__c media" data-asset="grid-38"></div></div>
+        <div class="ng__r ng__r--4"><div class="ng__c media" data-asset="grid-39"></div><div class="ng__c media" data-asset="grid-40"></div><div class="ng__c media" data-asset="grid-41"></div><div class="ng__c media" data-asset="grid-42"></div></div>
+        <div class="ng__r ng__r--3"><div class="ng__c media vid" data-asset="grid-43"><video muted loop playsinline preload="none" data-src="./casestudy_EnjinNFTs/05-grid-43.mp4"></video></div><div class="ng__c media vid" data-asset="grid-44"><video muted loop playsinline preload="none" data-src="./casestudy_EnjinNFTs/05-grid-44.mp4"></video></div><div class="ng__c media vid" data-asset="grid-45"><video muted loop playsinline preload="none" data-src="./casestudy_EnjinNFTs/05-grid-45.mp4"></video></div></div>
+        <div class="ng__r ng__r--2"><div class="ng__c media" data-asset="grid-46"></div><div class="ng__c media" data-asset="grid-47"></div></div>
       </div>
     </div>
-  </section>
-
-  <!-- ===== 9.5 Main Character (B12) ===== -->
-  <section class="cs-carousel3 fx" data-block="9.5 Main Character (B12)">
-    <div class="wrap">
-      <div class="sh"><h2 class="sh__title"><span>A recurring</span><span class="accent">character</span></h2><p class="sh__desc">A blue-haired gamer in an Enjin hoodie became the face of the series, returning in new outfits and scenes so each drop felt like a new chapter.</p></div>
-    </div>
-    <div class="c3__track"><div class="c3__card media" data-asset="card-1"></div><div class="c3__card media" data-asset="card-2"></div><div class="c3__card media" data-asset="card-3"></div></div>
-    <div class="wrap"><p class="c3__caption">The same character appears celebrating with a controller, playing late at night and dressed for seasonal drops, building familiarity with collectors from one release to the very next.</p></div>
-  </section>
-
-  <!-- ===== 9.6 Animation (B14) ===== -->
-  <section class="cs-media-single fx" data-block="9.6 Animation (B14)">
-    <div class="wrap">
-      <div class="sh"><h2 class="sh__title"><span>Brought</span><span class="accent">to life</span></h2><p class="sh__desc">Selected artworks were animated with short loops, glows and particles, giving each collectible movement and helping it stand out wherever it was shared or displayed.</p></div>
-      <div class="ms__img media" data-asset="media"></div>
-    </div>
-  </section>
-
-  <!-- ===== 9.7 Tradeoffs (B04) ===== -->
-  <section class="cs-list-numbered fx" data-block="9.7 Tradeoffs (B04)">
-    <div class="wrap ln">
-      <div class="ln__head">
-        <h2 class="sh__title"><span>Illustration</span><span class="accent">tradeoffs</span></h2>
-        <p class="ln__desc">Fast, frequent drops pushed toward speed, while collectors expected detail. These two choices kept the series moving without losing quality.</p>
-      </div>
-      <ol class="ln__list">
-        <li class="ln__item"><span class="ln__num">01</span><h3 class="ln__title">Variety over one style</h3><p class="ln__text">Switching between anime, painted, vector and pixel styles kept drops fresh, while the cast and purple palette held the series together.</p></li>
-        <li class="ln__item"><span class="ln__num">02</span><h3 class="ln__title">Shared bases, new looks</h3><p class="ln__text">Profile collections reused bodies and poses, putting the effort into outfits and accessories that made each piece feel unique.</p></li>
-      </ol>
-    </div>
-  </section>
-
-  <!-- ===== 9.8 Outcome (B02) ===== -->
-  <section class="cs-closing-scene fx" data-block="9.8 Outcome (B02)">
-    <div class="wrap">
-      <div class="sh"><h2 class="sh__title"><span>Series</span><span class="accent">outcome</span></h2><p class="sh__desc">The series gave Enjin a recognizable collectible world, with artwork ready for every season, partner and campaign, and a cast that collectors could follow.</p></div>
-      <ul class="csc__bullets">
-        <li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>5 seasonal themes, from Halloween to Lunar New Year</span></li>
-        <li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>1 recurring cast: a blue-haired gamer and a purple mascot</span></li>
-        <li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>4 styles: anime, painted, vector and pixel art</span></li>
-      </ul>
-    </div>
-    <div class="csc__scene media" data-asset="closing-scene"><div class="csc__inner" data-asset="closing-screen"></div></div>
   </section>
 
   </main>

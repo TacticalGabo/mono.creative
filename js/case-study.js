@@ -260,6 +260,8 @@
     function load(el){
       if(el.__ready)return el.__ready;
       el.classList.add('ld');[].forEach.call(el.querySelectorAll('[data-asset]'),function(n){n.classList.add('ld')});
+      /* vídeos (<video data-src>): src al cargar su hueco; el poster es el fondo del [data-asset] */
+      [].forEach.call(el.querySelectorAll('video[data-src]'),function(v){v.muted=true;v.src=v.getAttribute('data-src');v.removeAttribute('data-src');var p=v.play();if(p&&p.catch)p.catch(function(){})});
       el.__ready=Promise.all(urls(el).map(function(u){var i=new Image();i.src=u;
         return (i.decode?i.decode():new Promise(function(r){i.onload=i.onerror=r})).catch(function(){})}));
       return el.__ready;

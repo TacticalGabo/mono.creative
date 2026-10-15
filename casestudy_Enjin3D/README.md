@@ -1,35 +1,31 @@
-# casestudy_Enjin3D — imágenes del case study
+# casestudy_Enjin3D — imágenes y vídeos del case study
 
-Página: `../casestudy_Enjin3D.html`
+Página: `../casestudy_Enjin3D.html` · Origen: `mono.cases/cases_psd/` (copias optimizadas; los originales no se tocan).
+Actualizado: 2026-10-15.
 
-Para **reemplazar** una imagen: guarda el archivo nuevo aquí con **el mismo nombre**.
-No hay que tocar el HTML. Si un archivo no existe, su hueco muestra el color placeholder.
+- El tamaño del hueco lo manda el frame de Figma (Desktop 1440 / Mobile 360), no el archivo:
+  Figma FILL = `background-size:cover` / `object-fit:cover` centrado (ver `xlogClaude/figma-fill-imagenes.md`).
+- Export: 2× el tamaño máximo en pantalla (página a 1920) sin pasar del original. Opacas → WebP q84 o JPG q85
+  (el más ligero); con alfa → WebP q92; GIF grande → MP4 H.264 (crf 24-25, sin audio, faststart) + poster JPG
+  del primer frame; GIF pequeño → WebP animado.
+- Para reemplazar una pieza: mismo nombre de archivo. Las rutas viven en el bloque `9 · ASSETS` de la página.
 
-Si prefieres otro formato (`.png`, `.jpg`), cambia la extensión en un solo sitio:
-el bloque `9 · ASSETS` al final del `<style>` de la página.
-
-**2026-10-04: la página usa SOLO placeholders** (bloque `9 · ASSETS` vacío); estos archivos quedan listos para cuando se aprueben.
-Degen salió de este caso (ahora es el caso 12, `casestudy_DegenAnimations`): sus 4 webp se movieron a `mono.creative Entries/content generator/Degen Animations/_retirado-de-enjin3d/`.
-
-Generadas (todas menos el hero) desde `RAW images/Eniin Gifs and animations/` con
-`mono.creative Entries/content generator/Enjin 3D/make_assets.py` (fuente y recorte de cada una, ahí).
-Las marcadas **anim.** son WebP animados (loop): el bloque las pinta como `background-image`, sin código extra.
-Tamaño = el de la fuente, sin ampliar (las RAW son de 1080–4000 px). Formato `.webp`, q80 las fijas, q55–70 las animadas.
-
-| Archivo | Bloque | Proporción | Exportado | Peso |
-|---|---|---|---|---|
-| `01-hero.webp` | 11.1 Hero (B01) | 1056 : 508 desktop · 312 : 306 mobile (recorte centrado) | ⬜ placeholder por ahora (pedido de Gabriel); la regla CSS ya apunta a este nombre | — |
-| `01-avatar-1.webp` | 11.1 Hero, avatar (Gabriel) | 1 : 1 | ⬜ falta (100 × 100) | — |
-| `04-exploration-1.webp` | 11.4 Multiverse, fila 1 · anim. | 704 : 396 desktop · 360 : 260 mobile | 1408 × 792 | 1.5 MB |
-| `04-exploration-2.webp` | 11.4 Multiverse, fila 2 · anim. | 704 : 396 · 360 : 260 | 1408 × 792 | 811 KB |
-| `04-exploration-3a.webp` | 11.4 Multiverse, fila 3 panel estrecho · anim. | 140 : 304 desktop · 72 : 260 mobile | 400 × 868 | 798 KB |
-| `04-exploration-3b.webp` | 11.4 Multiverse, fila 3 panel ancho | 540 : 304 desktop · 276 : 260 mobile | 1408 × 792 | 33 KB |
-| `05-card-1.webp` … `05-card-3.webp` | 11.5 Blobby (B12) | 711 : 400 desktop · 360 : 260 mobile | 1600 × 900 · 1846 × 1039 | 43–126 KB |
-| `06-detail-1.webp`, `06-detail-2.webp` | 11.6 Two Styles (B10 modified) · anim. | 516 : 510 | 900 × 890 | 391 / 353 KB |
-| `08-closing-scene.webp` | 11.8 Outcome (B02), escena a sangre (desenfocada 8 px) | 1440 : 900 desktop · 360 : 400 mobile | ⬜ sin exportar: fuente prevista `Blobby long videos/video_screeshot_blobby3D_fantasy4.png` (portal con espada). Antes era el desierto de Degen, retirado el 2026-10-04 | — |
-| `08-closing-screen.webp` | 11.8 Outcome, pantalla interior | 744 : 419 | 1880 × 1059 | 48 KB |
-
-Las imágenes se pintan con `background-size: cover`: si la proporción mobile es
-distinta, se recorta al centro. Si una pieza necesita versión mobile propia,
-se añade un segundo archivo (`-m`) y una regla `@media (max-width:767.98px)` en el
-mismo bloque ASSETS.
+| Archivo | Bloque | Peso | Tamaño |
+|---|---|---|---|
+| `01-hero-mobile.webp` | Hero (B01) · mobile | 94 KB | 1000×1056 |
+| `01-hero.webp` | Hero (B01) · desktop | 128 KB | 1920×1080 |
+| `03-styles-1.webp` | 11.6 Two Styles (B10 modified) | 19 KB | 1032×1020 |
+| `03-styles-2.webp` | 11.6 Two Styles (B10 modified) | 22 KB | 1032×1020 |
+| `05-multiverse-1.mp4` | 11.4 Multiverse Items (B08) | 3646 KB | 1920×1080 (vídeo, poster `05-multiverse-1-poster.jpg`) |
+| `05-multiverse-2.mp4` | 11.4 Multiverse Items (B08) | 440 KB | 1240×1240 (vídeo, poster `05-multiverse-2-poster.jpg`) |
+| `05-multiverse-3.mp4` | 11.4 Multiverse Items (B08) | 483 KB | 1000×1080 (vídeo, poster `05-multiverse-3-poster.jpg`) |
+| `06-styles-1.mp4` | 11.6 Two Styles (B10 modified) | 100 KB | 700×692 (vídeo, poster `06-styles-1-poster.jpg`) |
+| `06-styles-2.mp4` | 11.6 Two Styles (B10 modified) | 178 KB | 700×692 (vídeo, poster `06-styles-2-poster.jpg`) |
+| `06-styles-3.mp4` | 11.6 Two Styles (B10 modified) | 114 KB | 700×692 (vídeo, poster `06-styles-3-poster.jpg`) |
+| `06-styles-4.mp4` | 11.6 Two Styles (B10 modified) | 244 KB | 700×692 (vídeo, poster `06-styles-4-poster.jpg`) |
+| `06-styles-5.mp4` | 11.6 Two Styles (B10 modified) | 327 KB | 700×692 (vídeo, poster `06-styles-5-poster.jpg`) |
+| `06-styles-6.mp4` | 11.6 Two Styles (B10 modified) | 384 KB | 700×692 (vídeo, poster `06-styles-6-poster.jpg`) |
+| `07-blobby-1.mp4` | 11.5 Blobby (B12) | 276 KB | 480×480 (vídeo, poster `07-blobby-1-poster.jpg`) |
+| `07-blobby-2.webp` | 11.5 Blobby (B12) | 321 KB | 500×500 animado |
+| `07-blobby-3.mp4` | 11.5 Blobby (B12) | 297 KB | 500×500 (vídeo, poster `07-blobby-3-poster.jpg`) |
+| `07-blobby-4.mp4` | 11.5 Blobby (B12) | 270 KB | 480×416 (vídeo, poster `07-blobby-4-poster.jpg`) |

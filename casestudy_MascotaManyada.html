@@ -16,7 +16,10 @@
 @font-face{font-family:'Plus Jakarta Sans';font-style:italic;font-weight:200 800;font-display:swap;src:url(./fonts/plus-jakarta-sans/webfont/PlusJakartaSans-200-800-italic-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 @font-face{font-family:'Space Mono';font-style:normal;font-weight:400;font-display:swap;src:url(./fonts/space-mono/webfont/SpaceMono-400-normal-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 </style>
-<link rel="stylesheet" href="./css/case-study.css?v=8">
+<link rel="stylesheet" href="./css/case-study.css?v=9">
+<!-- ASSETS — hero (LCP): precarga solo la del breakpoint activo -->
+<link rel="preload" as="image" href="./casestudy_MascotaManyada/01-hero.webp" media="(min-width:768px)" fetchpriority="high">
+<link rel="preload" as="image" href="./casestudy_MascotaManyada/01-hero-mobile.jpg" media="(max-width:767.98px)" fetchpriority="high">
 <!-- (2026-10-04) CARGA: React desde el propio dominio, igual que el home (mismos bytes,
      sha384 idéntico al SRI de support.js). Además, con window.__resources definido
      support.js NO vuelve a descargar la página entera (fetch(location.href)). -->
@@ -26,7 +29,7 @@ if(!r[u+'react@18.3.1/umd/react.production.min.js'])r[u+'react@18.3.1/umd/react.
 if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.1/umd/react-dom.production.min.js']='./vendor/react-dom.production.min.js';})();
 </script>
 <script src="./vendor/support.js"></script>
-<script src="./js/case-study.js?v=2" defer></script>
+<script src="./js/case-study.js?v=3" defer></script>
 </head>
 <body>
 <x-dc>
@@ -90,6 +93,30 @@ window.MC_GEOM = G;
 window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEOM); else setTimeout(p, 30); })(); };
 </script>
 <!-- /SHARED:JS-GEOM -->
+<style>
+/* ==========================================================================
+   9 · ASSETS — imágenes del caso en ./casestudy_MascotaManyada/
+       Para cambiar una imagen: reemplaza el archivo con el MISMO nombre.
+       Si cambias la extensión (.png/.jpg), cámbiala solo aquí.
+       Sin archivo, el hueco muestra el color placeholder (--media).
+   ========================================================================== */
+[data-asset="hero"]{background-image:url(./casestudy_MascotaManyada/01-hero.webp)}
+@media (max-width:767.98px){[data-asset="hero"]{background-image:url(./casestudy_MascotaManyada/01-hero-mobile.jpg)}}
+[data-asset="hero"]{background-color:transparent}
+[data-asset="exploration-1"]{background-image:url(./casestudy_MascotaManyada/04-exploration-1.webp)}
+[data-asset="exploration-2"]{background-image:url(./casestudy_MascotaManyada/04-exploration-2.webp)}
+[data-asset="exploration-wide"]{background-image:url(./casestudy_MascotaManyada/04-exploration-wide.webp)}
+[data-asset="card-1"]{background-image:url(./casestudy_MascotaManyada/06-card-1.webp)}
+[data-asset="card-2"]{background-image:url(./casestudy_MascotaManyada/06-card-2.webp)}
+[data-asset="card-3"]{background-image:url(./casestudy_MascotaManyada/06-card-3.webp)}
+[data-asset="closing-scene"]{background-image:url(./casestudy_MascotaManyada/09-closing-scene.webp)}
+/* tamaños propios de este caso (Figma 360) */
+@media (max-width:767.98px){
+  .m2c__img{aspect-ratio:312/308}
+  .m2w__wide{aspect-ratio:360/300}
+  .c3__card{aspect-ratio:360/300}
+}
+</style>
 
 <!-- SHARED:JS-SBW -->
 <script>
@@ -602,23 +629,6 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
     </div>
   </section>
 
-  <!-- ===== 1.3 Constraints (B04) ===== -->
-  <section class="cs-constraints fx" data-block="1.3 Constraints (B04)">
-    <div class="wrap">
-      <div class="sh"><h2 class="sh__title"><span>Challenges</span><span>encountered</span></h2><p class="sh__desc">The brief asked for more than a new logo. These limits kept the redesign warm and familiar for regular customers while it moved toward a more premium look.</p></div>
-      <div class="cs-constraints__canvas">
-        <svg class="curve curve--h" viewBox="0 0 1057 416" aria-hidden="true"><path d="M-210 38C-140 17 -70 6.4 -17 5C60 3 150 0 230 120C255 150 265 163 287 173C340 195 380 205 420 203C480 200 530 175 569 160C610 143 640 130 670 130C730 130 790 180 851 230C870 245 890 258 908 266"/></svg>
-        <svg class="curve curve--v" viewBox="0 0 61 601" preserveAspectRatio="none" aria-hidden="true"><path d="M-30 -46C-22 -36 -7.717 -10.813 0.603 0.446C7.711 10.064 19.216 16.275 24.542 27.4C40.199 60.504 17.344 94.684 24.542 130.946C30.18 159.344 40.132 174.727 45.644 191.606C69.103 263.446 40.603 307.946 13.571 386.944C-7.645 448.946 13.512 483.301 34.103 520.446C55.012 548.801 69.779 569.618 51.395 600.446"/></svg>
-        <ol class="cs-constraints__list">
-          <li class="ci"><span class="ci__dot"></span><span class="ci__num">01</span><h3 class="ci__title">Friendly,<br class="br-d"> not childish</h3><p class="ci__text">Maintain a friendly and approachable identity without feeling childish</p></li>
-          <li class="ci"><span class="ci__dot"></span><span class="ci__num">02</span><h3 class="ci__title">Warmth<br class="br-d"> with polish</h3><p class="ci__text">Balance sophistication with warmth and charisma</p></li>
-          <li class="ci"><span class="ci__dot"></span><span class="ci__num">03</span><h3 class="ci__title">One flexible system</h3><p class="ci__text">Create a flexible visual system for social media, packaging, and everyday communication</p></li>
-          <li class="ci"><span class="ci__dot"></span><span class="ci__num">04</span><h3 class="ci__title">Memorable beyond drawings</h3><p class="ci__text">Build memorability beyond illustration alone</p></li>
-        </ol>
-      </div>
-    </div>
-  </section>
-
   <!-- ===== 1.4 Exploration (B16) ===== -->
   <section class="cs-media-2up-wide m2w--captions fx" data-block="1.4 Exploration (B16)">
     <div class="wrap">
@@ -632,15 +642,19 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
     <div class="wrap"><ul class="m2w__cap"><li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span><b>Balance</b> Part of the process involved finding the right balance between emotional expression and long-term brand flexibility.</span></li></ul></div>
   </section>
 
-  <!-- ===== 1.5 Before / After (B09) ===== -->
-  <section class="cs-before-after fx" data-block="1.5 Before / After (B09)">
+  <!-- ===== 1.3 Constraints (B04) ===== -->
+  <section class="cs-constraints fx" data-block="1.3 Constraints (B04)">
     <div class="wrap">
-      <div class="sh"><h2 class="sh__title"><span>Before</span><span class="accent">&amp; After</span></h2><p class="sh__desc">The original identity did not accurately reflect the quality, care, and personality behind the business.</p></div>
-      <div class="ba__grid">
-        <figure class="ba ba--before"><div class="ba__img media" data-asset="before-1"></div><div class="ba__bar"></div><figcaption><span class="ba__label">Before</span><p class="ba__text">The previous logo leaned heavily into a childish and overly cartoonish aesthetic, which weakened the perception of trust, sophistication, and premium care that the brand actually offered.</p></figcaption></figure>
-        <figure class="ba ba--after"><div class="ba__img media" data-asset="after-1"></div><div class="ba__bar"></div><figcaption><span class="ba__label">After</span><p class="ba__text">A cleaner, bolder, and more contemporary identity centered around a strong sans serif logotype.</p></figcaption></figure>
-        <figure class="ba ba--before"><div class="ba__img media" data-asset="before-2"></div><div class="ba__bar"></div><figcaption><span class="ba__label">Before</span><p class="ba__text">The brand lacked a distinctive visual language within the highly saturated pet market.</p></figcaption></figure>
-        <figure class="ba ba--after"><div class="ba__img media" data-asset="after-2"></div><div class="ba__bar"></div><figcaption><span class="ba__label">After</span><p class="ba__text">Warmth and emotional expression now live across the illustration system, visual tone, and brand applications.</p></figcaption></figure>
+      <div class="sh"><h2 class="sh__title"><span>Challenges</span><span>encountered</span></h2><p class="sh__desc">The brief asked for more than a new logo. These limits kept the redesign warm and familiar for regular customers while it moved toward a more premium look.</p></div>
+      <div class="cs-constraints__canvas">
+        <svg class="curve curve--h" viewBox="0 0 1057 416" aria-hidden="true"><path d="M-210 38C-140 17 -70 6.4 -17 5C60 3 150 0 230 120C255 150 265 163 287 173C340 195 380 205 420 203C480 200 530 175 569 160C610 143 640 130 670 130C730 130 790 180 851 230C870 245 890 258 908 266"/></svg>
+        <svg class="curve curve--v" viewBox="0 0 61 601" preserveAspectRatio="none" aria-hidden="true"><path d="M-30 -46C-22 -36 -7.717 -10.813 0.603 0.446C7.711 10.064 19.216 16.275 24.542 27.4C40.199 60.504 17.344 94.684 24.542 130.946C30.18 159.344 40.132 174.727 45.644 191.606C69.103 263.446 40.603 307.946 13.571 386.944C-7.645 448.946 13.512 483.301 34.103 520.446C55.012 548.801 69.779 569.618 51.395 600.446"/></svg>
+        <ol class="cs-constraints__list">
+          <li class="ci"><span class="ci__dot"></span><span class="ci__num">01</span><h3 class="ci__title">Friendly,<br class="br-d"> not childish</h3><p class="ci__text">Maintain a friendly and approachable identity without feeling childish</p></li>
+          <li class="ci"><span class="ci__dot"></span><span class="ci__num">02</span><h3 class="ci__title">Warmth<br class="br-d"> with polish</h3><p class="ci__text">Balance sophistication with warmth and charisma</p></li>
+          <li class="ci"><span class="ci__dot"></span><span class="ci__num">03</span><h3 class="ci__title">One flexible system</h3><p class="ci__text">Create a flexible visual system for social media, packaging, and everyday communication</p></li>
+          <li class="ci"><span class="ci__dot"></span><span class="ci__num">04</span><h3 class="ci__title">Memorable beyond drawings</h3><p class="ci__text">Build memorability beyond illustration alone</p></li>
+        </ol>
       </div>
     </div>
   </section>
@@ -671,7 +685,7 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
 
   <!-- ===== 1.9 Closing Scene (B02) ===== -->
   <section class="cs-closing-scene csc--bare fx" data-block="1.9 Closing Scene (B02)">
-    <div class="csc__scene media" data-asset="closing-scene"><div class="csc__inner" data-asset="closing-screen"></div></div>
+    <div class="csc__scene media" data-asset="closing-scene"></div>
   </section>
 
   </main>

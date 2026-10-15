@@ -16,7 +16,10 @@
 @font-face{font-family:'Plus Jakarta Sans';font-style:italic;font-weight:200 800;font-display:swap;src:url(./fonts/plus-jakarta-sans/webfont/PlusJakartaSans-200-800-italic-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 @font-face{font-family:'Space Mono';font-style:normal;font-weight:400;font-display:swap;src:url(./fonts/space-mono/webfont/SpaceMono-400-normal-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 </style>
-<link rel="stylesheet" href="./css/case-study.css?v=8">
+<link rel="stylesheet" href="./css/case-study.css?v=9">
+<!-- ASSETS — hero (LCP): precarga solo la del breakpoint activo -->
+<link rel="preload" as="image" href="./casestudy_Enjin3D/01-hero.webp" media="(min-width:768px)" fetchpriority="high">
+<link rel="preload" as="image" href="./casestudy_Enjin3D/01-hero-mobile.webp" media="(max-width:767.98px)" fetchpriority="high">
 <!-- (2026-10-04) CARGA: React desde el propio dominio, igual que el home (mismos bytes,
      sha384 idéntico al SRI de support.js). Además, con window.__resources definido
      support.js NO vuelve a descargar la página entera (fetch(location.href)). -->
@@ -26,7 +29,7 @@ if(!r[u+'react@18.3.1/umd/react.production.min.js'])r[u+'react@18.3.1/umd/react.
 if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.1/umd/react-dom.production.min.js']='./vendor/react-dom.production.min.js';})();
 </script>
 <script src="./vendor/support.js"></script>
-<script src="./js/case-study.js?v=2" defer></script>
+<script src="./js/case-study.js?v=3" defer></script>
 </head>
 <body>
 <x-dc>
@@ -95,6 +98,44 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
        Si cambias la extensión (.png/.jpg), cámbiala solo aquí.
        Sin archivo, el hueco muestra el color placeholder (--media).
    ========================================================================== */
+[data-asset="hero"]{background-image:url(./casestudy_Enjin3D/01-hero.webp)}
+@media (max-width:767.98px){[data-asset="hero"]{background-image:url(./casestudy_Enjin3D/01-hero-mobile.webp)}}
+[data-asset="hero"]{background-color:transparent}
+[data-asset="styles-1"]{background-image:url(./casestudy_Enjin3D/03-styles-1.webp)}
+[data-asset="styles-2"]{background-image:url(./casestudy_Enjin3D/03-styles-2.webp)}
+[data-asset="multiverse-1"]{background-image:url(./casestudy_Enjin3D/05-multiverse-1-poster.jpg)}
+[data-asset="multiverse-2"]{background-image:url(./casestudy_Enjin3D/05-multiverse-2-poster.jpg)}
+[data-asset="multiverse-3"]{background-image:url(./casestudy_Enjin3D/05-multiverse-3-poster.jpg)}
+[data-asset="styles-3"]{background-image:url(./casestudy_Enjin3D/06-styles-1-poster.jpg)}
+[data-asset="styles-4"]{background-image:url(./casestudy_Enjin3D/06-styles-2-poster.jpg)}
+[data-asset="styles-5"]{background-image:url(./casestudy_Enjin3D/06-styles-3-poster.jpg)}
+[data-asset="styles-6"]{background-image:url(./casestudy_Enjin3D/06-styles-4-poster.jpg)}
+[data-asset="styles-7"]{background-image:url(./casestudy_Enjin3D/06-styles-5-poster.jpg)}
+[data-asset="styles-8"]{background-image:url(./casestudy_Enjin3D/06-styles-6-poster.jpg)}
+[data-asset="blobby-1"]{background-image:url(./casestudy_Enjin3D/07-blobby-1-poster.jpg)}
+[data-asset="blobby-2"]{background-image:url(./casestudy_Enjin3D/07-blobby-2.webp)}
+[data-asset="blobby-3"]{background-image:url(./casestudy_Enjin3D/07-blobby-3-poster.jpg)}
+[data-asset="blobby-4"]{background-image:url(./casestudy_Enjin3D/07-blobby-4-poster.jpg)}
+/* tamaños y bloques propios de este caso (Figma 11. Enjin 3D, 1440 / 360) */
+.cs-styles{padding:56px 0}
+.ts__grid{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;margin-top:32px}
+.ts__img{aspect-ratio:312/308;border-radius:30px}
+.zz__media--fit>video{object-fit:contain}
+@media (max-width:767.98px){
+  .m2c__img{width:100cqw;margin-left:calc(-1 * var(--m));aspect-ratio:360/355;border-radius:0}
+  .xc>.zz__media{width:calc(100cqw * 484 / 360);aspect-ratio:484/274;margin-left:calc(100cqw * -62 / 360)}
+  .zz__media--sq{aspect-ratio:360/360}
+  .c3__card{aspect-ratio:360/360}
+}
+@media (min-width:768px){
+  .cs-styles{padding:112px 0}
+  .ts__grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+  .ts__img{aspect-ratio:516/510}
+  .zz__media--sq{background-color:#000}
+  .zz__media--sq>video{left:21.875%;width:56.25%;border-radius:0}
+  .c3__track{justify-content:flex-start;gap:calc(100cqw * 24 / 1440);margin-left:calc(100cqw * -71 / 1440)}
+  .c3__card{width:calc(100cqw * 400 / 1440);aspect-ratio:1/1}
+}
 </style>
 
 <!-- SHARED:JS-SBW -->
@@ -608,6 +649,17 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
     </div>
   </section>
 
+  <!-- ===== 11.6 Two Styles (B10 modified) ===== -->
+  <section class="cs-media-2up-captions fx" data-block="11.6 Two Styles (B10 modified)">
+    <div class="wrap">
+      <div class="sh"><h2 class="sh__title"><span>Two styles,</span><span class="accent">one model</span></h2><p class="sh__desc">Two looks were developed from the same 3D models: a realistic one with soft materials and light, and a flat one textured to feel like 2D animation.</p></div>
+      <div class="m2c__grid">
+        <figure class="m2c__item"><div class="m2c__img media" data-asset="styles-1"></div><ul><li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>Realistic: soft materials, depth and studio light</span></li></ul></figure>
+        <figure class="m2c__item"><div class="m2c__img media" data-asset="styles-2"></div><ul><li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>Flat: outlines and toon color that mimic 2D frames</span></li></ul></figure>
+      </div>
+    </div>
+  </section>
+
   <!-- ===== 11.3 Constraints (B04) ===== -->
   <section class="cs-constraints fx" data-block="11.3 Constraints (B04)">
     <div class="wrap">
@@ -629,10 +681,17 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
     <div class="wrap">
       <div class="sh"><h2 class="sh__title"><span>Multiverse</span><span class="accent">items</span></h2><p class="sh__desc">Multiverse items are built to travel across games. Each one was textured, lit and placed in an animated 3D scene with visual effects that show it in action.</p></div>
       <div class="zz">
-        <div class="zz__row"><div class="zz__media media" data-asset="exploration-1"></div><div class="zz__body"><h3 class="zz__title">Scenes from the lore</h3><p class="zz__text">The Mask of U'thuchul was staged in a dark forest, with glowing crystals, soft light and particles that suit its mystic origin.</p></div></div>
-        <div class="zz__row"><div class="zz__media media" data-asset="exploration-2"></div><div class="zz__body"><h3 class="zz__title">Characters with weight</h3><p class="zz__text">Mike the Golem was animated in a night forest, with burning torches and a heavy stance that give it the presence of a game hero.</p></div></div>
-        <div class="zz__row"><div class="zz__media zz__media--split"><div class="media" data-asset="exploration-3a"></div><div class="media" data-asset="exploration-3b"></div></div><div class="zz__body"><h3 class="zz__title">Items in Blobby's hands</h3><p class="zz__text">Blobby, dressed as a wizard, held items like the Shadowsong staff and the Aeonclipse Key, showing how each one could be used.</p></div></div>
+        <div class="zz__row"><div class="xc"><div class="zz__media media vid" data-asset="multiverse-1"><video muted loop playsinline preload="none" data-src="./casestudy_Enjin3D/05-multiverse-1.mp4"></video></div></div><div class="zz__body"><h3 class="zz__title">Scenes from the lore</h3><p class="zz__text">The Mask of U'thuchul was staged in a dark forest, with glowing crystals, soft light and particles that suit its mystic origin.</p></div></div>
+        <div class="zz__row"><div class="zz__media zz__media--sq zz__media--fit media vid" data-asset="multiverse-2"><video muted loop playsinline preload="none" data-src="./casestudy_Enjin3D/05-multiverse-2.mp4"></video></div><div class="zz__body"><h3 class="zz__title">Characters with weight</h3><p class="zz__text">Mike the Golem was animated in a night forest, with burning torches and a heavy stance that give it the presence of a game hero.</p></div></div>
+        <div class="zz__row"><div class="zz__media zz__media--sq media vid" data-asset="multiverse-3"><video muted loop playsinline preload="none" data-src="./casestudy_Enjin3D/05-multiverse-3.mp4"></video></div><div class="zz__body"><h3 class="zz__title">Items in Blobby's hands</h3><p class="zz__text">Blobby, dressed as a wizard, held items like the Shadowsong staff and the Aeonclipse Key, showing how each one could be used.</p></div></div>
       </div>
+    </div>
+  </section>
+  <!-- ===== 11.6 Two Styles (B10 modified) ===== -->
+  <section class="cs-styles fx" data-block="11.6 Two Styles (B10 modified)">
+    <div class="wrap">
+      <div class="sh"><h2 class="sh__title"><span>Two styles,</span><span class="accent">one model</span></h2><p class="sh__desc">Two looks were developed from the same 3D models: a realistic one with soft materials and light, and a flat one textured to feel like 2D animation.</p></div>
+      <div class="ts__grid"><div class="ts__img media vid" data-asset="styles-3"><video muted loop playsinline preload="none" data-src="./casestudy_Enjin3D/06-styles-1.mp4"></video></div><div class="ts__img media vid" data-asset="styles-4"><video muted loop playsinline preload="none" data-src="./casestudy_Enjin3D/06-styles-2.mp4"></video></div><div class="ts__img media vid" data-asset="styles-5"><video muted loop playsinline preload="none" data-src="./casestudy_Enjin3D/06-styles-3.mp4"></video></div><div class="ts__img media vid" data-asset="styles-6"><video muted loop playsinline preload="none" data-src="./casestudy_Enjin3D/06-styles-4.mp4"></video></div><div class="ts__img media vid" data-asset="styles-7"><video muted loop playsinline preload="none" data-src="./casestudy_Enjin3D/06-styles-5.mp4"></video></div><div class="ts__img media vid" data-asset="styles-8"><video muted loop playsinline preload="none" data-src="./casestudy_Enjin3D/06-styles-6.mp4"></video></div></div>
     </div>
   </section>
 
@@ -641,46 +700,8 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
     <div class="wrap">
       <div class="sh"><h2 class="sh__title"><span>Blobby in</span><span class="accent">every channel</span></h2><p class="sh__desc">Blobby, Enjin's mascot, was built as a 3D character and placed in scenes, stickers, GIFs, meme templates and longer videos for social media and chats.</p></div>
     </div>
-    <div class="c3__track"><div class="c3__card media" data-asset="card-1"></div><div class="c3__card media" data-asset="card-2"></div><div class="c3__card media" data-asset="card-3"></div></div>
+    <div class="c3__track"><div class="c3__card media vid" data-asset="blobby-1"><video muted loop playsinline preload="none" data-src="./casestudy_Enjin3D/07-blobby-1.mp4"></video></div><div class="c3__card media" data-asset="blobby-2"></div><div class="c3__card media vid" data-asset="blobby-3"><video muted loop playsinline preload="none" data-src="./casestudy_Enjin3D/07-blobby-3.mp4"></video></div><div class="c3__card media vid" data-asset="blobby-4"><video muted loop playsinline preload="none" data-src="./casestudy_Enjin3D/07-blobby-4.mp4"></video></div></div>
     <div class="wrap"><p class="c3__caption">From classic meme formats to sci-fi corridors and fantasy forests, Blobby kept the same rounded shape, purple hoodie and expressions, so the mascot stayed recognizable in every format.</p></div>
-  </section>
-
-  <!-- ===== 11.6 Two Styles (B10 modified) ===== -->
-  <section class="cs-media-2up-captions fx" data-block="11.6 Two Styles (B10 modified)">
-    <div class="wrap">
-      <div class="sh"><h2 class="sh__title"><span>Two styles,</span><span class="accent">one model</span></h2><p class="sh__desc">Two looks were developed from the same 3D models: a realistic one with soft materials and light, and a flat one textured to feel like 2D animation.</p></div>
-      <div class="m2c__grid">
-        <figure class="m2c__item"><div class="m2c__img media" data-asset="detail-1"></div><ul><li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>Realistic: soft materials, depth and studio light</span></li></ul></figure>
-        <figure class="m2c__item"><div class="m2c__img media" data-asset="detail-2"></div><ul><li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>Flat: outlines and toon color that mimic 2D frames</span></li></ul></figure>
-      </div>
-    </div>
-  </section>
-
-  <!-- ===== 11.7 Tradeoffs (B04) ===== -->
-  <section class="cs-list-numbered fx" data-block="11.7 Tradeoffs (B04)">
-    <div class="wrap ln">
-      <div class="ln__head">
-        <h2 class="sh__title"><span>Production</span><span class="accent">tradeoffs</span></h2>
-        <p class="ln__desc">Many pieces had to ship across two lines of work, so the process leaned on reuse. These two choices kept the output steady without losing character.</p>
-      </div>
-      <ol class="ln__list">
-        <li class="ln__item"><span class="ln__num">01</span><h3 class="ln__title">Reuse over rebuilding</h3><p class="ln__text">Official Multiverse models and the same Blobby model were reused across scenes, putting the effort into texture, light, effects and motion.</p></li>
-        <li class="ln__item"><span class="ln__num">02</span><h3 class="ln__title">Flat look from 3D models</h3><p class="ln__text">The flat style was rendered from 3D models with creative texturing, instead of drawing every frame by hand as in traditional 2D animation.</p></li>
-      </ol>
-    </div>
-  </section>
-
-  <!-- ===== 11.8 Outcome (B02) ===== -->
-  <section class="cs-closing-scene fx" data-block="11.8 Outcome (B02)">
-    <div class="wrap">
-      <div class="sh"><h2 class="sh__title"><span>Project</span><span class="accent">outcome</span></h2><p class="sh__desc">Enjin gained a 3D library ready for every channel, with items shown in their own worlds and a mascot that fans could share as stickers, GIFs and memes.</p></div>
-      <ul class="csc__bullets">
-        <li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>10 Multiverse items brought to life in animated 3D scenes</span></li>
-        <li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>2 Blobby styles from one model: realistic and flat</span></li>
-        <li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>GIFs on Enjin's GIPHY channel, with 20.4M views overall</span></li>
-      </ul>
-    </div>
-    <div class="csc__scene media" data-asset="closing-scene"><div class="csc__inner" data-asset="closing-screen"></div></div>
   </section>
 
   </main>
