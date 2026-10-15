@@ -1,6 +1,6 @@
 /* Pantalla de carga del home (#boot0). La arranca MCIntro.start() desde el primer <script>
    del <body> de index.html y se retira sola con 'mc:arranca'.
-   · Primera carga de la web en la pestaña: intro de blobs. Fuente:
+   · Primera carga de la web en la pestaña, o recarga del home: intro de blobs. Fuente:
      entregables/lazyloading-intro/ (Lazyloading_INTRO_desktop / _mobile; mismo motor, solo
      cambia el tamaño del logo). Bucle hasta que la página está lista.
    · Llegada desde otra página del sitio (o intro ya vista): telón liso del fondo del home,
@@ -223,6 +223,8 @@
     var seen=false;
     try{ var r=document.referrer&&new URL(document.referrer); seen=!!r&&r.origin===location.origin; }catch(_){}
     try{ if(sessionStorage.getItem('mc-intro')==='1')seen=true; sessionStorage.setItem('mc-intro','1'); }catch(_){}
+    // recargar el home (F5 / botón de recarga) vuelve a mostrar la intro
+    try{ var nav=performance.getEntriesByType('navigation')[0]; if(nav&&nav.type==='reload')seen=false; }catch(_){}
     if(seen)cover(); else intro();
     // se inserta YA con su estilo: insertada antes, la transición arrancaría desde transparente
     document.body.appendChild(host);
