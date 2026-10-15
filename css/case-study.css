@@ -296,7 +296,7 @@ html .page,html .page *{cursor:none}
 .nav-anim-m{position:relative;display:inline-block;width:62px;height:26.304px;flex:none;color:var(--accent)}
 .nav-anim{display:none}
 @media (min-width:768px){
-  .nav-anim{position:relative;display:inline-block;width:204px;height:21px;flex:none;color:var(--accent)}
+  .nav-anim{position:relative;display:inline-block;width:210.1667px;height:21.636px;flex:none;color:var(--accent)}
 }
 .nav-right{display:flex;align-items:center;gap:12px}   /* mobile: 12 entre botón, toggle y menú (mono.case_mobile.html) */
 .nav-links{display:none;gap:40px}

@@ -51,11 +51,11 @@ const GRID = { x0: -60, y0: -62, x1: 780, y1: 358, cell: 4 };
 const K_BLEND = 62;               // ancho de la soldadura entre masas
 
 const SEQ = [
-  ['hold-logo', 1.7], ['fuse', 0.75], ['hold-blob', 0.08],
-  ['to-lamp', 1.25], ['hold-lamp', 0.4], ['beam-in', 0.5], ['beam-hold', 1.9], ['beam-out', 0.7], ['lamp-rest', 0.95],
-  ['from-lamp', 1.05], ['defuse', 0.7], ['hold-logo-2', 1.7],
-  ['fuse-2', 0.7], ['hold-blob-2', 0.08], ['to-flower', 0.85], ['flower-fall', 2.5], ['from-flower', 0.8],
-  ['defuse-2', 0.7], ['hold-logo-3', 1.7]
+  ['hold-logo', 1.1], ['fuse', 0.75], ['hold-blob', 0.08],
+  ['to-lamp', 1.25], ['hold-lamp', 0.4], ['beam-in', 0.5], ['beam-hold', 1.9], ['beam-out', 0.7], ['lamp-rest', 0.35],
+  ['from-lamp', 1.05], ['defuse', 0.7], ['hold-logo-2', 1.1],
+  ['fuse-2', 0.7], ['hold-blob-2', 0.08], ['to-flower', 0.85], ['flower-fall', 1.9], ['from-flower', 0.8],
+  ['defuse-2', 0.7], ['hold-logo-3', 1.1]
 ];
 const TOTAL = SEQ.reduce((a, s) => a + s[1], 0);
 
@@ -473,8 +473,8 @@ var self = this;
     // (handDrawn, 0 por defecto). Con boil 0 y fuseT 0 los tres óvalos salen
     // constantes, así que buildField + contours + resample + curvePath dan la
     // MISMA `d` frame a frame: se dibuja una vez y se congela. Eso cubre
-    // hold-logo, hold-logo-2 y hold-logo-3, 1,7 s cada uno = 5,1 s de los
-    // 19,32 s del ciclo (el 26 %). En cuanto fuseT o boil dejan de ser 0 la
+    // hold-logo, hold-logo-2 y hold-logo-3, 1,1 s cada uno = 3,3 s de los
+    // 16,01 s del ciclo (el 21 %). En cuanto fuseT o boil dejan de ser 0 la
     // bandera cae y se vuelve a calcular. El transform del grupo sí sigue
     // actualizándose: el rebote de `settle` se anima durante esas fases.
     const frozen = boil === 0 && fuseT === 0 && !showPath;

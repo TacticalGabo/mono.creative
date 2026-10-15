@@ -22,14 +22,17 @@
 </div>
 
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;cycleSeconds&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:7,&quot;min&quot;:3,&quot;max&quot;:14,&quot;step&quot;:0.5,&quot;unit&quot;:&quot;s&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;fps&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:12,&quot;min&quot;:8,&quot;max&quot;:60,&quot;step&quot;:1,&quot;unit&quot;:&quot;fps&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;handDrawn&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:0,&quot;min&quot;:0,&quot;max&quot;:2,&quot;step&quot;:0.1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;detail&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:9,&quot;min&quot;:5,&quot;max&quot;:24,&quot;step&quot;:1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;shapeColor&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#B8FF00&quot;,&quot;options&quot;:[&quot;#B8FF00&quot;,&quot;#f4f1ea&quot;,&quot;#FF0000&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Color&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;align&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;center&quot;,&quot;options&quot;:[&quot;center&quot;,&quot;left&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;cycleSeconds&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:7,&quot;min&quot;:3,&quot;max&quot;:14,&quot;step&quot;:0.5,&quot;unit&quot;:&quot;s&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;fps&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:12,&quot;min&quot;:8,&quot;max&quot;:60,&quot;step&quot;:1,&quot;unit&quot;:&quot;fps&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;handDrawn&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:0,&quot;min&quot;:0,&quot;max&quot;:2,&quot;step&quot;:0.1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;detail&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:9,&quot;min&quot;:5,&quot;max&quot;:24,&quot;step&quot;:1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;shapeColor&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#B8FF00&quot;,&quot;options&quot;:[&quot;#B8FF00&quot;,&quot;#f4f1ea&quot;,&quot;#FF0000&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Color&quot;}}">
 const BLOBS = [
   { cx: 116, cy: 148, rx: 116, ry: 148, arc: 26, delay: 0.10, wob: 1.0 },
   { cx: 302, cy: 148, rx: 116, ry: 148, arc: -18, delay: 0.17, wob: 1.35 },
   { cx: 595.5, cy: 148, rx: 120.5, ry: 148, arc: -34, delay: 0.0, wob: 0.8 }
 ];
 // el blob fusionado tiene la forma y el tamaño del blob suelto de la derecha
-const TARGET = { cx: 358, cy: 148, rx: 120.5, ry: 148 };
+// align="left" (header mobile): la masa fusionada queda en el borde izquierdo del símbolo completo;
+// por defecto (footer) se funde en el centro
+const TARGET_CENTER = { cx: 358, cy: 148, rx: 120.5, ry: 148 };
+const TARGET_LEFT = { cx: 120.5, cy: 148, rx: 120.5, ry: 148 };
 // 1) al entrar el cursor las masas se funden  2) al salir vuelven a separarse
 const IN_DUR = 0.9, OUT_DUR = 0.8;
 // malla de la fusión: la unión suave es geometría, no un filtro
@@ -266,6 +269,7 @@ class Component extends DCLogic {
   }
 
   loop(now) {
+    const TARGET = this.props.align === 'left' ? TARGET_LEFT : TARGET_CENTER;
     // Oculto: no se re-agenda. Antes pedía un frame en cada vsync aunque no
     // dibujara nada, y eso mantenía vivo el ciclo de render de toda la página
     // (en móvil le robaba presupuesto a la caída de los blobs). El observer lo

@@ -26,7 +26,9 @@
 <script type="text/x-dc" data-dc-script data-props="{&quot;speed&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:1,&quot;min&quot;:0.4,&quot;max&quot;:2,&quot;step&quot;:0.05,&quot;unit&quot;:&quot;×&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;fps&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:12,&quot;min&quot;:8,&quot;max&quot;:30,&quot;step&quot;:1,&quot;unit&quot;:&quot;fps&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;weld&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:1,&quot;min&quot;:0.4,&quot;max&quot;:2,&quot;step&quot;:0.05,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;handDrawn&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:0,&quot;min&quot;:0,&quot;max&quot;:2,&quot;step&quot;:0.1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;detail&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:1.6,&quot;min&quot;:0.6,&quot;max&quot;:4,&quot;step&quot;:0.2,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;shapeColor&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#B8FF00&quot;,&quot;options&quot;:[&quot;#B8FF00&quot;,&quot;#f4f1ea&quot;,&quot;#0e0e0d&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Color&quot;}}">
 const CENTER = { x: 102, y: 10.5 };
 const BLOB_SCALE = 1.45;
-const E2 = { center: { x: 31.9, y: 14 }, scale: 1.343 };
+const E2 = { center: { x: 31.9, y: 14 }, scale: 1.343 * 0.9 };
+const LOGO_SCALE = 1.2;
+const MARK_SCALE = 1.1;
 const N_OUT = 170, N_HOLE = 44;
 const SEQ = [
   ['logo', 0.8], ['merge', 0.75], ['blob', 0.1],
@@ -37,8 +39,8 @@ const TOTAL = SEQ.reduce((a, s) => a + s[1], 0);
 const IN_DUR = 1.24, OUT_DUR = 1.04;
 
 // lienzo interno: la soldadura se resuelve como geometría y se emite en curvas
-const VIEW = { x: -6, y: -15, w: 216, h: 52 };
-const PX = 4;
+const VIEW = { x: -12, y: -22, w: 280, h: 68 };
+const PX = 3.5;
 const W = VIEW.w * PX, H = VIEW.h * PX;
 
 const CASES = {
@@ -191,6 +193,29 @@ var self = this;
     return [x / pts.length, y / pts.length];
   }
 
+  denseN(d, base) {
+    this.sampleEl.setAttribute('d', d);
+    return Math.max(base, Math.ceil(this.sampleEl.getTotalLength() * LOGO_SCALE / 0.2));
+  }
+
+  resamplePoly(pts, n) {
+    const m = pts.length, acc = [0];
+    for (let i = 1; i <= m; i++) {
+      const p = pts[i - 1], q = pts[i % m];
+      const dx = q[0] - p[0], dy = q[1] - p[1];
+      acc.push(acc[i - 1] + Math.sqrt(dx * dx + dy * dy));
+    }
+    const total = acc[m], out = [];
+    let j = 0;
+    for (let k = 0; k < n; k++) {
+      const t = (k / n) * total;
+      while (acc[j + 1] < t) j++;
+      const p = pts[j], q = pts[(j + 1) % m], f = (t - acc[j]) / ((acc[j + 1] - acc[j]) || 1);
+      out.push([p[0] + (q[0] - p[0]) * f, p[1] + (q[1] - p[1]) * f]);
+    }
+    return out;
+  }
+
   prepare(m) {
     if (!this.sampleEl) return;
     const minX = (pts) => { let v = Infinity; for (const p of pts) if (p[0] < v) v = p[0]; return v; };
@@ -212,34 +237,89 @@ var self = this;
     ]);
     const BLOB_CX = LEFT + (lc[0] - looseX0) * BLOB_SCALE;
 
+    // el logotipo se dibuja más grande que su vector original, y el isotipo un poco más
+    const big = (p) => [LEFT + (p[0] - LEFT) * LOGO_SCALE, CENTER.y + (p[1] - CENTER.y) * LOGO_SCALE];
     const sources = m.E1_WORD.concat(m.E1_MARK);
+    const raw = sources.map((src, s) => ({
+      isMark: s >= m.E1_WORD.length,
+      markIdx: s - m.E1_WORD.length,
+      subs: src.split(/(?=M)/).filter((t) => t.trim().length > 3)
+        .map((sub, k) => {
+          const base = k === 0 ? N_OUT : N_HOLE;
+          const n = s >= m.E1_WORD.length ? base : this.denseN(sub, base);
+          return this.sample(sub, n).map(big);
+        })
+    }));
+    let mx0 = Infinity, mx1 = -Infinity;
+    raw.filter((r) => r.isMark).forEach((r) => r.subs.forEach((pts) => pts.forEach((p) => {
+      if (p[0] < mx0) mx0 = p[0];
+      if (p[0] > mx1) mx1 = p[0];
+    })));
+    const markGrow = (mx1 - mx0) * (MARK_SCALE - 1);
+    raw.forEach((r) => {
+      r.subs = r.subs.map((pts) => pts.map((p) => r.isMark
+        ? [mx0 + (p[0] - mx0) * MARK_SCALE, CENTER.y + (p[1] - CENTER.y) * MARK_SCALE]
+        : [p[0] + markGrow, p[1]]));
+    });
+
     this.shapes = [];
-    for (let s = 0; s < sources.length; s++) {
-      const isMark = s >= m.E1_WORD.length;
-      const markIdx = s - m.E1_WORD.length;
-      const subs = sources[s].split(/(?=M)/).filter((t) => t.trim().length > 3);
+    let logoRight = 0;
+    for (const r of raw) {
       const parts = [];
-      for (let k = 0; k < subs.length; k++) {
-        const n = k === 0 ? N_OUT : N_HOLE;
-        const lock = this.sample(subs[k], n);
+      const cL = this.centroid(r.subs[0]);
+      const shrink = (p, c) => [c[0] + (p[0] - cL[0]) * 0.3, c[1] + (p[1] - cL[1]) * 0.3];
+      r.subs.forEach((lock, k) => {
         let blob, sym;
-        if (k === 0) {
-          blob = this.align(blobShape, lock);
-          sym = isMark
-            ? this.align(symTargets[markIdx], blob)
-            : blob.map((p) => [symCenter[0] + (p[0] - BLOB_CX) * 0.3, symCenter[1] + (p[1] - CENTER.y) * 0.3]);
+        if (r.isMark) {
+          if (k === 0) {
+            blob = this.align(blobShape, lock);
+            sym = this.align(symTargets[r.markIdx], blob);
+          } else {
+            blob = lock.map(() => [BLOB_CX, CENTER.y]);
+            sym = lock.map(() => [symCenter[0], symCenter[1]]);
+          }
         } else {
-          blob = lock.map(() => [BLOB_CX, CENTER.y]);
-          sym = lock.map(() => [symCenter[0], symCenter[1]]);
+          blob = lock.map((p) => shrink(p, [BLOB_CX, CENTER.y]));
+          if (k === 0) {
+            const aligned = this.align(this.resamplePoly(blobShape, lock.length), lock);
+            sym = aligned.map((p) => [symCenter[0] + (p[0] - BLOB_CX) * 0.3, symCenter[1] + (p[1] - CENTER.y) * 0.3]);
+          } else {
+            sym = lock.map(() => [symCenter[0], symCenter[1]]);
+          }
         }
-        parts.push({ lock: lock, blob: blob, sym: sym });
-      }
-      this.shapes.push({ raw: sources[s], parts: parts, isMark: isMark, cx: this.centroid(parts[0].lock)[0] });
+        parts.push({ lock: lock, blob: blob, sym: sym, ph: (k === 0 ? N_OUT : N_HOLE) / lock.length });
+      });
+      let lx1 = -Infinity;
+      r.subs.forEach((pts) => pts.forEach((p) => { if (p[0] > lx1) lx1 = p[0]; }));
+      if (lx1 > logoRight) logoRight = lx1;
+      this.shapes.push({ parts: parts, isMark: r.isMark, cL: cL, dxR: lx1 - cL[0], cx: this.centroid(parts[0].lock)[0] });
     }
+    this.blobC = [BLOB_CX, CENTER.y];
+    let bx1 = -Infinity;
+    blobShape.forEach((p) => { if (p[0] > bx1) bx1 = p[0]; });
+    this.ballRight = bx1 - 1;
     const xs = this.shapes.map((s) => s.cx);
     const min = Math.min.apply(null, xs), max = Math.max.apply(null, xs);
     this.shapes.forEach((s) => { s.order = (s.cx - min) / (max - min); });
-    this.restD = this.shapes.map((s) => s.raw).join(' ');
+
+    // En reposo se dibuja el logotipo tal cual (los puntos de bloqueo), sin reconstruir nada.
+    let rest = '';
+    for (const s of this.shapes) {
+      for (const part of s.parts) {
+        for (let i = 0; i < part.lock.length; i++) rest += (i === 0 ? 'M' : 'L') + part.lock[i][0].toFixed(2) + ' ' + part.lock[i][1].toFixed(2);
+        rest += 'Z';
+      }
+    }
+    this.restD = rest;
+
+    // El logotipo creció: se amplía el viewBox para que ocupe en el header la misma caja
+    // que antes (el marco de 204 x 21 unidades originales) y el símbolo conserve su
+    // proporción real respecto a él.
+    const k = logoRight / 204;
+    const svg = this.blob && this.blob.ownerSVGElement;
+    if (svg && k > 0) {
+      svg.setAttribute('viewBox', [-6 * k, CENTER.y - 10.5 * k - 15 * k, 216 * k, 52 * k].map((v) => v.toFixed(3)).join(' '));
+    }
     this.ready = true;
   }
 
@@ -429,8 +509,23 @@ var self = this;
     }
     this.lastD = '';
 
+    // Con el símbolo armado (a = 1) solo se ve el isotipo: las letras ya fueron absorbidas.
+    const lettersHidden = wave === 0;
+    // Al volver, las letras brotan del borde de la bola a partir del 31 % del tramo.
+    const fluidOn = wave < 0 && a <= 0.6923;
+    if (fluidOn) {
+      const rl = this.shapes[this.shapes.length - 1];
+      const lagR = (1 - rl.order) * 0.5;
+      const dR = this.easeInOut(this.clamp01((a * 1.5 - lagR) / (1.5 - lagR)));
+      const lk = rl.parts[0].lock, sy = rl.parts[0].sym;
+      let ex = -Infinity;
+      for (let i = 0; i < lk.length; i++) { const x = lk[i][0] + (sy[i][0] - lk[i][0]) * dR; if (x > ex) ex = x; }
+      this.edgeX = ex - 1.2;
+    }
+
     const ds = [];
     for (const s of this.shapes) {
+      if (!s.isMark && lettersHidden) { ds.push(''); continue; }
       let ta, tb, direct = 0;
       if (wave < 0) {
         const lag = (1 - s.order) * 0.5;
@@ -446,24 +541,45 @@ var self = this;
       }
       const jitter = boil * (0.1 + 0.9 * (direct > 0 ? direct * (1 - direct) : ta * (1 - ta))) * (direct > 0 ? direct : Math.max(ta, tb));
 
+      // letras que viajan hacia la bola (ida) o brotan de su borde (vuelta)
+      let letterPose = null, fluid = null;
+      if (!s.isMark && wave > 0) {
+        const T = [this.ballRight - s.dxR - 0.5, this.blobC[1]];
+        letterPose = [s.cL[0] + (T[0] - s.cL[0]) * ta, s.cL[1] + (T[1] - s.cL[1]) * ta];
+      } else if (!s.isMark && fluidOn) {
+        const startX = this.edgeX - s.dxR - 0.5;
+        fluid = [startX + (s.cL[0] - startX) * (1 - direct), s.cL[1]];
+      }
+
       let d = '';
       for (const part of s.parts) {
         const n = part.lock.length;
         for (let i = 0; i < n; i++) {
           const L = part.lock[i], B = part.blob[i], S = part.sym[i];
           let px, py;
-          if (wave < 0) {
+          if (letterPose) {
+            px = letterPose[0] + (L[0] - s.cL[0]);
+            py = letterPose[1] + (L[1] - s.cL[1]);
+            const depth = this.ballRight - px;
+            if (depth > 0) px = this.ballRight - (depth * 0.3 + 0.7 * 4 * (1 - Math.exp(-depth / 4)));
+          } else if (wave < 0) {
             px = L[0] + (S[0] - L[0]) * direct;
             py = L[1] + (S[1] - L[1]) * direct;
+            if (fluid) {
+              px = fluid[0] + (L[0] - s.cL[0]);
+              py = fluid[1] + (L[1] - s.cL[1]);
+              const depth = this.edgeX - px;
+              if (depth > 0) px = this.edgeX - (depth * 0.3 + 0.7 * 4 * (1 - Math.exp(-depth / 4)));
+            }
           } else {
             const bx = L[0] + (B[0] - L[0]) * ta, by = L[1] + (B[1] - L[1]) * ta;
             px = bx + (S[0] - bx) * tb;
             py = by + (S[1] - by) * tb;
           }
-          const ang = (i / n) * Math.PI * 2;
+          const ph = i * part.ph;
           d += (i === 0 ? 'M' : 'L') +
-            (px + Math.sin(bt * 2.2 + ang * 7 + s.order * 5) * jitter).toFixed(2) + ' ' +
-            (py + Math.cos(bt * 1.8 + ang * 5 + s.order * 5) * jitter).toFixed(2);
+            (px + Math.sin(bt * 2.2 + ph * 0.39 + s.order * 5) * jitter).toFixed(2) + ' ' +
+            (py + Math.cos(bt * 1.8 + ph * 0.33 + s.order * 5) * jitter).toFixed(2);
         }
         d += 'Z';
       }

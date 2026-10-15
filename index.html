@@ -135,7 +135,17 @@ if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.
   // (2026-10-15) la intro de blobs (js/intro-loader.js) sustituye a la barra. Vive
   // aquí, fuera de la plantilla, para que React no la toque; se va sola con
   // 'mc:arranca'. Si el script no cargó, el temporizador la quita igual.
-  if(window.MCIntro)MCIntro.mount(b);
+  // La intro sale UNA vez por visita (sessionStorage). Al volver al home desde
+  // otra página solo hay un telón liso que se retira en cuanto el home monta.
+  var vista=0; try{ vista=sessionStorage.getItem('mc-intro')==='1'; }catch(_){}
+  if(vista){
+    b.style.cssText='transition:opacity .25s ease';
+    window.MCIntroSkip=1;
+    window.addEventListener('mc:arranca',function(){ b.style.opacity='0'; setTimeout(function(){ if(b.parentNode)b.parentNode.removeChild(b); },300); });
+  } else if(window.MCIntro){
+    MCIntro.mount(b);
+    try{ sessionStorage.setItem('mc-intro','1'); }catch(_){}
+  }
   setTimeout(function(){ if(b.parentNode)b.parentNode.removeChild(b); },17000);
 })();
 </script>
@@ -582,7 +592,7 @@ html.mc-leaving .page{opacity:0;transition:opacity .28s ease-out}
 .nav-anim-m{position:relative;display:inline-block;width:62px;height:26.304px;flex:none;color:var(--accent)}
 .nav-anim{display:none}
 @media (min-width:768px){
-  .nav-anim{position:relative;display:inline-block;width:204px;height:21px;flex:none;color:var(--accent)}
+  .nav-anim{position:relative;display:inline-block;width:210.1667px;height:21.636px;flex:none;color:var(--accent)}
 }
 .nav-right{display:flex;align-items:center;gap:12px}   /* mobile: 12 entre botón, toggle y menú (mono.case_mobile.html) */
 .nav-links{display:none;gap:40px}
@@ -2009,7 +2019,7 @@ html.ov-arm .oval.ov-in span{transition:color .5s ease,opacity .4s ease .65s}
         if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){ setP(0.94); });
         var ultimo=Date.now();
         (function poll(){
-          if((ready()&&(!window.MCIntro||MCIntro.minDone()))||Date.now()-t0>MAXWAIT)return setTimeout(hide,120);
+          if((ready()&&(!window.MCIntro||window.MCIntroSkip||MCIntro.minDone()))||Date.now()-t0>MAXWAIT)return setTimeout(hide,120);
           if(Date.now()-ultimo>=80){ ultimo=Date.now(); setP(p+0.004); }
           setTimeout(poll,16);
         })();
@@ -2218,7 +2228,7 @@ html.ov-arm .oval.ov-in span{transition:color .5s ease,opacity .4s ease .65s}
 
   <header class="nav" data-comp="nav">
     <div class="nav-logo">
-      <span class="nav-anim-m"><dc-import name="brandmark-fusion" hint-size="100%,100%"></dc-import></span>
+      <span class="nav-anim-m"><dc-import name="brandmark-fusion" align="left" hint-size="100%,100%"></dc-import></span>
       <span class="nav-anim d-only"><dc-import name="header-logo-hover" hint-size="100%,100%"></dc-import></span>
     </div>
     <div class="nav-right">
