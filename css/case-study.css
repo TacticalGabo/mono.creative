@@ -245,6 +245,8 @@ a{color:inherit;text-decoration:none}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 ul,ol{list-style:none}
 .page{container-type:inline-size;position:relative;max-width:1920px;margin:0 auto;overflow:clip;background:var(--bg)}
+/* salida al home: mismo fundido que el home al abrir una entry (ver js/case-study.js) */
+html.mc-leaving .page{opacity:0;transition:opacity .28s ease-out}
 .wrap{padding-inline:var(--m)}
 .media{background-color:var(--media);background-size:cover;background-position:center;background-repeat:no-repeat}
 /* vídeo en un hueco .media (Figma FILL = cover center); el poster va como fondo del [data-asset] */

@@ -4,6 +4,30 @@
   const loadedAt = Date.now();
   const timeOptions = ['09:00', '10:00', '11:00', '14:00', '15:00', '16:00'];
 
+  function loadTurnstile() {
+    if (window.turnstile) return new Promise((resolve) => window.turnstile.ready(resolve));
+    if (window.__monoTurnstileLoad) return window.__monoTurnstileLoad;
+    window.__monoTurnstileLoad = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      const timer = setTimeout(() => fail(), 15000);
+      function fail() {
+        clearTimeout(timer);
+        script.remove();
+        window.__monoTurnstileLoad = null;
+        reject(new Error('Verification could not load.'));
+      }
+      script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+      script.async = true;
+      script.onerror = fail;
+      script.onload = () => {
+        if (!window.turnstile) return fail();
+        window.turnstile.ready(() => { clearTimeout(timer); resolve(); });
+      };
+      document.head.append(script);
+    });
+    return window.__monoTurnstileLoad;
+  }
+
   function init(form) {
     const rules = window.MonoContactRules;
     const testing = window.MONO_CONTACT_CONFIG?.testing === true;
@@ -22,6 +46,39 @@
     const requestId = window.crypto?.randomUUID?.() || 'lead-' + Date.now() + '-' + Math.random().toString(36).slice(2);
     const cta = find('#form-cta');
     const feedback = find('#submit-feedback');
+    let delivery = null;
+
+    async function verificationToken(sitekey) {
+      await loadTurnstile();
+      const container = document.createElement('div');
+      container.className = 'contact-verification';
+      feedback.before(container);
+      return new Promise((resolve, reject) => {
+        let widgetId;
+        let finished = false;
+        const timeout = setTimeout(() => finish(new Error('Verification timed out.')), 120000);
+        function finish(error, token) {
+          if (finished) return;
+          finished = true;
+          clearTimeout(timeout);
+          if (widgetId !== undefined) window.turnstile.remove(widgetId);
+          container.remove();
+          if (error) reject(error);
+          else resolve(token);
+        }
+        try {
+          widgetId = window.turnstile.render(container, {
+            sitekey, action: 'contact', appearance: 'interaction-only', size: 'flexible',
+            theme: document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark',
+            'response-field': false,
+            callback: (token) => finish(null, token),
+            'error-callback': () => { finish(new Error('Verification failed.')); return true; },
+            'expired-callback': () => finish(new Error('Verification expired.')),
+            'timeout-callback': () => finish(new Error('Verification timed out.'))
+          });
+        } catch (error) { finish(error); }
+      });
+    }
 
     /* (2026-10-05) Iconos en línea: los 9 de Lucide 0.468 que usa el form. Antes se cargaba
        la librería entera (350 KB) solo para esto. Mismo marcado que lucide.createIcons(). */
@@ -281,20 +338,19 @@
       find('#cta-label').textContent = 'SENDING';
       feedback.textContent = '';
       find('#direct-submit').hidden = true;
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 20000);
       const controls = all('input, textarea, button');
       const disabledStates = controls.map((control) => control.disabled);
       controls.forEach((control) => { control.disabled = true; });
       try {
-        const body = new FormData();
-        body.append('payload', JSON.stringify(data));
         const file = find('#deck').files[0];
-        if (file) body.append('deck', file, file.name);
-        const response = await fetch(endpoint, { method: 'POST', body, signal: controller.signal });
-        if (!response.ok) throw new Error('Submission failed');
+        if (!delivery) delivery = window.MonoContactDelivery.createClient({ endpoint, origin: window.location.origin });
+        await delivery.send(data, file || null, verificationToken, (stage) => {
+          find('#cta-label').textContent = stage === 'uploading' ? 'UPLOADING' : 'SENDING';
+          feedback.textContent = stage === 'verifying' ? 'Verifying your request…' : stage === 'uploading' ? 'Uploading your deck. This may take a moment.' : 'Sending your brief…';
+        });
         state.sent = true;
         find('#cta-label').textContent = 'BRIEF SENT';
+        feedback.textContent = 'Thanks! Your brief has been sent.';
         form.dispatchEvent(new CustomEvent('mono:contact-sent', { detail: { id: requestId }, bubbles: true }));
       } catch (_) {
         controls.forEach((control, i) => { control.disabled = disabledStates[i]; });
@@ -302,7 +358,6 @@
         find('#cta-label').textContent = 'SEND MY BRIEF';
         offerEmail(data, 'Your brief could not be delivered. Try again or send it by email.');
       } finally {
-        clearTimeout(timeout);
         state.busy = false;
         form.setAttribute('aria-busy', 'false');
       }
@@ -463,7 +518,7 @@
   // The shared runtime replaces x-dc; bind only to the committed form.
   function boot() {
     const form = Array.from(document.querySelectorAll('#contact-form')).find((f) => !f.closest('x-dc'));
-    if (!form || form.dataset.ready || !window.MonoContactRules) return Boolean(form?.dataset.ready);
+    if (!form || form.dataset.ready || !window.MonoContactRules || !window.MonoContactDelivery) return Boolean(form?.dataset.ready);
     init(form);
     return true;
   }

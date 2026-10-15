@@ -31,9 +31,10 @@ if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.
 </script>
 <script src="./vendor/support.js"></script>
 <script src="./js/case-study.js?v=8" defer></script>
-<script src="./js/contact-config.js" defer></script>
-<script src="./js/contact-rules.js?v=2" defer></script>
-<script src="./js/contact.js?v=2" defer></script>
+<script src="./js/contact-config.js?v=3" defer></script>
+<script src="./js/contact-rules.js?v=3" defer></script>
+<script src="./js/contact-delivery.js?v=1" defer></script>
+<script src="./js/contact.js?v=3" defer></script>
 </head>
 <body class="contact-page">
 <x-dc>
@@ -545,7 +546,7 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
   <!-- SHARED:NAV -->
 <header class="nav" data-comp="nav">
     <a class="nav-logo" href="./index.html" aria-label="mono.creative — home">
-      <span class="nav-anim-m"><dc-import name="brandmark-fusion" hint-size="100%,100%"></dc-import></span>
+      <span class="nav-anim-m"><dc-import name="brandmark-fusion" align="left" hint-size="100%,100%"></dc-import></span>
       <span class="nav-anim d-only"><dc-import name="header-logo-hover" hint-size="100%,100%"></dc-import></span>
     </a>
     <div class="nav-right">
@@ -625,7 +626,7 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
                     <p class="field-error" id="link-1-error" aria-live="polite"></p>
                   </div>
                 </div>
-                <div class="link-tools"><button id="add-link" class="text-action" type="button"><i data-lucide="plus" aria-hidden="true"></i>Add link</button><button id="attach-deck" class="text-action" type="button"><i data-lucide="paperclip" aria-hidden="true"></i>Attach deck</button><span class="attachment-note">max size 20MB</span></div>
+                <div class="link-tools"><button id="add-link" class="text-action" type="button"><i data-lucide="plus" aria-hidden="true"></i>Add link</button><button id="attach-deck" class="text-action" type="button"><i data-lucide="paperclip" aria-hidden="true"></i>Attach deck</button><span class="attachment-note">max size 20 MiB</span></div>
                 <input class="sr-only" id="deck" name="deck" type="file" accept=".pdf,.key,.keynote,.pptx" tabindex="-1" aria-label="Attach deck" aria-describedby="file-error">
                 <div class="file-details" id="file-details" hidden="hidden"><i data-lucide="file" aria-hidden="true"></i><span id="file-name"></span><button class="icon-button" id="remove-file" type="button" title="Remove attachment" aria-label="Remove attachment"><i data-lucide="x" aria-hidden="true"></i></button></div>
                 <p class="field-error" id="file-error" aria-live="polite"></p>

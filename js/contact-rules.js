@@ -120,7 +120,7 @@
   function validateFile(file) {
     if (!file) return '';
     if (!/\.(?:pdf|key|keynote|pptx)$/i.test(String(file.name || ''))) return 'Use a PDF, Keynote or PowerPoint file';
-    if (!Number.isFinite(file.size) || file.size < 0 || file.size > 20 * 1024 * 1024) return 'Keep your file at 20 MB or less';
+    if (!Number.isSafeInteger(file.size) || file.size <= 0 || file.size > 20 * 1024 * 1024) return 'Use a non-empty file of 20 MiB or less';
     return '';
   }
 

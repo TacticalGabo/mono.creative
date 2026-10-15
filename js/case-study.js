@@ -313,3 +313,23 @@
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
+
+/* salida al home (logo, Work/About/Services, menú mobile): igual que el home al abrir una entry,
+   primero se funde .page al fondo (.28 s) y al terminar se navega. Así se ve desaparecer el
+   contenido y después el home entra sobre su propio fondo. Clics con modificador, otra pestaña
+   o un .btn[data-href] (los gestiona JS-BTN) siguen su camino normal. */
+(function(){
+  var leaving=0, h=document.documentElement;
+  document.addEventListener('click',function(e){
+    if(leaving||e.defaultPrevented||e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;
+    var a=e.target.closest&&e.target.closest('a[href]');
+    if(!a||a.target==='_blank'||a.hasAttribute('download')||a.matches('.btn[data-href]'))return;
+    var u=new URL(a.href,location.href);
+    if(u.origin!==location.origin||!/\/(index\.html)?$/.test(u.pathname))return;
+    e.preventDefault(); leaving=1;
+    h.classList.add('mc-leaving');
+    setTimeout(function(){ location.href=u.href; },300);   /* = duración del fundido */
+  });
+  /* al volver con "atrás" (bfcache) la página no debe seguir fundida */
+  addEventListener('pageshow',function(){ leaving=0; h.classList.remove('mc-leaving'); });
+})();

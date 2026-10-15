@@ -1,0 +1,8 @@
+# Copy to .dev.vars for Wrangler local development only. Never publish .dev.vars.
+# Production must list only the exact HTTPS origins that serve the real form.
+CONTACT_ALLOWED_ORIGINS="http://localhost:8788,http://127.0.0.1:8788"
+TURNSTILE_SITE_KEY="replace-with-public-site-key"
+TURNSTILE_SECRET_KEY="replace-with-private-turnstile-secret"
+CONTACT_SIGNING_KEY="replace-with-at-least-32-random-secret-characters"
+MAKE_WEBHOOK_URL="https://hook.example.invalid/replace-with-make-webhook"
+MAKE_DOWNLOAD_TOKEN="replace-with-a-different-random-secret-of-at-least-32-characters"

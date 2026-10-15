@@ -3,9 +3,9 @@
    · Primera carga de la web en la pestaña: intro de blobs. Fuente:
      entregables/lazyloading-intro/ (Lazyloading_INTRO_desktop / _mobile; mismo motor, solo
      cambia el tamaño del logo). Bucle hasta que la página está lista.
-   · Llegada desde otra página del sitio (o intro ya vista): telón sin logo que funde del
-     fondo de la página anterior al del home, y luego se desvanece sobre el home.
-   MCIntro.minDone(): true cuando ya se vio lo mínimo (intro: swapAt+0.7 s; telón: su fundido). */
+   · Llegada desde otra página del sitio (o intro ya vista): telón liso del fondo del home,
+     que se desvanece en cuanto el home está listo.
+   MCIntro.minDone(): true cuando ya se vio lo mínimo (intro: swapAt+0.7 s; telón: siempre). */
 (function(){
   if(window.MCIntro)return;
   var BLOBS=[
@@ -159,7 +159,8 @@
     group.setAttribute('transform','translate('+TARGET.cx+' '+TARGET.cy+') scale('+(1+s).toFixed(4)+' '+(1-s).toFixed(4)+') translate('+(-TARGET.cx)+' '+(-TARGET.cy)+')');
   }
 
-  var BASE='position:fixed;inset:0;z-index:99999;pointer-events:none;';
+  // tapa también los clics: debajo la página aún no está lista (se liberan al salir)
+  var BASE='position:fixed;inset:0;z-index:99999;';
   function intro(){
     var w=window.innerWidth>=768?126.438:100, h=w*296/716;
     host.style.cssText=BASE+'display:flex;align-items:center;justify-content:center;overflow:hidden;background-color:'+BG_LIGHT+';transition:background-color 700ms cubic-bezier(.65,0,.35,1),opacity 600ms ease;';
@@ -168,29 +169,23 @@
     stopped=false;raf=requestAnimationFrame(frame);
   }
 
-  // Fondos de página (los mismos --bg-d / --bg-l del CSS del sitio). Sin tema elegido en el
-  // toggle (sessionStorage 'mc-theme'): entries en claro; home y contacto en oscuro.
-  var PAGE_DARK='#101913', PAGE_LIGHT='#f8fbf9';
-  function theme(path){
-    try{ var m=sessionStorage.getItem('mc-theme'); if(m==='dark'||m==='light')return m; }catch(_){}
-    return /casestudy_/i.test(path)?'light':'dark';
-  }
-  function cover(from){
-    var to=document.documentElement.getAttribute('data-theme')==='light'?PAGE_LIGHT:PAGE_DARK;
-    host.style.cssText=BASE+'background-color:'+(theme(from)==='light'?PAGE_LIGHT:PAGE_DARK)+';transition:background-color 450ms ease,opacity 450ms ease;';
-    // doble rAF: el color de partida tiene que pintarse antes de cambiar, si no no hay fundido
-    requestAnimationFrame(function(){ requestAnimationFrame(function(){ host.style.backgroundColor=to; }); });
-    setTimeout(function(){ minOk=true; },450);
+  // Telón: el fondo del home (--bg-d / --bg-l del CSS) mientras monta, como una entry
+  // al llegar, que pinta su fondo y luego entra el contenido. La página anterior ya
+  // fundió su contenido antes de navegar (mc-leaving), así que aquí no hay que fundir color.
+  function cover(){
+    var claro=document.documentElement.getAttribute('data-theme')==='light';
+    host.style.cssText=BASE+'background-color:'+(claro?'#f8fbf9':'#101913')+';transition:opacity 450ms ease;';
+    minOk=true;
   }
 
   function start(){
     if(host)return;
     host=document.createElement('div');
     host.id='boot0';host.setAttribute('aria-hidden','true');
-    var from=null, seen=false;
-    try{ var r=document.referrer&&new URL(document.referrer); if(r&&r.origin===location.origin)from=r.pathname; }catch(_){}
-    try{ seen=sessionStorage.getItem('mc-intro')==='1'; sessionStorage.setItem('mc-intro','1'); }catch(_){}
-    if(from!==null||seen)cover(from||location.pathname); else intro();
+    var seen=false;
+    try{ var r=document.referrer&&new URL(document.referrer); seen=!!r&&r.origin===location.origin; }catch(_){}
+    try{ if(sessionStorage.getItem('mc-intro')==='1')seen=true; sessionStorage.setItem('mc-intro','1'); }catch(_){}
+    if(seen)cover(); else intro();
     // se inserta YA con su estilo: insertada antes, la transición arrancaría desde transparente
     document.body.appendChild(host);
   }
@@ -198,6 +193,7 @@
   // Salida. Intro: primero el logo, luego el fondo. Telón: directo. Después se quita y se para.
   function leave(){
     if(leaving||!host)return;leaving=true;
+    host.style.pointerEvents='none';
     var wait=svg?350:0;
     if(svg)svg.style.opacity='0';
     setTimeout(function(){host.style.opacity='0';},wait);

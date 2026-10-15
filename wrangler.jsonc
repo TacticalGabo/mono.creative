@@ -1,0 +1,16 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "mono-creative",
+  "compatibility_date": "2026-10-15",
+  "pages_build_output_dir": "./dist",
+  "r2_buckets": [
+    {
+      "binding": "CONTACT_BUCKET",
+      "bucket_name": "mono-creative-contact-private"
+    }
+  ]
+  // Set public vars CONTACT_ALLOWED_ORIGINS and TURNSTILE_SITE_KEY per environment.
+  // Set TURNSTILE_SECRET_KEY, CONTACT_SIGNING_KEY, MAKE_WEBHOOK_URL and
+  // MAKE_DOWNLOAD_TOKEN as encrypted Pages secrets, never as public frontend config.
+  // Keep R2 public access and r2.dev disabled. No CORS policy is needed.
+}
