@@ -139,7 +139,7 @@ if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.
   // otra página solo hay un telón liso que se retira en cuanto el home monta.
   var vista=0; try{ vista=sessionStorage.getItem('mc-intro')==='1'; }catch(_){}
   if(vista){
-    b.style.cssText='transition:opacity .25s ease';
+    b.style.cssText='background:transparent;pointer-events:none';
     window.MCIntroSkip=1;
     window.addEventListener('mc:arranca',function(){ b.style.opacity='0'; setTimeout(function(){ if(b.parentNode)b.parentNode.removeChild(b); },300); });
   } else if(window.MCIntro){
