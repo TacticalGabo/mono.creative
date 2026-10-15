@@ -110,14 +110,14 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
 [data-asset="story"]{background-image:url(./casestudy_DegenAnimations/06-story-poster.jpg)}
 [data-asset="keyvisual"]{background-image:url(./casestudy_DegenAnimations/06-keyvisual.webp)}
 /* tamaños y bloques propios de este caso (Figma 12. Degen, 1440 / 360) */
-.csc--oc{padding-bottom:56px}
-.oc{display:flex;flex-direction:column;gap:16px;margin-top:32px}
+.csc--oc{padding:56px 0}
+.oc{display:flex;flex-direction:column;gap:16px}
 .oc__row{display:flex;flex-direction:column;gap:16px}
 .oc .media{width:100cqw;margin-left:calc(-1 * var(--m));aspect-ratio:360/300}
 @media (max-width:767.98px){.zz__media{aspect-ratio:360/300}}
 @media (min-width:768px){
-  .csc--oc{padding-bottom:112px}
-  .oc{gap:24px;margin-top:40px}
+  .csc--oc{padding:112px 0}
+  .oc{gap:24px}
   .oc__row{flex-direction:row;align-items:flex-start;gap:24px}
   .oc .media{width:auto;margin:0}
   .oc .oc__a{aspect-ratio:1056/640}
@@ -651,14 +651,6 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
 
   <!-- ===== 12.7 Outcome (B02) ===== -->
   <section class="cs-closing-scene csc--oc fx" data-block="12.7 Outcome (B02)">
-    <div class="wrap">
-      <div class="sh"><h2 class="sh__title"><span>Project</span><span class="accent">outcome</span></h2><p class="sh__desc">Enjin launched the Degen collection with a full set of 3D visuals, where the artist's crew moved, posed and joked inside Enjin's world on every channel.</p></div>
-      <ul class="csc__bullets">
-        <li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>4 Degen characters rebuilt in 3D from the original 2D art</span></li>
-        <li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>6 article and blog visuals for the launch announcement</span></li>
-        <li class="bullet"><svg class="bullet__ic" viewBox="0 0 10 10" aria-hidden="true"><path d="M5 5V1M5 5l4-1.3M5 5l2.5 3.4M5 5L2.5 8.4M5 5L1 3.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg><span>3 animated GIFs and 2 meme templates for social channels</span></li>
-      </ul>
-    </div>
     <div class="wrap"><div class="oc"><div class="oc__a media" data-asset="outcome-1"></div><div class="oc__row"><div class="oc__b media vid" data-asset="outcome-2"><video muted loop playsinline preload="none" data-src="./casestudy_DegenAnimations/04-outcome-2.mp4"></video></div><div class="oc__c media" data-asset="outcome-3"></div></div></div></div>
   </section>
 
