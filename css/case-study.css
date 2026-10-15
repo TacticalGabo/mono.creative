@@ -251,13 +251,14 @@ ul,ol{list-style:none}
 .vid{position:relative;overflow:hidden}
 .vid>video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;border-radius:inherit}
 /* mobile: pieza más ancha que el viewport, alineada a la izquierda con offset (tamaño/offset en la página).
-   .hs = tira con scroll horizontal (Figma overflow horizontal); .xc = recorte fijo */
+   .hs = tira con scroll horizontal (annotation Dev de Figma); .xc = recorte fijo */
 @media (max-width:767.98px){
   .hs,.xc{width:100cqw;overflow:hidden}
   .hs{overflow-x:auto;scrollbar-width:none;overscroll-behavior-x:contain}
   .hs::-webkit-scrollbar{display:none}
   :is(.hs,.xc)>.media{flex:none}
   .wrap :is(.hs,.xc){margin-left:calc(-1 * var(--m))}
+  .hs.hs-on>.media{margin-left:0}   /* con JS: pieza entera recorrible; arranca con el offset de Figma (scrollLeft) */
 }
 @media (min-width:768px){.hs,.xc{display:contents}}
 .accent{color:var(--accent)}

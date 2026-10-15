@@ -257,6 +257,10 @@
         var m=/url\(["']?([^"')]+)["']?\)/.exec(getComputedStyle(n).backgroundImage||'');if(m)out.push(m[1])});
       return out;
     }
+    /* tiras con scroll horizontal (mobile, .hs): la pieza se puede recorrer entera y arranca desplazada
+       como en Figma (su margin-left negativo pasa a scrollLeft) */
+    [].forEach.call(main.querySelectorAll('.hs'),function(h){var m=h.firstElementChild,x=m?-parseFloat(getComputedStyle(m).marginLeft):0;
+      if(x>0){h.classList.add('hs-on');h.scrollLeft=x}});
     /* vídeos en bucle solo mientras se ven: fuera de pantalla se pausan (CPU/batería) */
     function vplay(v){var p=v.play();if(p&&p.catch)p.catch(function(){})}
     var vo=io_ok?new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)vplay(e.target);else e.target.pause()})}):null;
