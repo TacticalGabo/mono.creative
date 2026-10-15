@@ -115,45 +115,17 @@ if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.
   },{once:true});
 })();
 </script>
-<!-- (2026-10-04) CARGA: la pantalla de carga se pinta desde el primer byte. La de
-     verdad (#boot) vive dentro de la plantilla y no existe hasta que el runtime
-     baja React, compila la página y la monta: hasta entonces el móvil enseñaba
-     una pantalla oscura vacía. #boot0 es una copia exacta (mismo CSS, barra a 0)
-     que se quita en cuanto aparece #boot, así que solo adelanta lo que ya se veía. -->
-<style>
-#boot0{position:fixed;inset:0;z-index:99999;background:#B8FF00}
-</style>
-<script src="./js/intro-loader.js"></script>
+<!-- (2026-10-15) PANTALLA DE CARGA: #boot0 se pinta desde el primer byte, fuera de la
+     plantilla (React no la toca). js/intro-loader.js decide qué lleva:
+       · primera carga de la web: la intro de blobs (entregables/lazyloading-intro/);
+       · al llegar desde otra página del sitio (o ya vista en la pestaña): solo un telón
+         que funde del fondo de la página anterior al del home.
+     Se va con 'mc:arranca' (lo dispara el script de carga de más abajo). -->
+<script src="./js/intro-loader.js?v=2"></script>
 <script src="./vendor/support.js"></script>
 </head>
 <body>
-<script>
-(function(){
-  var b=document.createElement('div');
-  b.id='boot0'; b.setAttribute('aria-hidden','true');
-  document.body.appendChild(b);
-  // (2026-10-15) la intro de blobs (js/intro-loader.js) sustituye a la barra. Vive
-  // aquí, fuera de la plantilla, para que React no la toque; se va sola con
-  // 'mc:arranca'. Si el script no cargó, el temporizador la quita igual.
-  // La intro sale UNA vez por visita (sessionStorage). Al volver al home desde
-  // otra página solo hay un telón liso que se retira en cuanto el home monta.
-  // También se salta si se llega desde otra página del sitio (entry, contacto):
-  // la web ya se cargó aunque se entrara por un entry y no por el home.
-  var vista=0; try{ vista=sessionStorage.getItem('mc-intro')==='1'; }catch(_){}
-  try{ if(document.referrer&&new URL(document.referrer).origin===location.origin)vista=1; }catch(_){}
-  if(vista){
-    // telón del color de fondo del tema (nada de verde), y fundido al montar
-    var claro=document.documentElement.getAttribute('data-theme')==='light';
-    b.style.cssText='background:'+(claro?'#f8fbf9':'#101913')+';pointer-events:none;transition:opacity .25s ease';
-    window.MCIntroSkip=1;
-    window.addEventListener('mc:arranca',function(){ b.style.opacity='0'; setTimeout(function(){ if(b.parentNode)b.parentNode.removeChild(b); },300); });
-  } else if(window.MCIntro){
-    MCIntro.mount(b);
-    try{ sessionStorage.setItem('mc-intro','1'); }catch(_){}
-  }
-  setTimeout(function(){ if(b.parentNode)b.parentNode.removeChild(b); },17000);
-})();
-</script>
+<script>if(window.MCIntro)MCIntro.start();</script>
 <x-dc>
 <helmet>
 <script>
@@ -404,9 +376,6 @@ i{font-style:italic}
 a{color:var(--lime400);text-decoration:none}
 a:hover{color:var(--lime400)}
 
-#boot{position:fixed;inset:0;z-index:99998;background:transparent;pointer-events:none;transition:opacity .45s ease}
-#boot.done{opacity:0;pointer-events:none}
-#bar,#bootmsg{display:none}
 .page{container-type:inline-size;position:relative;max-width:1920px;margin:0 auto;overflow:clip;background:var(--bg)}
 /* al pulsar una entry: fundido inmediato al fondo mientras carga (ver __mcCase) */
 html.mc-leaving .page{opacity:0;transition:opacity .28s ease-out}
@@ -1841,16 +1810,11 @@ html.ov-arm .oval.ov-in span{transition:color .5s ease,opacity .4s ease .65s}
 <script>
 (function(){
   if(window.__mcBoot)return; window.__mcBoot=1;
-  // Pantalla de carga con barra. Avanza por CONTEO de imágenes decodificadas,
-  // no por bytes, y decodifica de cuatro en cuatro con un setTimeout entre
-  // tandas: así la barra pinta de verdad y el hilo principal no se queda
-  // colgado descodificando megas de data: URI de golpe (el caso del móvil).
-  var MAXWAIT=12000, t0=Date.now(), hidden=false, p=0, curtxt='Preparing…';
-  function el(id){ return document.getElementById(id); }
-  // El overlay vive dentro de la plantilla, así que un re-render de React
-  // puede devolverle su contenido inicial. Por eso el estado se repinta en un
-  // latido en vez de escribirse una sola vez: si lo pisan, vuelve solo.
-  //
+  // Cuándo se va la pantalla de carga (#boot0, js/intro-loader.js): página
+  // montada + imágenes visibles decodificadas + hero listo + la intro, si sale,
+  // con su secuencia mínima vista. Decodifica de cuatro en cuatro con un
+  // setTimeout entre tandas para no colgar el hilo principal (el caso del móvil).
+  var MAXWAIT=12000, t0=Date.now(), hidden=false;
   // OJO con los nombres de variable en los scripts de <helmet>: el compilador
   // de plantillas pasa encodeCamelAttrs por TODO el HTML, así que un nombre en
   // camelCase con espacio delante y '=' detrás sale convertido en
@@ -1859,7 +1823,6 @@ html.ov-arm .oval.ov-in span{transition:color .5s ease,opacity .4s ease .65s}
   // (El ejemplo literal ya no se escribe en este comentario: el validador de
   //  build-standalone.py mira el texto del script, no si está comentado, y
   //  abortaba el build por culpa del propio ejemplo.)
-  var goneat=0;
   // La coreografía de entrada (UI → líneas del titular → paréntesis → cápsula)
   // arranca al MONTAR, no al verse. Corriendo debajo de esta pantalla, lo que
   // se ve depende de una carrera: si la carga tarda, la secuencia se reproduce
@@ -1906,33 +1869,14 @@ html.ov-arm .oval.ov-in span{transition:color .5s ease,opacity .4s ease .65s}
     if(hay)pag.classList.add('cv');
   }
   setTimeout(arranca,MAXWAIT+2500);
-  function paint(){
-    var b=el('bar'), m=el('bootmsg'), o=el('boot');
-    if(b&&b.firstChild){var w=(p*100).toFixed(1)+'%';if(b.__w!==w){b.__w=w;b.firstChild.style.width=w;}}
-    if(m&&m.textContent!==curtxt)m.textContent=curtxt;
-    if(!hidden)return;
-    if(!goneat)goneat=Date.now()+600;
-    if(o)o.classList.add('done');
-    if(Date.now()<goneat)return;
-    if(o&&o.parentNode)o.parentNode.removeChild(o);
-    // se sigue vigilando 2 s por si un re-render lo devuelve, y luego se para
-    if(Date.now()>goneat+2000)clearInterval(beat);
-  }
-  var beat=setInterval(paint,16);
-  function setP(v){ if(v>p)p=v>1?1:v; paint(); }
-  function msg(t){ curtxt=t; paint(); }
   function ready(){
     // el hero y su animación son lo último en montar
     return !!document.querySelector('.hero .h1') && !!document.querySelector('.hero-anim svg');
   }
   function hide(){
     if(hidden)return; hidden=true;
-    curtxt='';
-    // se suelta la secuencia AQUÍ, no cuando se quita el overlay: el overlay
-    // tarda .45 s en desvanecerse y el primer retardo de la coreografía es de
-    // .1 s, así que solapan y no queda un hueco muerto en negro
+    // 'mc:arranca' suelta la coreografía y retira #boot0 (js/intro-loader.js)
     arranca();
-    setP(1);   // paint() se encarga del .done y de quitarlo 600 ms después
   }
   // (2026-10-04) CARGA: la pantalla solo espera las imágenes que se ven al
   // quitarla. Antes esperaba TODAS las de las hojas de estilo (avatares del
@@ -2001,7 +1945,6 @@ html.ov-arm .oval.ov-in span{transition:color .5s ease,opacity .4s ease .65s}
           var im=new Image();
           im.onload=im.onerror=function(){
             fin++;
-            setP(0.05+0.80*(fin/n));
             if(fin>=n)return done();
             setTimeout(pump,0);
           };
@@ -2011,21 +1954,12 @@ html.ov-arm .oval.ov-in span{transition:color .5s ease,opacity .4s ease .65s}
     })();
   }
   function go(){
-    // (2026-10-04) los sondeos miran cada 16 ms en vez de 80: el hero se detecta
-    // en cuanto está, no hasta 80 ms después. La barra avanza al mismo ritmo de
-    // antes (+0.004 cada 80 ms) y la pausa de 120 ms antes del fundido no cambia.
-    if(!el('boot')||document.querySelector('x-dc'))return setTimeout(go,16);
-    setP(0.05);
-    msg('Decoding images…');
+    // los sondeos miran cada 16 ms: el hero se detecta en cuanto está
+    if(!document.querySelector('.page')||document.querySelector('x-dc'))return setTimeout(go,16);
     setTimeout(function(){
       decode(urls(),function(){
-        msg('Assembling the page…');
-        setP(0.88);
-        if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){ setP(0.94); });
-        var ultimo=Date.now();
         (function poll(){
-          if((ready()&&(!window.MCIntro||window.MCIntroSkip||MCIntro.minDone()))||Date.now()-t0>MAXWAIT)return setTimeout(hide,120);
-          if(Date.now()-ultimo>=80){ ultimo=Date.now(); setP(p+0.004); }
+          if((ready()&&(!window.MCIntro||MCIntro.minDone()))||Date.now()-t0>MAXWAIT)return setTimeout(hide,120);
           setTimeout(poll,16);
         })();
       });
@@ -2212,7 +2146,7 @@ html.ov-arm .oval.ov-in span{transition:color .5s ease,opacity .4s ease .65s}
 </script>
 <template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#101913"/><ellipse cx="36" cy="50" rx="14" ry="18" fill="#b8ff00"/><ellipse cx="58" cy="50" rx="14" ry="18" fill="#b8ff00"/><ellipse cx="76" cy="50" rx="8" ry="10" fill="#b8ff00"/></svg></template>
 </helmet>
-<div id="boot"><div id="bar"><b></b></div><div id="bootmsg">Preparing…</div></div>
+
 <div class="qa-w" data-comp="qa-width-overlay"></div>
 <div class="page" data-screen-label="home — responsive">
   <div class="bgfade"></div>

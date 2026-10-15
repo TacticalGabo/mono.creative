@@ -1,7 +1,11 @@
-/* Intro de carga (reemplaza la barra de progreso). Fuente: entregables/lazyloading-intro/
-   (Lazyloading_INTRO_desktop / _mobile). Mismo motor para los dos; solo cambia el tamaño
-   del logo. Bucle de blobs que se fusionan hasta que la página avisa con 'mc:arranca'.
-   API: window.MCIntro.minDone() -> true cuando ya se vio la secuencia base (swapAt+0.7 s). */
+/* Pantalla de carga del home (#boot0). La arranca MCIntro.start() desde el primer <script>
+   del <body> de index.html y se retira sola con 'mc:arranca'.
+   · Primera carga de la web en la pestaña: intro de blobs. Fuente:
+     entregables/lazyloading-intro/ (Lazyloading_INTRO_desktop / _mobile; mismo motor, solo
+     cambia el tamaño del logo). Bucle hasta que la página está lista.
+   · Llegada desde otra página del sitio (o intro ya vista): telón sin logo que funde del
+     fondo de la página anterior al del home, y luego se desvanece sobre el home.
+   MCIntro.minDone(): true cuando ya se vio lo mínimo (intro: swapAt+0.7 s; telón: su fundido). */
 (function(){
   if(window.MCIntro)return;
   var BLOBS=[
@@ -115,7 +119,7 @@
     return d+'Z';
   }
 
-  var raf=0,t0=null,lastFrame=-1,dark=false,leaving=false,stopped=false,swapped=0,minOk=false;
+  var raf=0,t0=null,lastFrame=-1,dark=false,leaving=false,stopped=true,minOk=false;
   var host,svg,group,blob;
 
   function frame(now){
@@ -155,26 +159,54 @@
     group.setAttribute('transform','translate('+TARGET.cx+' '+TARGET.cy+') scale('+(1+s).toFixed(4)+' '+(1-s).toFixed(4)+') translate('+(-TARGET.cx)+' '+(-TARGET.cy)+')');
   }
 
-  function mount(el){
-    host=el;
+  var BASE='position:fixed;inset:0;z-index:99999;pointer-events:none;';
+  function intro(){
     var w=window.innerWidth>=768?126.438:100, h=w*296/716;
-    host.style.cssText='position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;overflow:hidden;background-color:'+BG_LIGHT+';transition:background-color 700ms cubic-bezier(.65,0,.35,1),opacity 600ms ease;';
+    host.style.cssText=BASE+'display:flex;align-items:center;justify-content:center;overflow:hidden;background-color:'+BG_LIGHT+';transition:background-color 700ms cubic-bezier(.65,0,.35,1),opacity 600ms ease;';
     host.innerHTML='<svg width="'+w+'" height="'+h.toFixed(3)+'" viewBox="0 0 716 296" shape-rendering="geometricPrecision" style="display:block;overflow:visible;transform-origin:50% 50%;color:'+FG_LIGHT+';transition:color 700ms cubic-bezier(.65,0,.35,1),opacity 700ms cubic-bezier(.4,0,.2,1);"><g><path d="" fill="currentColor"></path></g></svg>';
     svg=host.firstChild;group=svg.firstChild;blob=group.firstChild;
-    raf=requestAnimationFrame(frame);
+    stopped=false;raf=requestAnimationFrame(frame);
   }
 
-  // Sale: el logo se desvanece, luego el fondo; después se quita y se para el bucle.
+  // Fondos de página (los mismos --bg-d / --bg-l del CSS del sitio). Sin tema elegido en el
+  // toggle (sessionStorage 'mc-theme'): entries en claro; home y contacto en oscuro.
+  var PAGE_DARK='#101913', PAGE_LIGHT='#f8fbf9';
+  function theme(path){
+    try{ var m=sessionStorage.getItem('mc-theme'); if(m==='dark'||m==='light')return m; }catch(_){}
+    return /casestudy_/i.test(path)?'light':'dark';
+  }
+  function cover(from){
+    var to=document.documentElement.getAttribute('data-theme')==='light'?PAGE_LIGHT:PAGE_DARK;
+    host.style.cssText=BASE+'background-color:'+(theme(from)==='light'?PAGE_LIGHT:PAGE_DARK)+';transition:background-color 450ms ease,opacity 450ms ease;';
+    // doble rAF: el color de partida tiene que pintarse antes de cambiar, si no no hay fundido
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ host.style.backgroundColor=to; }); });
+    setTimeout(function(){ minOk=true; },450);
+  }
+
+  function start(){
+    if(host)return;
+    host=document.createElement('div');
+    host.id='boot0';host.setAttribute('aria-hidden','true');
+    var from=null, seen=false;
+    try{ var r=document.referrer&&new URL(document.referrer); if(r&&r.origin===location.origin)from=r.pathname; }catch(_){}
+    try{ seen=sessionStorage.getItem('mc-intro')==='1'; sessionStorage.setItem('mc-intro','1'); }catch(_){}
+    if(from!==null||seen)cover(from||location.pathname); else intro();
+    // se inserta YA con su estilo: insertada antes, la transición arrancaría desde transparente
+    document.body.appendChild(host);
+  }
+
+  // Salida. Intro: primero el logo, luego el fondo. Telón: directo. Después se quita y se para.
   function leave(){
     if(leaving||!host)return;leaving=true;
-    svg.style.opacity='0';
-    setTimeout(function(){host.style.opacity='0';host.style.pointerEvents='none';},350);
+    var wait=svg?350:0;
+    if(svg)svg.style.opacity='0';
+    setTimeout(function(){host.style.opacity='0';},wait);
     setTimeout(function(){
       stopped=true;cancelAnimationFrame(raf);
       if(host.parentNode)host.parentNode.removeChild(host);
-    },1100);
+    },wait+650);
   }
   window.addEventListener('mc:arranca',leave);
 
-  window.MCIntro={mount:mount,leave:leave,minDone:function(){return minOk;}};
+  window.MCIntro={start:start,minDone:function(){return minOk;}};
 })();
