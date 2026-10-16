@@ -68,7 +68,8 @@ class Component extends DCLogic {
 var self = this;
     // MCgeom hace polling y no se puede cancelar: si el componente ya murió,
     // el callback tiene que salir solo. prepare() muestrea cientos de puntos
-    // del SVG y bloquea el hilo 15-30 ms, así que se aplaza a un hueco libre;
+    // del SVG y bloquea el hilo 15-30 ms, así que se aplaza a un hueco libre
+    // (y desde 2026-10-16 va en trozos, ver prepare);
     // el bucle de dibujo ya no pinta nada hasta que this.ready es true.
     const idle = typeof window.requestIdleCallback === 'function'
       ? function (fn) { window.requestIdleCallback(fn, { timeout: 120 }); }
@@ -130,13 +131,15 @@ var self = this;
     };
   }
 
-  sample(d, n) {
+  // Generador: un punto por paso (ver prepare). Mismas llamadas, mismo orden.
+  *sample(d, n) {
     this.sampleEl.setAttribute('d', d);
     const total = this.sampleEl.getTotalLength();
     const out = [];
     for (let i = 0; i < n; i++) {
       const p = this.sampleEl.getPointAtLength((i / n) * total);
       out.push([p.x, p.y]);
+      yield;
     }
     return out;
   }
@@ -171,11 +174,33 @@ var self = this;
     return { x0: x0, y0: y0, x1: x1, y1: y1, w: x1 - x0, h: y1 - y0 };
   }
 
+  // (2026-10-16) prepare() EN TROZOS. Lo caro son las 900 llamadas a
+  // getPointAtLength: seguidas eran UNA tarea de ~460 ms con la CPU de un móvil,
+  // y al despertar una pantalla antes caía justo en mitad de la caída de los
+  // blobs de About (página entera congelada). Ahora el trabajo es un generador
+  // que se avanza en huecos libres de pocos ms: mismas llamadas, mismo orden,
+  // mismo resultado. El bucle sigue sin pintar nada hasta this.ready.
   prepare(m) {
     if (!this.sampleEl) return;
+    const it = this.prepSteps(m);
+    const ric = typeof window.requestIdleCallback === 'function' ? window.requestIdleCallback : null;
+    const run = dl => {
+      if (this.dead) return;
+      const t0 = performance.now(), slack = dl && !dl.didTimeout;
+      while (!it.next().done) {
+        if (slack ? dl.timeRemaining() < 2 : performance.now() - t0 > 5) {
+          if (ric) ric(run, { timeout: 120 }); else setTimeout(run, 0);
+          return;
+        }
+      }
+    };
+    run(null);
+  }
+
+  *prepSteps(m) {
     // las dos masas del logo, tal cual vienen del SVG
-    this.left = this.sample(m.E1_LEFT, N);
-    this.right = this.sample(m.E1_RIGHT, N);
+    this.left = yield* this.sample(m.E1_LEFT, N);
+    this.right = yield* this.sample(m.E1_RIGHT, N);
     const rb = this.bbox(this.right);
     // masa fusionada: el lóbulo derecho, anclado al borde izquierdo del logo
     const LEFT = this.bbox(this.left).x0;
@@ -188,9 +213,13 @@ var self = this;
     }
     // cada silueta real viaja punto a punto hacia la masa fusionada
     this.fuseFrom = [this.left, this.right];
-    this.fuseTo = [this.align(oval, this.left), this.align(oval, this.right)];
+    const toLeft = this.align(oval, this.left);
+    yield;
+    const toRight = this.align(oval, this.right);
+    yield;
+    this.fuseTo = [toLeft, toRight];
 
-    const raw = this.sample(m.E2_BUBBLE, N);
+    const raw = yield* this.sample(m.E2_BUBBLE, N);
     const bb = this.bbox(raw);
     const s = (E1.h / bb.h) * BUBBLE_SCALE;
     // el globo se ancla por su borde izquierdo al del logo

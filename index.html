@@ -91,6 +91,10 @@ if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.
     },1200);
   }
   function arrancada(){
+    // (2026-10-16) el clúster de blobs del ancho visible se DESCARGA ya a la caché HTTP (solo red,
+    // prioridad baja; montarlo sigue esperando a soltar()): si se scrollea nada más cargar, el
+    // montaje sale del primer scroll sin esperar además el viaje de red.
+    try{ F('./components/blobs-cluster-'+(se_ve('d')?'desktop':'mobile')+'.dc.html',{priority:'low'}).then(function(r){ return r.arrayBuffer(); }).catch(function(){}); }catch(e){}
     if(document.readyState==='complete')tras_load(); else addEventListener('load',tras_load,{once:true});
     ['scroll','touchstart','wheel','keydown','pointerdown'].forEach(function(e){ addEventListener(e,soltar,{once:true,passive:true}); });
   }

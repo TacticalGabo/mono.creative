@@ -69,62 +69,6 @@ const RINGS = [{"id":1,"cx":82.1,"cy":63.3,"ring":[[38.58,43.03],[50.16,26.79],[
 const TARGET = {"1":[54.1,275.7],"2":[117.35,400.72],"3":[56.08,422.04],"4":[153.6,297.49],"5":[275.7,418.7],"6":[222.06,373.27]};
 const PAIRS = [[2, 3], [5, 6]];
 const N = 16, FLOOR = 497, W = 329, H = 534, SKIN = 0;   // el diseño toca el borde derecho: sin margen de pared
-
-// ── DEBUG TEMPORAL (2026-10-16, QUITAR tras medir) ───────────────────────────
-// Con ?dbg=1 en la URL: panel abajo a la izquierda con el estado del precálculo
-// de la caída al arrancar, los pasos calculados en vivo y los frames reales de
-// la caída. Sin ?dbg=1 DBG es null y nada de esto corre.
-const DBG = (function () {
-  let on = false;
-  try { on = /[?&]dbg=1(&|$)/.test(location.search); } catch (e) {}
-  if (!on) return null;
-  const d = { t: {}, preAtStart: '-', preEnd: '?', live: 0, liveMs: 0, fr: 0, frSum: 0, frMax: 0, fr50: 0, last: 0, lt: 0, ltMs: 0, el: null, po: null };
-  const f = v => v == null ? '-' : v + ' ms';
-  d.show = () => {
-    if (!d.el) {
-      if (!document.body) return;
-      d.el = document.createElement('div');
-      d.el.style.cssText = 'position:fixed;left:4px;bottom:4px;z-index:2147483647;background:rgba(0,0,0,.82);color:#9f0;font:11px/1.35 monospace;padding:6px 8px;border-radius:6px;white-space:pre;pointer-events:none';
-      document.body.appendChild(d.el);
-    }
-    let load = null;
-    try { const n = performance.getEntriesByType('navigation')[0]; if (n && n.loadEventEnd) load = Math.round(n.loadEventEnd); } catch (e) {}
-    const t = d.t;
-    d.el.textContent =
-      'BLOBS DEBUG (t desde navegacion)\n' +
-      'load          ' + f(load) + '\n' +
-      'montado       ' + f(t.mount) + '\n' +
-      'precalc listo ' + f(t.preDone) + '  (' + d.preEnd + ' pasos)\n' +
-      'start (30%)   ' + f(t.start) + '\n' +
-      'precalc @start ' + d.preAtStart + '\n' +
-      'pasos en vivo ' + d.live + '  (' + Math.round(d.liveMs) + ' ms)\n' +
-      'frames caida  ' + d.fr + '  media ' + (d.fr ? (d.frSum / d.fr).toFixed(1) : '-') + ' ms  max ' + Math.round(d.frMax) + ' ms  >50ms ' + d.fr50 + '\n' +
-      'long tasks    ' + d.lt + '  (' + Math.round(d.ltMs) + ' ms)\n' +
-      'handover      ' + f(t.handover) + '\n' +
-      'aterrizaje    ' + f(t.land);
-  };
-  d.mark = k => {
-    if (d.t[k] != null) return;
-    d.t[k] = Math.round(performance.now());
-    if (k === 'start' && window.PerformanceObserver) {
-      try {
-        d.po = new PerformanceObserver(l => l.getEntries().forEach(e => { d.lt++; d.ltMs += e.duration; }));
-        d.po.observe({ type: 'longtask', buffered: false });
-      } catch (e) {}
-    }
-    if ((k === 'land' || k === 'handover') && d.po) { d.po.disconnect(); d.po = null; }
-    d.show();
-  };
-  d.frame = now => {
-    if (d.last) {
-      const dt = now - d.last;
-      d.fr++; d.frSum += dt; if (dt > d.frMax) d.frMax = dt; if (dt > 50) d.fr50++;
-      if (d.fr % 15 === 0) d.show();
-    }
-    d.last = now;
-  };
-  return d;
-})();
 const GAP = 6, OVERLAP = 1.28;   // el diseño mobile solapa más: 1.29 es el par más apretado
 const BULGE = 1 - Math.cos(Math.PI / 16), SLACK = 0.6;
 const K_AREA = 0.9, K_CR = 0.1716, ITERS = 6;
@@ -197,6 +141,71 @@ function ringPath(P) {
   return d + 'Z';
 }
 
+// ─── CAÍDA PRECALCULADA EN UN WORKER (2026-10-16) ───────────────────────────
+// El precálculo de la caída (ver preInit) iba en el tiempo libre del hilo
+// principal. Si se scrollea al clúster nada más cargar, ese tiempo libre no
+// existe: al arrancar faltaban pasos, advance() los calculaba en el acto
+// (varios ms cada uno, hasta 3 por frame) y la caída salía a tirones o se
+// congelaba, frenando de paso el scroll del resto de la página.
+// Ahora lo calcula un Worker con EL MISMO código, no una copia: las funciones
+// y constantes de módulo de arriba y los métodos de física del componente se
+// serializan tal cual (toString / JSON). Mismo motor, mismas operaciones:
+// misma secuencia paso a paso, bit a bit. El hilo principal solo recibe los
+// pasos por tandas (transferidos, sin copia). Sin Worker, el camino de siempre.
+const PRE_METHODS = ['soft', 'grav', 'strategy', 'useCradles', 'useSequence', 'settleK', 'uprightK',
+  'spin', 'magnetRamp', 'centroid', 'centroidI', 'capOverlap', 'step', 'atRest', 'snapRest'];
+let preSrc = null;
+function preWorkerSrc(inst) {
+  if (preSrc) return preSrc;
+  const J = JSON.stringify;
+  const K = { N, FLOOR, W, H, SKIN, GAP, OVERLAP, BULGE, SLACK, K_AREA, ITERS, TARGET, PAIRS, PAIR_OK };
+  // método de clase "step() {...}" -> ({ step() {...} }).step ; función normal tal cual
+  const fn = (name, f) => {
+    const s = f.toString();
+    return /^(async\s+)?function\b/.test(s) ? '(' + s + ')' : '({' + s + '})[' + J(name) + ']';
+  };
+  let src = "'use strict';\n";
+  for (const k in K) src += 'const ' + k + ' = ' + J(K[k]) + ';\n';
+  src += 'const allowed = ' + allowed.toString() + ';\n';
+  src += 'const _cA = { x: 0, y: 0 }, _cB = { x: 0, y: 0 }, _cC = { x: 0, y: 0 };\n';
+  src += 'const _NX = new Float64Array(N), _NY = new Float64Array(N);\n';
+  [hyp, polyArea, segNearest, pointInPoly].forEach(f => { src += f.toString() + '\n'; });
+  src += 'const P = {};\n';
+  PRE_METHODS.forEach(n => { src += 'P.' + n + ' = ' + fn(n, inst[n]) + ';\n'; });
+  src += '(' + preWorkerMain.toString() + ')(P);\n';
+  return (preSrc = src);
+}
+// Lo que corre en el Worker: la copia de preInit + el bucle de preStep, con el
+// mismo criterio de fin. Manda tandas de 12 pasos (0,2 s de caída).
+function preWorkerMain(P) {
+  onmessage = e => {
+    try {
+      const m = e.data, sim = Object.create(P), byId = {};
+      sim.props = m.props;
+      sim.blobs = m.blobs;
+      sim.blobs.forEach(b => { byId[b.id] = b; });
+      sim.capPairs = m.pairs.map(pr => ({ A: byId[pr[0]], B: byId[pr[1]] }));
+      sim.frames = 0; sim.wakeF = 0; sim.drag = null; sim.restSnap = null; sim.restFrame = 0;
+      const S = sim.blobs.length * N * 4, CH = 12;
+      let buf = new Float64Array(S * CH), n = 0, done = false;
+      while (!done) {
+        sim.step(); sim.frames++;
+        let j = n * S;
+        for (const b of sim.blobs) for (const p of b.P) { buf[j++] = p.x; buf[j++] = p.y; buf[j++] = p.px; buf[j++] = p.py; }
+        n++;
+        done = (sim.frames > 140 && sim.atRest()) || sim.frames >= 1800;
+        if (done || n === CH) {
+          postMessage({ xy: buf, n: n, end: done ? sim.frames : 0 }, [buf.buffer]);
+          buf = new Float64Array(S * CH); n = 0;
+        }
+      }
+    } catch (err) {
+      postMessage({ err: String(err) });
+    }
+    close();
+  };
+}
+
 class Component extends DCLogic {
   rootRef = React.createRef();
   statusRef = React.createRef();
@@ -218,6 +227,7 @@ class Component extends DCLogic {
     if (this.io) this.io.disconnect();
     if (this.ro) this.ro.disconnect();
     if (this.preIdle) { if (window.cancelIdleCallback) cancelIdleCallback(this.preIdle); clearTimeout(this.preIdle); }
+    if (this.pre && this.pre.w) this.pre.w.terminate();
     if (this.armIdle) { if (window.cancelIdleCallback) cancelIdleCallback(this.armIdle); clearTimeout(this.armIdle); }
     if (this.onDragMove) window.removeEventListener('pointermove', this.onDragMove);
     if (this.onDragUp) {
@@ -273,7 +283,6 @@ class Component extends DCLogic {
   }
 
   build() {
-    if (DBG) DBG.mark('mount');
     const root = this.rootRef.current;
     if (!root) return;
     this.supportsG = root.querySelector('[data-role="supports"]');
@@ -1168,7 +1177,6 @@ class Component extends DCLogic {
   detail(txt) { if (this.detailRef.current) this.detailRef.current.textContent = txt; }
 
   start() {
-    if (DBG) { DBG.preAtStart = this.pre ? this.pre.xy.length + ' de ' + (this.pre.done ? this.pre.end : '?') + (this.pre.done ? ' (completo)' : ' (INCOMPLETO)') : 'sin precalculo'; DBG.mark('start'); }
     this.started = true; this.settled = false; this.frames = 0; this.wakeF = 0; this.tdraw = null; this.frozen = false; this.tprev = null; this.acc = 0;
     // la caída se reproduce desde lo precalculado (o se calcula en el acto lo
     // que aún falte): el resultado es el mismo paso a paso
@@ -1215,35 +1223,44 @@ class Component extends DCLogic {
     for (const b of sim.blobs) for (const p of b.P) { a[j++] = p.x; a[j++] = p.y; a[j++] = p.px; a[j++] = p.py; }
     pre.xy.push(a);
     // 1800 pasos = 30 s: red de seguridad por si algo no llegara a posarse
-    if ((sim.frames > 140 && sim.atRest()) || sim.frames >= 1800) {
-      pre.done = true; pre.end = sim.frames;
-      if (DBG) { DBG.preEnd = pre.end; DBG.mark('preDone'); }
-      pre.fin = sim.blobs.map(b => b.P.map(p => [p.x, p.y, p.px, p.py]));
-      // COLA INVISIBLE: desde el paso ~200 nadie se mueve 0,02 px por frame,
-      // pero se seguía dibujando hasta el ~356. Primer paso desde el que ningún
-      // punto queda a más de 0,1 u (~0,1 px) de su posición final: ahí se salta
-      // al final y el bucle se duerme unos segundos antes.
-      const F = pre.xy[pre.xy.length - 1];
-      let cut = pre.end;
-      for (let t = pre.xy.length - 2; t >= 0; t--) {
-        const q = pre.xy[t];
-        let far = false;
-        for (let k = 0; k < q.length; k += 4) {
-          const dx = q[k] - F[k], dy = q[k + 1] - F[k + 1];
-          if (dx * dx + dy * dy > 0.01) { far = true; break; }
-        }
-        if (far) break;
-        cut = t + 1;
+    // (el Worker usa el mismo criterio, ver preWorkerMain)
+    if ((sim.frames > 140 && sim.atRest()) || sim.frames >= 1800) this.preFinish(sim.frames);
+  }
+
+  // Cierre del precálculo, venga del hilo principal o del Worker. El estado
+  // final completo es el último paso guardado (x, y, px, py de cada punto, en
+  // el mismo orden que los blobs): los mismos valores que tenía la copia.
+  preFinish(end) {
+    const pre = this.pre, F = pre.xy[pre.xy.length - 1];
+    pre.done = true; pre.end = end;
+    pre.fin = this.blobs.map((b, i) => b.P.map((p, k) => {
+      const j = (i * N + k) * 4;
+      return [F[j], F[j + 1], F[j + 2], F[j + 3]];
+    }));
+    // COLA INVISIBLE: desde el paso ~200 nadie se mueve 0,02 px por frame,
+    // pero se seguía dibujando hasta el ~356. Primer paso desde el que ningún
+    // punto queda a más de 0,1 u (~0,1 px) de su posición final: ahí se salta
+    // al final y el bucle se duerme unos segundos antes.
+    let cut = pre.end;
+    for (let t = pre.xy.length - 2; t >= 0; t--) {
+      const q = pre.xy[t];
+      let far = false;
+      for (let k = 0; k < q.length; k += 4) {
+        const dx = q[k] - F[k], dy = q[k + 1] - F[k + 1];
+        if (dx * dx + dy * dy > 0.01) { far = true; break; }
       }
-      pre.cut = cut;
+      if (far) break;
+      cut = t + 1;
     }
+    pre.cut = cut;
   }
 
   // En trozos dentro de requestIdleCallback: un paso cuesta ~0,2 ms en un PC
   // y unos pocos ms en un móvil lento, así que solo se da otro si queda hueco
   // de sobra en el tiempo libre del frame. Sin rIC (Safari), trozos de 4 ms.
   preRun() {
-    if (this.preIdle || !this.pre || this.pre.done) return;
+    if (this.preIdle || !this.pre || this.pre.done || this.pre.w) return;
+    if (this.preOff()) return;
     const ric = window.requestIdleCallback;
     const go = dl => {
       this.preIdle = 0;
@@ -1258,13 +1275,58 @@ class Component extends DCLogic {
     this.preIdle = ric ? ric(go, { timeout: 1000 }) : setTimeout(go, 16);
   }
 
+  // (2026-10-16) El precálculo en un Worker (ver preWorkerSrc): arranca desde
+  // el estado inicial de la copia (pre.sim, que aquí no se toca) y manda los
+  // pasos por tandas. Si el Worker no se puede crear o falla, el precálculo se
+  // rehace de cero en el hilo principal como siempre (mismo resultado).
+  // Devuelve true si el Worker quedó en marcha.
+  preOff() {
+    const pre = this.pre;
+    if (this.noWorker || pre.xy.length || !window.Worker || !window.Blob || !window.URL) return false;
+    const props = {};
+    for (const k in this.props) {
+      const v = this.props[k], t = typeof v;
+      if (v == null || t === 'number' || t === 'string' || t === 'boolean') props[k] = v;
+    }
+    let w = null;
+    try {
+      const url = URL.createObjectURL(new Blob([preWorkerSrc(this)], { type: 'text/javascript' }));
+      w = new Worker(url); URL.revokeObjectURL(url);
+      w.postMessage({ props: props, blobs: pre.sim.blobs, pairs: pre.sim.capPairs.map(pr => [pr.A.id, pr.B.id]) });
+    } catch (e) {
+      if (w) w.terminate();
+      this.noWorker = true;
+      return false;
+    }
+    pre.w = w;
+    const fail = () => {
+      w.terminate();
+      this.noWorker = true;
+      if (this.pre !== pre || this.stopped) return;
+      pre.w = null; pre.xy.length = 0;
+      this.preRun();
+    };
+    w.onerror = e => { e.preventDefault(); fail(); };
+    w.onmessage = e => {
+      const m = e.data;
+      // otra caída (replay), cedida a la física viva (handover) o desmontado
+      if (this.pre !== pre || this.stopped) { w.terminate(); return; }
+      if (m.err) { fail(); return; }
+      const S = this.blobs.length * N * 4;
+      for (let i = 0; i < m.n; i++) pre.xy.push(m.xy.subarray(i * S, (i + 1) * S));
+      if (m.end) { pre.w = null; this.preFinish(m.end); }
+    };
+    return true;
+  }
+
   // Un paso del bucle: durante la caída, el estado precalculado; después, la
   // física viva de siempre.
   advance() {
     const pre = this.pre;
     if (!this.playing || !pre) { this.step(); this.frames++; return; }
-    if (DBG) { const t0 = performance.now(); while (pre.xy.length <= this.frames && !pre.done) { this.preStep(); DBG.live++; } DBG.liveMs += performance.now() - t0; }
-    else while (pre.xy.length <= this.frames && !pre.done) this.preStep();
+    // Con el Worker en marcha aquí no se calcula nada: si el paso aún no llegó,
+    // este frame repite el anterior (el Worker va muy por delante del reloj).
+    if (!pre.w) while (pre.xy.length <= this.frames && !pre.done) this.preStep();
     const a = pre.xy[this.frames];
     if (a) {
       let j = 0;
@@ -1293,7 +1355,6 @@ class Component extends DCLogic {
     }
     this.playing = false;
     this.pre = null;
-    if (DBG) DBG.mark('handover');
   }
 
   // Fin de la caída: estado completo (con velocidades) en los blobs de verdad,
@@ -1310,7 +1371,6 @@ class Component extends DCLogic {
     this.restSnap = null;
     this.frozen = true;
     this.enableInteraction();
-    if (DBG) DBG.mark('land');
   }
 
   // El bucle solo corre si hay algo que simular: arrancado, en pantalla y en
@@ -1382,7 +1442,6 @@ class Component extends DCLogic {
   loop = (now) => {
     if (this.stopped) return;
     this.raf = 0;
-    if (DBG && this.playing && typeof now === 'number') DBG.frame(now);
     if (this.started) {
       // Paso fijo de 1/60 s con acumulador. Antes se avanzaba un paso por
       // frame, así que en un móvil a 25 fps la caída duraba el doble y se
