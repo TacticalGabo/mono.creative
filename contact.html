@@ -29,8 +29,16 @@
 if(!r[u+'react@18.3.1/umd/react.production.min.js'])r[u+'react@18.3.1/umd/react.production.min.js']='./vendor/react.production.min.js';
 if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.1/umd/react-dom.production.min.js']='./vendor/react-dom.production.min.js';})();
 </script>
+<!-- (2026-10-16) CARGA EN PARALELO: support.js pide React y los componentes recien al ejecutarse
+     (y los componentes al montar la pagina): cadena en serie HTML -> support.js -> React -> montaje
+     -> logo del header. Con preload todo baja a la vez que support.js; el runtime usa estas
+     mismas respuestas (sin descarga doble). -->
+<link rel="preload" as="script" href="./vendor/react.production.min.js">
+<link rel="preload" as="script" href="./vendor/react-dom.production.min.js">
+<link rel="preload" as="fetch" crossorigin href="./components/brandmark-fusion.dc.html">
+<link rel="preload" as="fetch" crossorigin href="./components/header-logo-hover.dc.html">
 <script src="./vendor/support.js"></script>
-<script src="./js/case-study.js?v=11" defer></script>
+<script src="./js/case-study.js?v=12" defer></script>
 <script src="./js/contact-config.js?v=4" defer></script>
 <script src="./js/contact-rules.js?v=3" defer></script>
 <script src="./js/contact-delivery.js?v=1" defer></script>

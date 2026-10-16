@@ -9,7 +9,7 @@
     /* el runtime corre este script primero sobre la plantilla cruda (oculta dentro de
        <x-dc>) y luego la reemplaza por la página montada: esperar a la montada */
     var blocks=[].filter.call(document.querySelectorAll('.fx'),function(el){return !el.closest('x-dc')});
-    if(!blocks.length)return setTimeout(init,120);
+    if(!blocks.length)return setTimeout(init,40);
     var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
     /* bloques */
     if('IntersectionObserver' in window){
@@ -220,7 +220,7 @@
   var tries=0;
   function init(){
     var main=live('main[data-case]')[0];
-    if(!main){if(++tries<250)setTimeout(init,120);return}   /* tope 30 s: contact.html carga este JS y no tiene main[data-case] */
+    if(!main){if(++tries<750)setTimeout(init,40);return}   /* sondeo cada 40 ms (el hero y los bloques salen en cuanto la página está montada); tope 30 s: contact.html carga este JS y no tiene main[data-case] */
     var io_ok='IntersectionObserver' in window;
     var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 
