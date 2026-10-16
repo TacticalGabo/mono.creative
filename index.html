@@ -347,13 +347,12 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
 @media (min-width:768px){:root{--m:calc(24px + (100vw - var(--sbw) - 768px)*.2485119);--mnav:calc(24px + (100vw - var(--sbw) - 768px)*.1428571)}}
 @media (min-width:1440px){:root{--m:calc(191px + (100vw - var(--sbw) - 1440px)*.0591667);--mnav:calc(120px - (100vw - var(--sbw) - 1440px)*.075)}}
 /* columna central (.wrap): tope de +30% sobre el default de 1440px (1058px -> 1375.4px),
-   alcanzado a los 1800px de viewport. Entre 1800 y 1920, --m sigue creciendo 1:1 con el
-   viewport (rate .5, wrap fijo en 1375.4px) porque .page todavía no llegó a su
-   max-width:1920px propio. A partir de 1920px .page deja de crecer, así que --m se congela
-   también ahí (272.3px = valor en 1920px) para no seguir achicando el wrap dentro de un
-   .page que ya no se mueve. --mnav no forma parte de este tope, sigue su curva propia. */
+   alcanzado a los 1800px de viewport. Desde ahí --m crece 1:1 con el viewport (rate .5):
+   el wrap queda fijo en 1375.4px y centrado a cualquier ancho. .page no tiene tope de
+   ancho (lo que va a sangre llega al borde del viewport); por eso desde 1920px --mnav
+   también crece 1:1 y el header se queda donde estaba en 1920 (84px del marco centrado). */
 @media (min-width:1800px){:root{--m:calc(212.3px + (100vw - var(--sbw) - 1800px)*.5)}}
-@media (min-width:1920px){:root{--m:272.3px;--mnav:84px}}
+@media (min-width:1920px){:root{--mnav:calc(84px + (100vw - var(--sbw) - 1920px)*.5)}}
 /* TEMA (2026-10-03): ya no hay cruce dark→light con el scroll. El tema es fijo
    y lo cambia el toggle del header (data-theme en <html>): dark = --fade-p 0,
    light = --fade-p 1. Todos los tokens derivados cuelgan de --fade-p, así que
@@ -376,7 +375,7 @@ i{font-style:italic}
 a{color:var(--lime400);text-decoration:none}
 a:hover{color:var(--lime400)}
 
-.page{container-type:inline-size;position:relative;max-width:1920px;margin:0 auto;overflow:clip;background:var(--bg)}
+.page{container-type:inline-size;position:relative;overflow:clip;background:var(--bg)}
 /* al pulsar una entry: fundido inmediato al fondo mientras carga (ver __mcCase) */
 html.mc-leaving .page{opacity:0;transition:opacity .28s ease-out}
 .fade-mark{position:absolute;left:0;right:0;height:0;pointer-events:none}   /* marca 'swap' invisible: solo la usa el observador del cambio de tema */
@@ -1225,7 +1224,7 @@ html.ov-arm .oval.ov-in span{transition:color .5s ease,opacity .4s ease .65s}
     // '' = sin imagen: rectángulo placeholder (--bezel) hasta que haya portada
     var SHOTS=[
       ['./assets/home/work-enjin-darkmode.webp','./assets/home/work-jupiter-dtf-v3.webp','./assets/home/work-bedrock-web.webp','./assets/home/work-enjin-beam.webp'],
-      ['./assets/home/work-enjin-beam.webp','','./assets/home/work-enjin-nfts.webp',''],
+      ['./assets/home/work-enjin-beam.webp','./assets/home/work-enjin-3d.webp','./assets/home/work-enjin-nfts.webp','./assets/home/work-enjin-degen.webp'],
       ['./assets/home/work-sensive.webp','./assets/home/work-various-ecommerce-v3.webp','./assets/home/work-mascota-manyada.webp','./assets/home/work-panama-convention-center.webp']
     ];
     // Pestanas con proyectos reales: nombre y resto del caption por casilla.

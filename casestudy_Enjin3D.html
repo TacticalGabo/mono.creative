@@ -16,7 +16,7 @@
 @font-face{font-family:'Plus Jakarta Sans';font-style:italic;font-weight:200 800;font-display:swap;src:url(./fonts/plus-jakarta-sans/webfont/PlusJakartaSans-200-800-italic-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 @font-face{font-family:'Space Mono';font-style:normal;font-weight:400;font-display:swap;src:url(./fonts/space-mono/webfont/SpaceMono-400-normal-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 </style>
-<link rel="stylesheet" href="./css/case-study.css?v=13">
+<link rel="stylesheet" href="./css/case-study.css?v=14">
 <!-- ASSETS — hero (LCP): precarga solo la del breakpoint activo -->
 <link rel="preload" as="image" href="./assets/casestudy_Enjin3D/01-hero.webp" media="(min-width:768px)" fetchpriority="high">
 <link rel="preload" as="image" href="./assets/casestudy_Enjin3D/01-hero-mobile.webp" media="(max-width:767.98px)" fetchpriority="high">
@@ -30,7 +30,7 @@ if(!r[u+'react@18.3.1/umd/react.production.min.js'])r[u+'react@18.3.1/umd/react.
 if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.1/umd/react-dom.production.min.js']='./vendor/react-dom.production.min.js';})();
 </script>
 <script src="./vendor/support.js"></script>
-<script src="./js/case-study.js?v=9" defer></script>
+<script src="./js/case-study.js?v=10" defer></script>
 </head>
 <body>
 <x-dc>
@@ -38,7 +38,7 @@ if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.
 <!--
   CASE STUDY 11 · ENJIN 3D ART — página responsive (360 → 1920+)
   · Mismo sistema que Jupiter/GVRN: clases cs-*, parcial .sh, --m/--mnav,
-    breakpoint único 768, container queries sobre .page (tope 1920).
+    breakpoint único 768, container queries sobre .page (sin tope de ancho).
   · CSS/JS comunes: ./css/case-study.css y ./js/case-study.js (no duplicar aquí).
   · Contenido GENERADO desde mono.creative Entries/content generator/Enjin 3D/copy.json
     con content generator/build_casestudy.py (copy provisional: editar el JSON y regenerar).
@@ -104,28 +104,18 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
 [data-asset="hero"]{background-color:transparent}
 [data-asset="styles-1"]{background-image:url(./assets/casestudy_Enjin3D/03-styles-1.webp)}
 [data-asset="styles-2"]{background-image:url(./assets/casestudy_Enjin3D/03-styles-2.webp)}
-[data-asset="multiverse-1"]{background-image:url(./assets/casestudy_Enjin3D/05-multiverse-1-poster.webp)}
-[data-asset="multiverse-2"]{background-image:url(./assets/casestudy_Enjin3D/05-multiverse-2-poster.webp)}
-[data-asset="multiverse-3"]{background-image:url(./assets/casestudy_Enjin3D/05-multiverse-3-poster.webp)}
-[data-asset="styles-3"]{background-image:url(./assets/casestudy_Enjin3D/06-styles-1-poster.webp)}
-[data-asset="styles-4"]{background-image:url(./assets/casestudy_Enjin3D/06-styles-2-poster.webp)}
-[data-asset="styles-5"]{background-image:url(./assets/casestudy_Enjin3D/06-styles-3-poster.webp)}
-[data-asset="styles-6"]{background-image:url(./assets/casestudy_Enjin3D/06-styles-4-poster.webp)}
-[data-asset="styles-7"]{background-image:url(./assets/casestudy_Enjin3D/06-styles-5-poster.webp)}
-[data-asset="styles-8"]{background-image:url(./assets/casestudy_Enjin3D/06-styles-6-poster.webp)}
-[data-asset="blobby-1"]{background-image:url(./assets/casestudy_Enjin3D/07-blobby-1-poster.webp)}
 [data-asset="blobby-2"]{background-image:url(./assets/casestudy_Enjin3D/07-blobby-2.webp)}
-[data-asset="blobby-3"]{background-image:url(./assets/casestudy_Enjin3D/07-blobby-3-poster.jpg)}
-[data-asset="blobby-4"]{background-image:url(./assets/casestudy_Enjin3D/07-blobby-4-poster.webp)}
 /* tamaños y bloques propios de este caso (Figma 11. Enjin 3D, 1440 / 360) */
 .cs-styles{padding:56px 0}
 .ts__grid{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;margin-top:32px}
 .ts__img{aspect-ratio:312/308;border-radius:30px}
 .zz__media--fit>video{object-fit:contain}
+/* vídeo cuadrado: el sobrante en negro */
+.zz__media.zz__media--sq{background-color:#000}
 @media (max-width:767.98px){
   .m2c__img{width:100cqw;margin-left:calc(-1 * var(--m));aspect-ratio:360/355;border-radius:0}
   .xc>.zz__media{width:calc(100cqw * 484 / 360);aspect-ratio:484/274;margin-left:calc(100cqw * -62 / 360)}
-  .zz__media--sq{aspect-ratio:360/360}
+  .zz__media--sq{aspect-ratio:360/360;background-color:#000}
   .c3__card{aspect-ratio:360/360}
 }
 @media (min-width:768px){
@@ -135,8 +125,10 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
   .zz__media--sq{background-color:#000}
   .zz__media--sq>video{left:21.875%;width:56.25%;border-radius:0}
   .c3__track{justify-content:flex-start;gap:calc(100cqw * 24 / 1440);margin-left:calc(100cqw * -71 / 1440)}
-  .c3__card{width:calc(100cqw * 400 / 1440);aspect-ratio:1/1}
+  .c3__card{width:calc(100cqw * 400 / 1440);aspect-ratio:1/1;transform:translateX(var(--c3x,0px))}
 }
+/* mobile: la tira se queda en las 4 primeras apiladas; el carrusel (5+) es solo desktop */
+@media (max-width:767.98px){.c3__card:nth-child(n+5){display:none}}
 </style>
 
 <!-- SHARED:JS-SBW -->
@@ -572,6 +564,49 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
 })();
 </script>
 <!-- /SHARED:JS-MENU -->
+<script>
+/* CARRUSEL BLOBBY (11.5 · B12), solo desktop: arranca con el primer set quieto; cuando la tira
+   entra en pantalla espera un poco y empieza a correr a la izquierda. La card que sale por la
+   izquierda pasa al final (sin clones: los vídeos no se duplican). El desplazamiento va en
+   --c3x (translateX de cada card), así el recorte sigue siendo el de .c3__track. Pausa fuera de
+   pantalla, con la pestaña oculta y con reduced-motion; en mobile vuelve al orden original. */
+(function(){
+  if(window.__mcC3)return; window.__mcC3=1;
+  function init(){
+    var track=document.querySelector('.c3__track');
+    if(!track||document.querySelector('x-dc'))return setTimeout(init,120);
+    var desk=matchMedia('(min-width:768px)'), calm=matchMedia('(prefers-reduced-motion:reduce)');
+    var orig=[].slice.call(track.children), x=0, last=0, raf=0, vis=false, seen=false, wait=0;
+    var SPEED=.25;   /* anchos de card por segundo */
+    function run(){ return desk.matches&&!calm.matches&&vis&&seen&&!document.hidden; }
+    function put(){ track.style.setProperty('--c3x',x+'px'); }
+    function step(t){
+      raf=0;
+      if(!run())return;
+      var dt=last?Math.min(t-last,64):0; last=t;
+      var first=track.firstElementChild, w=first.getBoundingClientRect().width,
+          gap=parseFloat(getComputedStyle(track).columnGap)||0;
+      x-=w*SPEED*dt/1000;
+      if(-x>=w+gap){ track.appendChild(first); x+=w+gap; }
+      put();
+      raf=requestAnimationFrame(step);
+    }
+    function kick(){ if(!raf&&run()){ last=0; raf=requestAnimationFrame(step); } }
+    new IntersectionObserver(function(es){
+      vis=es[es.length-1].isIntersecting;
+      if(vis&&!seen&&!wait)wait=setTimeout(function(){ seen=true; kick(); },700);
+      kick();
+    },{threshold:.6}).observe(track);
+    document.addEventListener('visibilitychange',kick);
+    function mode(){
+      if(!desk.matches){ x=0; put(); orig.forEach(function(c){ track.appendChild(c); }); }
+      kick();
+    }
+    if(desk.addEventListener){ desk.addEventListener('change',mode); calm.addEventListener('change',kick); }
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init); else init();
+})();
+</script>
 </helmet>
 <div class="qa-w" data-comp="qa-width-overlay"></div>
 <div class="page" data-screen-label="case study — Enjin">
@@ -682,8 +717,8 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
     <div class="wrap">
       <div class="sh"><h2 class="sh__title"><span>Multiverse</span><span class="accent">items</span></h2><p class="sh__desc">Multiverse items are built to travel across games. Each one was textured, lit and placed in an animated 3D scene with visual effects that show it in action.</p></div>
       <div class="zz">
-        <div class="zz__row"><div class="xc"><div class="zz__media media vid" data-asset="multiverse-1"><video muted loop playsinline preload="none" data-src="./assets/casestudy_Enjin3D/05-multiverse-1.mp4"></video></div></div><div class="zz__body"><h3 class="zz__title">Scenes from the lore</h3><p class="zz__text">The Mask of U'thuchul was staged in a dark forest, with glowing crystals, soft light and particles that suit its mystic origin.</p></div></div>
-        <div class="zz__row"><div class="zz__media zz__media--sq zz__media--fit media vid" data-asset="multiverse-2"><video muted loop playsinline preload="none" data-src="./assets/casestudy_Enjin3D/05-multiverse-2.mp4"></video></div><div class="zz__body"><h3 class="zz__title">Characters with weight</h3><p class="zz__text">Mike the Golem was animated in a night forest, with burning torches and a heavy stance that give it the presence of a game hero.</p></div></div>
+        <div class="zz__row"><div class="xc"><div class="zz__media media vid" data-asset="multiverse-1"><video muted loop playsinline preload="none" data-src="./assets/casestudy_Enjin3D/05-multiverse-1.mp4?v=6"></video></div></div><div class="zz__body"><h3 class="zz__title">Scenes from the lore</h3><p class="zz__text">The Mask of U'thuchul was staged in a dark forest, with glowing crystals, soft light and particles that suit its mystic origin.</p></div></div>
+        <div class="zz__row"><div class="zz__media zz__media--sq zz__media--fit media vid" data-asset="multiverse-2"><video muted loop playsinline preload="none" data-src="./assets/casestudy_Enjin3D/05-multiverse-2.mp4?v=4"></video></div><div class="zz__body"><h3 class="zz__title">Characters with weight</h3><p class="zz__text">Mike the Golem was animated in a night forest, with burning torches and a heavy stance that give it the presence of a game hero.</p></div></div>
         <div class="zz__row"><div class="zz__media zz__media--sq media vid" data-asset="multiverse-3"><video muted loop playsinline preload="none" data-src="./assets/casestudy_Enjin3D/05-multiverse-3.mp4"></video></div><div class="zz__body"><h3 class="zz__title">Items in Blobby's hands</h3><p class="zz__text">Blobby, dressed as a wizard, held items like the Shadowsong staff and the Aeonclipse Key, showing how each one could be used.</p></div></div>
       </div>
     </div>
@@ -701,7 +736,7 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
     <div class="wrap">
       <div class="sh"><h2 class="sh__title"><span>Blobby in</span><span class="accent">every channel</span></h2><p class="sh__desc">Blobby, Enjin's mascot, was built as a 3D character and placed in scenes, stickers, GIFs, meme templates and longer videos for social media and chats.</p></div>
     </div>
-    <div class="c3__track"><div class="c3__card media vid" data-asset="blobby-1"><video muted loop playsinline preload="none" data-src="./assets/casestudy_Enjin3D/07-blobby-1.mp4"></video></div><div class="c3__card media" data-asset="blobby-2"></div><div class="c3__card media vid" data-asset="blobby-3"><video muted loop playsinline preload="none" data-src="./assets/casestudy_Enjin3D/07-blobby-3.mp4"></video></div><div class="c3__card media vid" data-asset="blobby-4"><video muted loop playsinline preload="none" data-src="./assets/casestudy_Enjin3D/07-blobby-4.mp4"></video></div></div>
+    <div class="c3__track" data-marquee="1"><div class="c3__card media vid" data-asset="blobby-1"><video muted loop playsinline preload="none" data-src="./assets/casestudy_Enjin3D/07-blobby-1.mp4?v=4"></video></div><div class="c3__card media" data-asset="blobby-2"></div><div class="c3__card media vid" data-asset="blobby-3"><video muted loop playsinline preload="none" data-src="./assets/casestudy_Enjin3D/07-blobby-3.mp4?v=4"></video></div><div class="c3__card media vid" data-asset="blobby-4"><video muted loop playsinline preload="none" data-src="./assets/casestudy_Enjin3D/07-blobby-4.mp4?v=4"></video></div><div class="c3__card media vid" data-asset="blobby-5"><video muted loop playsinline preload="none" data-src="./assets/casestudy_Enjin3D/07-blobby-5.mp4?v=4"></video></div><div class="c3__card media vid" data-asset="blobby-6"><video muted loop playsinline preload="none" data-src="./assets/casestudy_Enjin3D/07-blobby-6.mp4?v=4"></video></div><div class="c3__card media vid" data-asset="blobby-7"><video muted loop playsinline preload="none" data-src="./assets/casestudy_Enjin3D/07-blobby-7.mp4?v=4"></video></div><div class="c3__card media vid" data-asset="blobby-8"><video muted loop playsinline preload="none" data-src="./assets/casestudy_Enjin3D/07-blobby-8.mp4?v=4"></video></div><div class="c3__card media vid" data-asset="blobby-9"><video muted loop playsinline preload="none" data-src="./assets/casestudy_Enjin3D/07-blobby-9.mp4?v=4"></video></div><div class="c3__card media vid" data-asset="blobby-10"><video muted loop playsinline preload="none" data-src="./assets/casestudy_Enjin3D/07-blobby-10.mp4?v=4"></video></div><div class="c3__card media vid" data-asset="blobby-11"><video muted loop playsinline preload="none" data-src="./assets/casestudy_Enjin3D/07-blobby-11.mp4?v=4"></video></div><div class="c3__card media vid" data-asset="blobby-12"><video muted loop playsinline preload="none" data-src="./assets/casestudy_Enjin3D/07-blobby-12.mp4?v=4"></video></div><div class="c3__card media vid" data-asset="blobby-13"><video muted loop playsinline preload="none" data-src="./assets/casestudy_Enjin3D/07-blobby-13.mp4?v=4"></video></div><div class="c3__card media vid" data-asset="blobby-14"><video muted loop playsinline preload="none" data-src="./assets/casestudy_Enjin3D/07-blobby-14.mp4?v=4"></video></div><div class="c3__card media vid" data-asset="blobby-15"><video muted loop playsinline preload="none" data-src="./assets/casestudy_Enjin3D/07-blobby-15.mp4?v=4"></video></div><div class="c3__card media vid" data-asset="blobby-16"><video muted loop playsinline preload="none" data-src="./assets/casestudy_Enjin3D/07-blobby-16.mp4?v=4"></video></div><div class="c3__card media vid" data-asset="blobby-17"><video muted loop playsinline preload="none" data-src="./assets/casestudy_Enjin3D/07-blobby-17.mp4?v=4"></video></div><div class="c3__card media vid" data-asset="blobby-18"><video muted loop playsinline preload="none" data-src="./assets/casestudy_Enjin3D/07-blobby-18.mp4?v=4"></video></div></div>
     <div class="wrap"><p class="c3__caption">From classic meme formats to sci-fi corridors and fantasy forests, Blobby kept the same rounded shape, purple hoodie and expressions, so the mascot stayed recognizable in every format.</p></div>
   </section>
 

@@ -289,7 +289,12 @@
       return el.__ready;
     }
     if(io_ok){
-      var lo=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){load(e.target);lo.unobserve(e.target)}})},{rootMargin:'150% 0px'});
+      /* carrusel ([data-marquee]): sus cards fuera de la tira (recortadas en horizontal) nunca cruzan el
+         observer; cargan junto con la primera de la tira que lo haga */
+      var lo=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){
+        var m=e.target.closest('[data-marquee]');
+        (m?[].slice.call(m.querySelectorAll('[data-asset]')).filter(function(n){return lazy.indexOf(n)>-1}):[e.target]).forEach(function(n){load(n);lo.unobserve(n)});
+      }})},{rootMargin:'150% 0px'});
       lazy.forEach(function(el){lo.observe(el)});
     } else lazy.forEach(load);
 
@@ -307,7 +312,11 @@
     var io=new IntersectionObserver(function(es){
       es.filter(function(e){return e.isIntersecting})
         .sort(function(a,b){var d=a.boundingClientRect.top-b.boundingClientRect.top;return Math.abs(d)>40?d:a.boundingClientRect.left-b.boundingClientRect.left})
-        .forEach(function(e,i){io.unobserve(e.target);start(e.target,Math.min(i,4)*.15)});   /* escalonado con tope (.6 s): en grillas largas no se hace esperar */
+        .forEach(function(e,i){io.unobserve(e.target);start(e.target,Math.min(i,4)*.15);
+          /* carrusel: las cards aún fuera de la tira entran ya visibles (su entrada pasa fuera de vista) */
+          var m=e.target.closest('[data-marquee]');
+          if(m)[].forEach.call(m.querySelectorAll('.media'),function(n){if(imgs.indexOf(n)>-1&&!n.classList.contains('ir-in')){io.unobserve(n);start(n,0)}});
+        });   /* escalonado con tope (.6 s): en grillas largas no se hace esperar */
     },{threshold:0,rootMargin:'0px 0px -8% 0px'});
     imgs.forEach(function(el){io.observe(el)});
   }

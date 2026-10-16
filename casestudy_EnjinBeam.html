@@ -16,7 +16,7 @@
 @font-face{font-family:'Plus Jakarta Sans';font-style:italic;font-weight:200 800;font-display:swap;src:url(./fonts/plus-jakarta-sans/webfont/PlusJakartaSans-200-800-italic-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 @font-face{font-family:'Space Mono';font-style:normal;font-weight:400;font-display:swap;src:url(./fonts/space-mono/webfont/SpaceMono-400-normal-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 </style>
-<link rel="stylesheet" href="./css/case-study.css?v=13">
+<link rel="stylesheet" href="./css/case-study.css?v=14">
 <!-- ASSETS — hero (LCP): precarga solo la del breakpoint activo -->
 <link rel="preload" as="image" href="./assets/casestudy_EnjinBeam/01-hero.webp" media="(min-width:768px)" fetchpriority="high">
 <link rel="preload" as="image" href="./assets/casestudy_EnjinBeam/01-hero-mobile.webp" media="(max-width:767.98px)" fetchpriority="high">
@@ -30,7 +30,7 @@ if(!r[u+'react@18.3.1/umd/react.production.min.js'])r[u+'react@18.3.1/umd/react.
 if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.1/umd/react-dom.production.min.js']='./vendor/react-dom.production.min.js';})();
 </script>
 <script src="./vendor/support.js"></script>
-<script src="./js/case-study.js?v=9" defer></script>
+<script src="./js/case-study.js?v=10" defer></script>
 </head>
 <body>
 <x-dc>
@@ -38,7 +38,7 @@ if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.
 <!--
   CASE STUDY 3 · ENJIN BEAM — página responsive (360 → 1920+)
   · Base: casestudy_JupiterDTF.html (mismas clases cs-*, parcial .sh, --m/--mnav,
-    breakpoint único 768, tramo tablet 768–1099 por container query, .page tope 1920).
+    breakpoint único 768, tramo tablet 768–1099 por container query, .page sin tope de ancho).
   · Variantes nuevas (reutilizables): .sh--bullets + .sh__bullets (bulletsRight, 3.8),
     .m2w--2up + .m2w__grid/.m2w__img (fila 2-up antes de caption + ancha, 3.6),
     .m2w__caption--s (caption 14 centrada), .ms__img--bleed (imagen a sangre en mobile).
@@ -116,6 +116,8 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
 .dc__col,.im__col{margin-top:32px}
 .dc__vid{aspect-ratio:348/250;border-radius:16px;width:calc(100cqw - 12px);margin-left:calc(6px - var(--m))}
 .dc__cap{font:var(--t-body-s);text-align:center;margin-top:10px}
+/* vídeo de la tablet: entra con fade + escala pero SIN la animación de radio (ir-round): el radio es fijo desde el inicio */
+html.js main .dc__vid.media.ir-in:not(.ba__img){animation:ir-fade 1s cubic-bezier(.33,0,.2,1) var(--ir-d,0s) both,ir-pop 1s var(--ir-out) var(--ir-d,0s) both}
 .dc__band{margin-top:16px;padding:8px;background:var(--bezel);overflow-x:auto;scrollbar-width:none;overscroll-behavior-x:contain}
 .dc__band::-webkit-scrollbar{display:none}
 .dc__wide{flex:none;width:calc(100cqw * 622 / 360);aspect-ratio:622/356;border-radius:10px}
@@ -139,7 +141,7 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
   .cs-decision,.cs-access,.cs-impact{padding:112px 0}
   .ba__img{aspect-ratio:516/510}
   .dc__col{width:calc(100% * 718 / 1056);margin:32px auto 0}
-  .dc__vid{width:100%;margin:0;aspect-ratio:718/516;border-radius:22px}
+  .dc__vid{width:100%;margin:0;aspect-ratio:718/516;border-radius:3.0641%/4.2636%}   /* 22px de 718x516 (1440), escala con el ancho: encaja con el marco del vídeo */
   .dc__cap{font:var(--t-body-m);margin-top:24px}
   .dc__band{margin-top:40px;padding:calc(100cqw * 20 / 1440);overflow:visible}
   .dc__wide{width:100%;aspect-ratio:1400/802;border-radius:31px}
