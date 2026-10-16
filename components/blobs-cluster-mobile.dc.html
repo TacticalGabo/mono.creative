@@ -1111,7 +1111,7 @@ class Component extends DCLogic {
   detail(txt) { if (this.detailRef.current) this.detailRef.current.textContent = txt; }
 
   start() {
-    this.started = true; this.settled = false; this.frames = 0; this.wakeF = 0; this.frozen = false; this.tprev = null; this.acc = 0;
+    this.started = true; this.settled = false; this.frames = 0; this.wakeF = 0; this.tdraw = null; this.frozen = false; this.tprev = null; this.acc = 0;
     // la caída se reproduce desde lo precalculado (o se calcula en el acto lo
     // que aún falte): el resultado es el mismo paso a paso
     if (!this.pre) { this.preInit(); this.preRun(); }
@@ -1344,6 +1344,15 @@ class Component extends DCLogic {
       // Ahora se dibuja en cada frame el estado intermedio entre los dos
       // últimos pasos según el tiempo sobrante. La trayectoria es la misma.
       const alpha = this.frozen ? 1 : Math.min(1, this.acc / DT);
+      // CAÍDA A 30 fps: la física sigue a 60 pasos/s (misma trayectoria y
+      // duración), pero durante la reproducción solo se dibuja cada ~33 ms.
+      // 30 divide exacto 60, 90 y 120 Hz (2, 3 y 4 refrescos por frame): sin
+      // cadencia irregular, y la mitad de pintado. El aterrizaje (frozen) se
+      // dibuja siempre; el arrastre (física viva) va al refresco de la pantalla.
+      if (this.playing && !this.frozen) {
+        if (this.tdraw != null && t - this.tdraw < 1000 / 30 - 2) return this.kick();
+        this.tdraw = t;
+      }
       if (!n) { this.drawLerp(alpha); return this.kick(); }
       this.drawLerp(alpha);
       // durante la caída los p.px no se copian (no hacen falta para dibujar):
