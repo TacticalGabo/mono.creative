@@ -214,7 +214,8 @@
 /* imágenes: carga diferida + entrada, y hero por partes. Ver el CSS del mismo nombre. */
 (function(){
   if(window.__csImg)return; window.__csImg=1;
-  var WAIT=500;   /* ms máx. esperando la decodificación antes de animar igualmente */
+  var WAIT=2500;   /* ms máx. esperando la decodificación antes de animar igualmente (con 500 en móvil el
+                      fade corría sobre el hueco vacío y la imagen llegaba después, de golpe) */
   function live(q){return [].filter.call(document.querySelectorAll(q),function(el){return !el.closest('x-dc')})}
   var tries=0;
   function init(){
@@ -237,9 +238,13 @@
     /* ---- radio de la imagen del hero: arranca cuando la página queda libre (mín. 550 ms),
        para que se vea animado y no salte de golpe con el hilo ocupado tras montar ---- */
     setTimeout(function(){document.documentElement.classList.add('hero-ok')},2500);   /* red de seguridad del aviso del <head> */
-    var hero_img=main.querySelector('.cs-hero .media'), fired=0;
+    var hero_img=main.querySelector('.cs-hero .media'), fired=0, h=document.documentElement;
     function go_round(){
-      if(fired||!hero_img)return; fired=1;
+      if(fired||!hero_img)return;
+      /* el radio se anima con la imagen ya decodificada (html.hero-ok): si arranca antes, su repintado
+         compite con la decodificación y se pierden los fotogramas (salta de cuadrada a redonda) */
+      if(!h.classList.contains('hero-ok'))return setTimeout(go_round,50);
+      fired=1;
       hero_img.classList.add('ir-r');   /* quita el radio 0: el destino es el radio de diseño */
       if(hero_img.animate&&!reduce)hero_img.animate([{borderRadius:'0px'},{}],{duration:1000,easing:'cubic-bezier(.8,0,.1,1)'});
     }
@@ -294,8 +299,19 @@
       var lo=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){
         var m=e.target.closest('[data-marquee]');
         (m?[].slice.call(m.querySelectorAll('[data-asset]')).filter(function(n){return lazy.indexOf(n)>-1}):[e.target]).forEach(function(n){load(n);lo.unobserve(n)});
-      }})},{rootMargin:'150% 0px'});
+      }})},{rootMargin:'300% 0px'});   /* 3 pantallas: con 1,5 un scroll rápido en el móvil llegaba antes que la descarga */
       lazy.forEach(function(el){lo.observe(el)});
+      /* tras la carga, en tiempo libre y de una en una, se piden las que quedan: al llegar a ellas
+         ya están en caché y decodificadas (los vídeos solo registran su hueco, su src sigue a 3 pantallas) */
+      var ric=window.requestIdleCallback?function(f){requestIdleCallback(f,{timeout:3000})}:function(f){setTimeout(f,200)};
+      var rest=function(){
+        var next=lazy.filter(function(n){return !n.__ready})[0];
+        if(!next)return;
+        lo.unobserve(next);
+        load(next).then(function(){ric(rest)});
+      };
+      var idle=function(){setTimeout(function(){ric(rest)},1500)};
+      if(document.readyState==='complete')idle(); else addEventListener('load',idle,{once:true});
     } else lazy.forEach(load);
 
     /* ---- entrada de imágenes (menos Before / After y la del hero, que va por CSS) ---- */
