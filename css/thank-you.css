@@ -1,0 +1,68 @@
+/* ==========================================================================
+   mono.creative — Thank you (thank-you.html), la página tras enviar el brief.
+   · Va encima de css/case-study.css: tokens (tema dark/light), .page, .btn,
+     grano y cursor son los comunes. Aquí solo el layout propio (.ty-*).
+   · Sin header ni footer del sitio. Margen lateral = el del header (--mnav).
+   · Referencia: proto HTML estático (Downloads/Thank You Page Design, 1440 y 360; no hay Figma). En desktop las medidas
+     escalan con el ancho del contenido (1200 a 1440): 1px = 100cqw/1200.
+   ========================================================================== */
+.ty{display:flex;flex-direction:column;min-height:100vh;min-height:100svh;padding-inline:var(--mnav);container-type:inline-size}
+.ty-main{flex:1;display:flex;flex-direction:column}
+
+/* titular + símbolo */
+.ty-title{margin:0;font-family:var(--sans);font-weight:400;letter-spacing:-.045em;color:var(--accent)}
+.ty-symbol{position:relative;display:inline-block}   /* símbolo animado (brandmark-fusion, color = currentColor del titular) */
+
+.ty-title .ty-w{color:var(--txt)}   /* "We're glad" en blanco (--txt), el resto en lima */
+
+/* entrada: el mismo fundido que header/CTA/footer (fx-in de case-study.css), escalonado */
+.ty-in{animation:fx-in .7s ease both;animation-delay:calc(.1s + var(--i,0) * .15s)}
+@media (prefers-reduced-motion:reduce){.ty-in{animation:none}}
+
+/* botones "Back to home" (lime) y "TG Follow-up" (outline, el del header): el .btn de 48px del sitio (foot-btn), sin su margen del footer */
+.ty-btn-wrap{display:flex;flex-wrap:wrap;gap:8px}
+.ty .ty-btn{margin:0}
+/* píldora del texto 14px más larga (172 en vez de 158; círculo igual): data-pad 13 + data-shift 12 en el HTML */
+.ty .btn.ty-btn{width:172px}
+.ty .btn.ty-btn .ar{left:134.14px}
+
+/* contacto */
+.ty-contact{border-top:var(--hair) solid var(--border);display:flex;flex-direction:column}
+.ty-write{display:flex;flex-direction:column;gap:16px}
+.ty-label{font-family:var(--mono);font-size:12px;line-height:16px;letter-spacing:.04em;color:var(--accent)}
+.ty-handle{font-family:var(--sans);font-weight:500;font-size:28px;line-height:32px;letter-spacing:-.02em;color:var(--txt)}
+.ty-note{margin:-8px 0 0;font-family:var(--sans);font-size:14px;line-height:20px;color:var(--muted)}
+.ty-note svg{display:inline-block;vertical-align:-3.5px;margin-left:4px;fill:currentColor}
+.ty-mail{font-family:var(--sans);font-weight:400;font-size:28px;line-height:1.15;letter-spacing:-.035em;color:var(--txt);white-space:nowrap}
+.ty-handle,.ty-mail{transition:color .25s ease-out}
+@media (hover:hover){.ty-handle:hover,.ty-mail:hover{color:var(--accent)}}
+
+/* ---- mobile (<768): todo en una columna centrada en vertical ---- */
+@media (max-width:767.98px){
+  .ty{justify-content:center}
+  .ty-main{flex:none;padding-top:48px;gap:32px}
+  .ty-title{font-size:min(48px,15.385cqw);line-height:1.08}
+  .ty-symbol{width:1.7em;height:.708em;vertical-align:-.042em;margin-left:.1875em}
+  .ty-contact{margin-top:40px;padding:40px 0;gap:32px}
+  .ty-mail .br-m{display:block}
+}
+
+/* ---- desktop (>=768) ---- */
+@media (min-width:768px){
+  .ty-main{padding-top:calc(22 * 100cqw / 1200 + 92px)}
+  .ty-title{position:relative;font-size:calc(105 * 100cqw / 1200);line-height:1.12}
+  .ty-title .ty-l1{display:block;text-align:right}
+  .ty-title .ty-l2{display:block}
+  .ty-symbol{position:absolute;left:0;top:.405em;width:1.351em;height:.604em}
+  .ty-btn-wrap{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;
+    /* centrado en alto entre el titular y la línea, 32px por encima del centro en pantallas altas
+       (>=828px). Al bajar el alto se reducen por igual los dos huecos y el desplazamiento cae a 0
+       (<=700px): queda centrado y nunca a menos de 40px del titular ni de la línea. */
+    --ty-up:clamp(0px,calc((100vh - 700px) / 4),32px);
+    padding:40px 0 calc(40px + 2 * var(--ty-up))}
+  .ty-contact{flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:40px;padding:80px 0 120px}
+  .ty-label{font-size:13px;letter-spacing:.04em}
+  .ty-handle{line-height:36px}
+  .ty-mail{font-size:max(30px,calc(54 * 100cqw / 1200));line-height:1}
+  .ty-mail .br-m{display:none}
+}

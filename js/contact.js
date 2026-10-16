@@ -183,7 +183,7 @@
         else item.removeAttribute('aria-current');
       });
       find('#back-step').hidden = step === 1;
-      find('#cta-label').textContent = step === 1 ? "LET'S CONNECT" : 'SEND MY BRIEF';
+      find('#cta-label').textContent = step === 1 ? 'Setup a call' : "Let's do this";
       find('#step-caption').replaceChildren();
       find('#step-caption').hidden = step === 1;
       if (step === 2) find('#step-caption').append('Your next chapter starts here.', document.createElement('br'), "Let's make it a good one.");
@@ -314,6 +314,12 @@
       link.hidden = false;
     }
 
+    // a la página de gracias con el mismo fundido de salida que el resto del sitio (mc-leaving, .28 s)
+    function toThankYou() {
+      document.documentElement.classList.add('mc-leaving');
+      setTimeout(() => { window.location.href = './thank-you.html'; }, 300);
+    }
+
     async function sendBrief() {
       if (state.busy || state.sent || !validateProject()) return;
       let slotError = '';
@@ -335,7 +341,7 @@
       state.busy = true;
       cta.disabled = true;
       form.setAttribute('aria-busy', 'true');
-      find('#cta-label').textContent = 'SENDING';
+      find('#cta-label').textContent = 'Sending';
       feedback.textContent = '';
       find('#direct-submit').hidden = true;
       const controls = all('input, textarea, button');
@@ -345,17 +351,18 @@
         const file = find('#deck').files[0];
         if (!delivery) delivery = window.MonoContactDelivery.createClient({ endpoint, origin: window.location.origin });
         await delivery.send(data, file || null, verificationToken, (stage) => {
-          find('#cta-label').textContent = stage === 'uploading' ? 'UPLOADING' : 'SENDING';
+          find('#cta-label').textContent = stage === 'uploading' ? 'Uploading' : 'Sending';
           feedback.textContent = stage === 'verifying' ? 'Verifying your request…' : stage === 'uploading' ? 'Uploading your deck. This may take a moment.' : 'Sending your brief…';
         });
         state.sent = true;
-        find('#cta-label').textContent = 'BRIEF SENT';
+        find('#cta-label').textContent = 'Brief sent';
         feedback.textContent = 'Thanks! Your brief has been sent.';
         form.dispatchEvent(new CustomEvent('mono:contact-sent', { detail: { id: requestId }, bubbles: true }));
+        toThankYou();
       } catch (_) {
         controls.forEach((control, i) => { control.disabled = disabledStates[i]; });
         cta.disabled = false;
-        find('#cta-label').textContent = 'SEND MY BRIEF';
+        find('#cta-label').textContent = "Let's do this";
         offerEmail(data, 'Your brief could not be delivered. Try again or send it by email.');
       } finally {
         state.busy = false;
@@ -484,9 +491,9 @@
       if (testing) {
         if (state.step === 1) setStep(2);
         else {
-          feedback.textContent = 'Test completed. Nothing was sent.';
           find('#direct-submit').hidden = true;
           form.dispatchEvent(new CustomEvent('mono:contact-test', { detail: payload(), bubbles: true }));
+          toThankYou();
         }
         return;
       }
@@ -604,30 +611,81 @@
 /* ---- flecha 'atrás' del paso 2 = botón #back-step ---- */
 (function(){if(window.__mcBack)return;window.__mcBack=1;document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('.schedule-back');if(!b)return;var f=b.closest('form');var s=f&&f.querySelector('#back-step');if(s)s.click();});})();
 
+/* ---- CTA blob (contact_*TEST): etiqueta en minúsculas/frase con fundido, rebote al pulsar y
+   fundido de entrada de lo que se desoculta en el formulario. ---- */
+(function(){
+  if(window.__mcCtaBlob)return; window.__mcCtaBlob=1;
+  var reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var map={"let’s connect":"Setup a call","let's connect":"Setup a call","send my brief":"Let's do this"};
+  function replay(el,cls){el.classList.remove(cls);void el.offsetWidth;el.classList.add(cls);}
+  function init(){
+    var form=[].find.call(document.querySelectorAll("#contact-form"),function(f){return !f.closest("x-dc")}), cta=form&&form.querySelector("#form-cta"), l=form&&form.querySelector("#cta-label");
+    if(!form||!cta||!l)return setTimeout(init,120);
+    var last=l.textContent;
+    function fix(){
+      var t=l.textContent, s=map[t.toLowerCase()]||(t.charAt(0).toUpperCase()+t.slice(1).toLowerCase());
+      if(t!==s)l.textContent=s;
+      if(l.textContent!==last){last=l.textContent;replay(l,"label-fade");}
+    }
+    fix(); new MutationObserver(fix).observe(l,{childList:true,characterData:true,subtree:true});
+    function fade(el){
+      if(!el.animate||reduce)return;
+      if(el._fade)el._fade.cancel();
+      el._fade=el.animate([{opacity:0},{opacity:1}],{duration:900,easing:"ease-out"});
+    }
+    new MutationObserver(function(list){list.forEach(function(m){if(m.attributeName==="hidden"&&!m.target.hidden)fade(m.target);});})
+      .observe(form,{attributes:true,attributeFilter:["hidden"],subtree:true});
+    var pt=0, pa=null;
+    function press(){
+      var now=Date.now(); if(now-pt<350)return; pt=now;
+      var path=cta.querySelector(".cta-blob path");
+      if(!path||!path.animate||reduce)return;
+      if(pa)pa.cancel();
+      pa=path.animate([{transform:"scale(1)"},{transform:"scale(.9,.93)",offset:.18},{transform:"scale(1.05,1.02)",offset:.42},{transform:"scale(.98,1.01)",offset:.64},{transform:"scale(1)"}],{duration:900,easing:"cubic-bezier(.22,1,.36,1)"});
+    }
+    cta.addEventListener("pointerdown",press); cta.addEventListener("click",press); form.addEventListener("submit",press,true);
+  }
+  init();
+})();
+
 /* ---- CTA circular: mismo efecto blob que los .btn del sitio (JS-BTN) ----
    Un punto del color del acento sigue al cursor y se funde con el círculo bajo el filtro
    #goo compartido. Solo desktop con ratón (≥768); en táctil no hay nada que fundir. */
 (function(){
   if(window.__mcCtaGoo)return; window.__mcCtaGoo=1;
-  var ZONE=40, BLUR=null, ev=null, raf=0, b=null, dot=null;
+  var ZONE=40, BLUR=null, ev=null, raf=0, b=null, dot=null, g=null;
   var FINE=window.matchMedia&&matchMedia('(hover:hover) and (pointer:fine)').matches;
   function fine(){return FINE&&window.innerWidth>=768}
   function frame(){
     raf=0;
-    if(!b||!b.isConnected){b=[].find.call(document.querySelectorAll('.circle-cta'),function(x){return !x.closest('x-dc')});dot=b&&b.querySelector('.btn-dot');}
-    if(!dot)return;
+    if(!b||!b.isConnected){
+      b=[].find.call(document.querySelectorAll('.circle-cta'),function(x){return !x.closest('x-dc')});
+      dot=b&&b.querySelector('.btn-dot'); g=b&&b.querySelector('.cta-blob g');
+      /* Para que la gota y el blob sean el mismo líquido: la gota vive en el mismo <g> que el
+         blob (gira con él) y el degradado pasa a coordenadas del SVG, así ambos se pintan con el
+         mismo campo de color y la unión no deja costura. El runtime pierde el camelCase de
+         gradientUnits al copiar el HTML, por eso se fija aquí. */
+      if(dot&&g&&dot.parentNode!==g)g.appendChild(dot);
+      [].forEach.call(document.querySelectorAll('[id="cta-blob-fill"]'),function(x){x.setAttribute('gradientUnits','userSpaceOnUse')});
+    }
+    if(!dot||!g)return;
     var p=0, r=b.getBoundingClientRect();
     if(ev&&fine()){
       var R=r.width/2, dx=ev.x-(r.left+R), dy=ev.y-(r.top+R), d=Math.sqrt(dx*dx+dy*dy)-R;
       p=d<=0?1:(d<ZONE?1-d/ZONE:0);
     }
     if(p>0){
-      dot.style.transform='translate3d('+(ev.x-r.left)+'px,'+(ev.y-r.top)+'px,0) translate(-50%,-50%)';
+      /* la gota es un <circle> dentro del SVG del blob (viewBox 100) y comparte su degradado */
+      /* cursor → unidades del viewBox (100) → deshacer el giro del <g> (alrededor de 50,50) */
+      var ux=(ev.x-r.left)*100/r.width-50, uy=(ev.y-r.top)*100/r.height-50, m=getComputedStyle(g).transform, k=1, s=0;
+      if(m&&m!=='none'){var v=new DOMMatrix(m); var t=Math.atan2(v.b,v.a); k=Math.cos(t); s=Math.sin(t);}
+      dot.setAttribute('cx',(50+ux*k+uy*s).toFixed(2)); dot.setAttribute('cy',(50-ux*s+uy*k).toFixed(2));
       dot.style.opacity=p.toFixed(3);
       b.classList.add('goo');
       if(!BLUR)BLUR=document.querySelector('#goo feGaussianBlur');
       if(BLUR)BLUR.setAttribute('stdDeviation',(0.2+5.8*p).toFixed(2));
       window.__mcGooNear=Math.max(window.__mcGooNear||0,p);
+      go();   /* el blob sigue girando: re-colocar la gota cada frame aunque el ratón esté quieto */
     } else if(b.classList.contains('goo')){
       dot.style.opacity='0'; b.classList.remove('goo'); window.__mcGooNear=0;
     }

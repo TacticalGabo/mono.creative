@@ -172,16 +172,42 @@ body { margin: 0; }
 /* salto del titular solo en mobile (360: "Let's bring your / ideas to life") */
 @media (min-width: 768px) { .contact-aside .br-m { display: none; } }
 
-/* CTA circular con el efecto blob de los .btn: el círculo y el punto del cursor viven en
-   .circle-cta-fluid, que es lo único que pasa por el filtro #goo (el texto queda nítido). */
-.circle-cta { position: relative; background: none; }
+/* CTA circular = blob animado (contact_*TEST): SVG con forma/degradado animados, giro lento,
+   rebote al hover y al pulsar. Tamaño: 180 desktop, 168 mobile. */
+.circle-cta { position: relative; background: none; width: 180px !important; height: 180px !important; }
+.circle-cta .circle-cta-inner, .circle-cta:hover .circle-cta-inner, .circle-cta:focus-visible .circle-cta-inner, .circle-cta:disabled .circle-cta-inner { position: relative; background: transparent; border-color: transparent; }
+.circle-cta-inner > #cta-label { position: relative; z-index: 1; font-weight: 400; font-size: 14px; text-align: center; }
+.circle-cta svg.cta-blob { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; transition: transform .5s cubic-bezier(.34,1.56,.64,1); }
+.cta-blob g { transform-origin: 50px 50px; animation: cta-blob-spin 18s linear infinite; }
+.circle-cta:focus-visible .cta-blob { transform: scale(1.05); }   /* solo teclado; con ratón la interacción es la gota que sigue al cursor (goo, como los .btn) */
+@keyframes cta-blob-spin { to { transform: rotate(360deg); } }
 .circle-cta-fluid { position: absolute; inset: 0; pointer-events: none; }
-.circle-cta-bg { position: absolute; inset: 0; border-radius: 50%; background: var(--accent); transition: background .22s; }
-.circle-cta .btn-dot { position: absolute; left: 0; top: 0; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); transform: translate(-50%,-50%); opacity: 0; will-change: transform; pointer-events: none; }
-.circle-cta-inner, .circle-cta:hover .circle-cta-inner, .circle-cta:focus-visible .circle-cta-inner, .circle-cta:disabled .circle-cta-inner { position: relative; background: transparent; border-color: transparent; }
-.circle-cta:hover .circle-cta-bg, .circle-cta:focus-visible .circle-cta-bg { background: var(--lime400); }
-.circle-cta:disabled .circle-cta-bg { background: var(--accent); }
+.circle-cta .btn-dot { pointer-events: none; }
 @media (hover: hover) and (pointer: fine) and (min-width: 768px) { .circle-cta.goo .circle-cta-fluid { filter: url(#goo); } }
+.label-fade { animation: label-fade .4s ease both; }
+.cta-blob path { transform-origin: 50px 50px; transform-box: view-box; }
+.cta-blob path.blob-press { animation: blob-press .9s cubic-bezier(.22,1,.36,1); }
+@keyframes label-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes blob-press { 0% { transform: scale(1); } 18% { transform: scale(.9,.93); } 42% { transform: scale(1.05,1.02); } 64% { transform: scale(.98,1.01); } 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .cta-blob g { animation: none; } .cta-blob animate { display: none; } .label-fade, .cta-blob path.blob-press { animation: none; } }
+
+/* (contact_desktop TEST) ≥ 768: titular y correo a 32, símbolo 160, columna izquierda centrada.
+   La flecha del correo se queda como estaba. */
+@media (min-width: 768px) {
+  .contact-aside h1, .contact-aside .contact-email { font-size: 32px; }
+  .scheduling-panel { margin-right: 24px; }
+  .contact-symbol { width: 160px; height: 66.67px; }
+  .contact-aside .contact-direct { margin-top: 24px !important; }
+  .contact-layout > .contact-aside { display: flex; flex-direction: column; justify-content: center; }
+}
+/* Columna izquierda (hero): 32 px más arriba del medio; el formulario no se mueve. */
+@media (min-width: 768px) { .contact-aside { position: relative; top: -32px; } }
+/* (contact_mobile TEST) < 768: CTA 168, desplazado; logo del header 58 y símbolo 16 más arriba. */
+@media (max-width: 767.98px) {
+  .circle-cta { width: 168px !important; height: 168px !important; left: 16px; top: -32px !important; }
+  .nav-anim-m { width: 58px; height: 24.607px; }
+  .contact-symbol { margin-top: -16px; }
+}
 
 /* tema claro: los fondos de hover estaban fijados al verde oscuro */
 :root[data-theme="light"] .choice-chip:hover > span,
@@ -426,8 +452,8 @@ body { margin: 0; }
    su izquierda, pegado a él y centrado en su alto (128 px → centro a 64 px del borde). */
 @media (min-width: 420px) and (max-width: 750px) {
   .form-bottom { margin-top: 32px; }
-  .circle-cta { top: 0; }
-  #skip-call { left: auto; right: calc(128px + 20px); bottom: calc(64px - 10.5px); }
+  .circle-cta { top: 0 !important; }
+  #skip-call { left: auto; right: calc(168px + 4px); bottom: calc(84px - 10.5px); }
 }
 
 /* (2026-10-05) el símbolo no cambia de color al pasar el cursor: los componentes del header

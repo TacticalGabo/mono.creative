@@ -20,7 +20,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="./fonts/plus-jakarta-sans/webfont/PlusJakartaSans-200-800-normal-latin.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="./fonts/space-mono/webfont/SpaceMono-400-normal-latin.woff2">
 <link rel="stylesheet" href="./css/case-study.css?v=12">
-<link rel="stylesheet" href="./css/contact.css?v=7">
+<link rel="stylesheet" href="./css/contact.css?v=13">
 <!-- (2026-10-04) CARGA: React desde el propio dominio, igual que el home (mismos bytes,
      sha384 idéntico al SRI de support.js). Además, con window.__resources definido
      support.js NO vuelve a descargar la página entera (fetch(location.href)). -->
@@ -31,10 +31,10 @@ if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.
 </script>
 <script src="./vendor/support.js"></script>
 <script src="./js/case-study.js?v=8" defer></script>
-<script src="./js/contact-config.js?v=3" defer></script>
+<script src="./js/contact-config.js?v=4" defer></script>
 <script src="./js/contact-rules.js?v=3" defer></script>
 <script src="./js/contact-delivery.js?v=1" defer></script>
-<script src="./js/contact.js?v=3" defer></script>
+<script src="./js/contact.js?v=13" defer></script>
 </head>
 <body class="contact-page">
 <x-dc>
@@ -668,7 +668,7 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
 
           <div class="form-bottom">
             <div class="form-bottom-copy"><button class="text-action back-step" id="back-step" type="button" hidden="hidden"><i data-lucide="arrow-left" aria-hidden="true"></i>Back to your project</button><p id="step-caption" hidden="hidden"></p><p class="submit-feedback" id="submit-feedback" aria-live="polite"></p><a class="direct-submit" id="direct-submit" href="mailto:hello.monocreative@gmail.com" hidden="hidden">Email your brief<i data-lucide="arrow-up-right" aria-hidden="true"></i></a></div>
-            <button class="circle-cta" id="form-cta" type="submit"><span class="circle-cta-fluid" aria-hidden="true"><span class="circle-cta-bg"></span><i class="btn-dot"></i></span><span class="circle-cta-inner"><span id="cta-label">LET'S CONNECT</span><i data-lucide="arrow-up-right" aria-hidden="true"></i></span></button>
+            <button class="circle-cta" id="form-cta" type="submit"><span class="circle-cta-fluid" aria-hidden="true"><svg class="cta-blob" viewBox="0 0 100 100" aria-hidden="true"><defs><radialGradient id="cta-blob-fill" gradientUnits="userSpaceOnUse" cx="50%" cy="45%" r="55%"><animate attributeName="cx" values="50%;58%;46%;42%;54%;50%" dur="7.2s" repeatCount="indefinite" calcMode="spline" keySplines=".45 0 .55 1;.45 0 .55 1;.45 0 .55 1;.45 0 .55 1;.45 0 .55 1"></animate><animate attributeName="cy" values="45%;52%;58%;48%;40%;45%" dur="7.2s" repeatCount="indefinite" calcMode="spline" keySplines=".45 0 .55 1;.45 0 .55 1;.45 0 .55 1;.45 0 .55 1;.45 0 .55 1"></animate><stop offset="0" stop-color="#B8FF00"></stop><stop offset=".62" stop-color="#B8FF00"></stop><stop offset=".86" stop-color="#9BD700"></stop><stop offset="1" stop-color="#7BAA00"></stop></radialGradient></defs><g><path fill="url(#cta-blob-fill)" d="M50.00,3.00C66.79,3.00 81.62,12.77 89.84,27.00C98.05,41.23 100.14,59.15 91.57,74.00C82.99,88.85 66.43,96.00 50.00,96.00C33.57,96.00 17.69,88.04 9.30,73.50C0.90,58.96 0.90,41.04 9.30,26.50C17.69,11.96 33.21,3.00 50.00,3.00Z"><animate attributeName="d" dur="7.2s" repeatCount="indefinite" calcMode="spline" keySplines=".45 0 .55 1;.45 0 .55 1;.45 0 .55 1;.45 0 .55 1;.45 0 .55 1" values="M50.00,3.00C66.79,3.00 81.62,12.77 89.84,27.00C98.05,41.23 100.14,59.15 91.57,74.00C82.99,88.85 66.43,96.00 50.00,96.00C33.57,96.00 17.69,88.04 9.30,73.50C0.90,58.96 0.90,41.04 9.30,26.50C17.69,11.96 33.21,3.00 50.00,3.00Z;M54.45,0.70C69.27,2.04 79.07,14.42 86.47,25.39C96.42,40.13 99.69,60.05 89.22,75.90C81.34,87.83 69.25,97.46 54.40,98.80C34.15,100.63 18.81,85.29 10.90,69.06C4.90,56.76 2.98,41.99 9.51,29.25C17.97,12.74 34.35,-1.11 54.45,0.70Z;M46.96,6.61C64.49,5.38 85.33,9.97 94.28,27.87C101.01,41.33 97.10,56.56 91.29,69.12C83.49,85.95 65.54,94.33 47.83,93.45C34.00,92.75 17.37,90.42 8.69,77.28C-2.53,60.28 0.44,38.75 11.57,22.94C19.71,11.38 33.91,7.52 46.96,6.61Z;M52.35,3.06C69.79,3.93 86.06,13.65 93.56,29.83C99.76,43.24 94.82,57.93 88.71,69.84C80.77,85.34 66.31,100.77 46.54,99.38C31.69,98.34 20.68,87.38 12.80,76.20C2.31,61.30 3.84,41.95 13.00,27.13C21.33,13.65 35.24,2.20 52.35,3.06Z;M47.27,4.58C63.66,3.60 78.02,13.21 86.54,26.39C95.99,41.03 102.12,61.25 91.03,77.69C82.12,90.89 66.70,97.02 51.42,97.48C32.41,98.05 17.85,84.09 10.53,68.28C5.03,56.41 -1.02,41.69 5.51,28.31C13.33,12.25 30.88,5.57 47.27,4.58Z;M50.00,3.00C66.79,3.00 81.62,12.77 89.84,27.00C98.05,41.23 100.14,59.15 91.57,74.00C82.99,88.85 66.43,96.00 50.00,96.00C33.57,96.00 17.69,88.04 9.30,73.50C0.90,58.96 0.90,41.04 9.30,26.50C17.69,11.96 33.21,3.00 50.00,3.00Z"></animate></path></g><circle class="btn-dot" cx="50" cy="50" r="10" fill="url(#cta-blob-fill)" style="opacity:0"></circle></svg></span><span class="circle-cta-inner"><span id="cta-label" style="text-align:center">Setup a call</span></span></button>
           </div>
         </form>
       </main>

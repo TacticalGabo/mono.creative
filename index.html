@@ -121,7 +121,7 @@ if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.
        · al llegar desde otra página del sitio (o ya vista en la pestaña): solo un telón
          liso del fondo del home (la entry ya fundió su contenido antes de navegar).
      Se va con 'mc:arranca' (lo dispara el script de carga de más abajo). -->
-<script src="./js/intro-loader.js?v=6"></script>
+<script src="./js/intro-loader.js?v=7"></script>
 <script src="./vendor/support.js"></script>
 </head>
 <body>
@@ -499,6 +499,13 @@ html.mc-leaving .page{opacity:0;transition:opacity .28s ease-out}
    de que la mancha asome, que ese es el único coste de esto: un re-desenfoque
    por reentrada. visibility y no display: no altera layout ni dispara nada. */
 .glow.lejos{visibility:hidden}
+/* (2026-10-15) En desktop NO se oculta: con scroll muy rapido el toggle de
+   visibility re-desenfoca texturas de blur(100px) en cada cruce y la GPU suelta
+   las capas vecinas (ovalo del correo, burbuja, elementos del hero) = parpadeo.
+   Las manchas ya se pausan con .idle, asi que el coste en reposo es minimo. */
+@media (min-width:768px){.glow.lejos{visibility:visible}}
+/* capas propias y estables para lo que parpadeaba */
+.oval,.cta-bubble{will-change:transform;backface-visibility:hidden}
 @media (min-width:768px){
   /* manchas orgánicas: mismo tratamiento en todos los anchos */
   .glow.g-d{background:#9de14a}
@@ -2595,5 +2602,65 @@ class Component extends DCLogic {
   :root[data-theme="light"] .grain-overlay{mix-blend-mode:multiply;opacity:.14}
 </style>
 <!-- GRAIN-OVERLAY:END -->
+<!-- COOKIE-TOOLTIP:START (solo primera visita; flag localStorage 'mc-ck') -->
+<style>
+.ck{position:fixed;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:900;display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;padding:12px 12px 12px 16px;background:rgba(16,25,19,.92);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:.8px solid #2c513a;border-radius:14px;transition:opacity .4s ease,transform .4s ease}
+.ck.in{animation:ck-in .6s cubic-bezier(.22,.7,.2,1) both}
+@keyframes ck-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.ck.off{opacity:0;transform:translateY(12px);pointer-events:none}
+.ck p{flex:1 1 160px;margin:0;font-family:var(--sans);font-size:13px;font-weight:300;line-height:20px;color:#87918BEB}
+.ck-a{display:flex;align-items:center;gap:8px}
+.ck-btn{height:36px;padding:0 14px;border-radius:999px;font-family:var(--mono);font-size:12px;line-height:1;cursor:pointer;white-space:nowrap;transition:background .3s ease,border-color .3s ease}
+.ck-ok{background:#b8ff00;border:1px solid #b8ff00;color:#101913}
+.ck-ok:hover{background:#9bd700;border-color:#9bd700}
+.ck-x{flex:none;width:28px;height:28px;display:flex;align-items:center;justify-content:center;border:0;border-radius:50%;background:transparent;color:#87918b;cursor:pointer;transition:color .3s ease}
+.ck-x:hover{color:#fff}
+.ck-lang{position:relative}
+.ck-dd{display:flex;align-items:center;gap:8px;background:transparent;border:1px solid #414b45;color:#eef4f0}
+.ck-dd:hover{border-color:#5f8300}
+.ck-dd svg{transition:transform .3s ease}
+.ck-lang.open .ck-dd svg{transform:rotate(180deg)}
+.ck-menu{position:absolute;right:0;bottom:calc(100% + 6px);min-width:120px;padding:4px;background:#101913;border:.8px solid #2c513a;border-radius:10px;display:none}
+.ck-lang.open .ck-menu{display:block}
+.ck-menu button{display:block;width:100%;text-align:left;padding:8px 10px;border:0;border-radius:6px;background:transparent;font-family:var(--mono);font-size:12px;color:#eef4f0;cursor:pointer}
+.ck-menu button:hover{background:rgba(44,81,58,.5)}
+.ck-menu button.on{color:#9bd700}
+@media (min-width:768px){.ck{left:24px;right:auto;bottom:calc(24px + env(safe-area-inset-bottom,0px));flex-wrap:nowrap}.ck p{flex:0 0 auto;white-space:nowrap}.ck p br{display:none}.ck-x{margin-left:-16px}.ck-x svg{width:11px;height:11px}}
+@media (max-width:767px){
+.ck{left:auto;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));width:165px;flex-direction:column;align-items:stretch;gap:8px;padding:12px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.ck p{flex:none;width:131px;line-height:18px;white-space:nowrap}
+.ck-a{flex-direction:column;align-items:stretch;gap:6px}
+.ck-btn{height:32px;width:100%;justify-content:center}
+.ck-ok,.ck-lang{width:139px}
+.ck-dd{justify-content:space-between}
+.ck-menu{left:0;right:0;min-width:0}
+.ck-x{position:absolute;top:4px;left:128.4px}
+}
+@media (prefers-reduced-motion:reduce){.ck,.ck.in{animation:none;transition:none}}
+</style>
+<script>
+(function(){
+  var K='mc-ck';
+  try{if(localStorage.getItem(K))return}catch(_){}
+  var HTML='<p>Cookies make our<br>site better.</p><div class="ck-a"><div class="ck-lang"><button class="ck-btn ck-dd" type="button" aria-haspopup="listbox"><span>English</span><svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.2"></path></svg></button><div class="ck-menu" role="listbox"><button type="button" class="on">English</button><button type="button">Spanish</button></div></div><button class="ck-btn ck-ok" type="button">Accept cookies</button></div><button class="ck-x" type="button" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 1l8 8M9 1L1 9" stroke="currentColor" stroke-width="1.2"></path></svg></button>';
+  function show(){
+    if(document.documentElement.classList.contains('espera'))return setTimeout(show,300);
+    var c=document.createElement('div');c.className='ck in';c.setAttribute('role','region');c.setAttribute('aria-label','Cookies');c.innerHTML=HTML;
+    document.body.appendChild(c);
+    var lang=c.querySelector('.ck-lang');
+    function done(){try{localStorage.setItem(K,'1')}catch(_){}c.classList.add('off');setTimeout(function(){c.remove()},500)}
+    c.addEventListener('click',function(e){
+      if(e.target.closest('.ck-ok')||e.target.closest('.ck-x'))return done();
+      if(e.target.closest('.ck-dd')){lang.classList.toggle('open');return}
+      var o=e.target.closest('.ck-menu button');
+      if(o){lang.querySelectorAll('.ck-menu button').forEach(function(b){b.classList.toggle('on',b===o)});lang.querySelector('.ck-dd span').textContent=o.textContent;lang.classList.remove('open')}
+    });
+    document.addEventListener('click',function(e){if(!e.target.closest('.ck-lang'))lang.classList.remove('open')});
+  }
+  function start(){setTimeout(show,1200)}
+  if(document.readyState==='complete')start();else addEventListener('load',start);
+})();
+</script>
+<!-- COOKIE-TOOLTIP:END -->
 </body>
 </html>

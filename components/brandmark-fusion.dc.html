@@ -22,7 +22,7 @@
 </div>
 
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;align&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;center&quot;,&quot;options&quot;:[&quot;center&quot;,&quot;left&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;cycleSeconds&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:7,&quot;min&quot;:3,&quot;max&quot;:14,&quot;step&quot;:0.5,&quot;unit&quot;:&quot;s&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;fps&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:12,&quot;min&quot;:8,&quot;max&quot;:60,&quot;step&quot;:1,&quot;unit&quot;:&quot;fps&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;handDrawn&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:0,&quot;min&quot;:0,&quot;max&quot;:2,&quot;step&quot;:0.1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;detail&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:9,&quot;min&quot;:5,&quot;max&quot;:24,&quot;step&quot;:1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;shapeColor&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#B8FF00&quot;,&quot;options&quot;:[&quot;#B8FF00&quot;,&quot;#f4f1ea&quot;,&quot;#FF0000&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Color&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;align&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;center&quot;,&quot;options&quot;:[&quot;center&quot;,&quot;left&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;intro&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;cycleSeconds&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:7,&quot;min&quot;:3,&quot;max&quot;:14,&quot;step&quot;:0.5,&quot;unit&quot;:&quot;s&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;fps&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:12,&quot;min&quot;:8,&quot;max&quot;:60,&quot;step&quot;:1,&quot;unit&quot;:&quot;fps&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;handDrawn&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:0,&quot;min&quot;:0,&quot;max&quot;:2,&quot;step&quot;:0.1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;detail&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:9,&quot;min&quot;:5,&quot;max&quot;:24,&quot;step&quot;:1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Animación&quot;},&quot;shapeColor&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#B8FF00&quot;,&quot;options&quot;:[&quot;#B8FF00&quot;,&quot;#f4f1ea&quot;,&quot;#FF0000&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Color&quot;}}">
 const BLOBS = [
   { cx: 116, cy: 148, rx: 116, ry: 148, arc: 26, delay: 0.10, wob: 1.0 },
   { cx: 302, cy: 148, rx: 116, ry: 148, arc: -18, delay: 0.17, wob: 1.35 },
@@ -35,6 +35,9 @@ const TARGET_CENTER = { cx: 358, cy: 148, rx: 120.5, ry: 148 };
 const TARGET_LEFT = { cx: 120.5, cy: 148, rx: 120.5, ry: 148 };
 // 1) al entrar el cursor las masas se funden  2) al salir vuelven a separarse
 const IN_DUR = 0.9, OUT_DUR = 0.8;
+// intro (thank-you page): entra ya fundido, se mantiene INTRO_HOLD s y se despliega a las tres
+// masas una sola vez; después queda quieto y sin hover ni toque
+const INTRO_HOLD = 0.6;
 // malla de la fusión: la unión suave es geometría, no un filtro
 const GRID = { x0: -60, y0: -60, x1: 780, y1: 356, cell: 4 };
 const K_BLEND = 62;
@@ -64,7 +67,13 @@ class Component extends DCLogic {
     this.raf = requestAnimationFrame(this.loop);
     this.watchVisibility();
     const host = (this.rootEl && this.rootEl.parentElement) || this.rootEl;
-    if (host) {
+    const intro = this.props.intro === true || this.props.intro === 'true' || this.props.intro === '';
+    if (intro) {
+      this.t = 1;
+      this.hovering = true;
+      this.wake = () => { if (!this.raf && !this.dead && this.visible !== false) this.raf = requestAnimationFrame(this.loop); };
+      this.introTimer = setTimeout(() => { this.hovering = false; this.wake(); }, INTRO_HOLD * 1000);
+    } else if (host) {
       this.host = host;
       // el hover solo cuenta en desktop; por debajo de 768 px manda el toque.
       // La MediaQueryList se crea una sola vez: es reactiva, y fabricarla en
@@ -103,6 +112,7 @@ class Component extends DCLogic {
   componentWillUnmount() {
     cancelAnimationFrame(this.raf);
     if (this.io) this.io.disconnect();
+    if (this.introTimer) clearTimeout(this.introTimer);
     if (this.host) {
       this.host.removeEventListener('mouseenter', this.hoverIn);
       this.host.removeEventListener('mouseleave', this.hoverOut);

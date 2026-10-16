@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<script>/* .js + tema elegido en el toggle (home, entry o contact); sin elección = dark */document.documentElement.classList.add('js');try{var t=sessionStorage.getItem('mc-theme');if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="icon" type="image/svg+xml" href="./assets/shared/logo-favicon-48x29.svg?v=3">
+<title>Thank you · mono.creative</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="description" content="Your brief reached mono.creative. We'll be in touch soon.">
+<style>
+@font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:200 800;font-display:swap;src:url(./fonts/plus-jakarta-sans/webfont/PlusJakartaSans-200-800-normal-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:200 800;font-display:swap;src:url(./fonts/plus-jakarta-sans/webfont/PlusJakartaSans-200-800-normal-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Plus Jakarta Sans';font-style:italic;font-weight:200 800;font-display:swap;src:url(./fonts/plus-jakarta-sans/webfont/PlusJakartaSans-200-800-italic-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Space Mono';font-style:normal;font-weight:400;font-display:swap;src:url(./fonts/space-mono/webfont/SpaceMono-400-normal-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+</style>
+<link rel="preload" as="font" type="font/woff2" crossorigin href="./fonts/plus-jakarta-sans/webfont/PlusJakartaSans-200-800-normal-latin.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="./fonts/space-mono/webfont/SpaceMono-400-normal-latin.woff2">
+<link rel="stylesheet" href="./css/case-study.css?v=12">
+<link rel="stylesheet" href="./css/thank-you.css?v=24">
+<!-- (2026-10-04) CARGA: React desde el propio dominio, igual que el home (mismos bytes,
+     sha384 idéntico al SRI de support.js). Además, con window.__resources definido
+     support.js NO vuelve a descargar la página entera (fetch(location.href)). -->
+<script>
+(function(){var r=window.__resources=window.__resources||{},u='https://unpkg.com/';
+if(!r[u+'react@18.3.1/umd/react.production.min.js'])r[u+'react@18.3.1/umd/react.production.min.js']='./vendor/react.production.min.js';
+if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.1/umd/react-dom.production.min.js']='./vendor/react-dom.production.min.js';})();
+</script>
+<script src="./vendor/support.js"></script>
+<!--
+  THANK YOU — página tras enviar el formulario de contact.html (js/contact.js redirige aquí).
+  · Sin header/footer del sitio. Runtime (support.js) solo para el símbolo animado:
+    brandmark-fusion con intro (entra fundido y se despliega una vez), el mismo del header mobile.
+  · Botón, cursor, filtro goo y grano = los del home, entre marcadores SHARED:
+    se regeneran con  python "build/sync-shared.py"  (NO editarlos aquí a mano).
+-->
+</head>
+<body>
+<x-dc>
+<helmet></helmet>
+<div class="page" data-screen-label="thank-you">
+  <div class="grain"></div>
+  <!-- SHARED:GOO -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="goo" x="-60%" y="-140%" width="220%" height="380%" color-interpolation-filters="sRGB"><feGaussianBlur in="SourceGraphic" stdDeviation="6" result="b"></feGaussianBlur><feColorMatrix in="b" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -9" result="g"></feColorMatrix><feComposite in="SourceGraphic" in2="g" operator="atop"></feComposite></filter></svg>
+<!-- /SHARED:GOO -->
+
+  <div class="ty">
+    <main class="ty-main">
+      <h1 class="ty-title"><span class="ty-l1 ty-in"><span class="ty-w">We&rsquo;re glad</span> you&rsquo;re in</span> <span class="ty-l2 ty-in" style="--i:1">so, let&rsquo;s make it happen<span class="ty-symbol" aria-hidden="true"><dc-import name="brandmark-fusion" align="left" intro="true" fps="24" hint-size="100%,100%"></dc-import></span></span></h1>
+      <div class="ty-btn-wrap ty-in" style="--i:2">
+        <div data-href="./index.html" class="btn foot-btn ty-btn" data-h="48" data-pad="13" data-shift="12" data-comp="button/lime" role="link" tabindex="0">
+          <div class="btn-fluid"><svg class="btn-shape" width="172" height="48" viewBox="0 0 172 48" fill="none"><clipPath class="bclip" id="bclip1"><path d="M37.83 14.83C41.54 5.85 50.3 0 60.01 0L148 0C161.25 0 172 10.75 172 24C172 37.25 161.25 48 148 48L60.01 48C50.3 48 41.54 42.15 37.83 33.17L37.83 33.17C34.25 43.75 25.04 49.77 15.83 47.54C6.63 45.31 0 35.45 0 24C0 12.55 6.63 2.69 15.83 0.46C25.04 -1.77 34.25 4.25 37.83 14.83Z"></path></clipPath><path class="bpath" d="M37.83 14.83C41.54 5.85 50.3 0 60.01 0L148 0C161.25 0 172 10.75 172 24C172 37.25 161.25 48 148 48L60.01 48C50.3 48 41.54 42.15 37.83 33.17L37.83 33.17C34.25 43.75 25.04 49.77 15.83 47.54C6.63 45.31 0 35.45 0 24C0 12.55 6.63 2.69 15.83 0.46C25.04 -1.77 34.25 4.25 37.83 14.83Z" fill="var(--btn2-fill)" stroke="var(--btn2-stroke)" stroke-width="2.4" clip-path="url(#bclip1)"></path></svg><i class="btn-dot"></i></div>
+          <span class="btn-label" style="color:var(--btn2-label)">Back to home</span>
+          <svg class="btn-arr al" width="12.22" height="14.67" viewBox="11.9 14.75 10 12" fill="none" overflow="visible" style="color:var(--btn2-arrow)"><path d="M12.3984 20.747H21.3984M17.8726 23.7109L21.3984 20.747L17.8726 17.7832" stroke="currentColor" stroke-width="1.2" vector-effect="non-scaling-stroke"></path></svg>
+          <svg class="btn-arr ar" width="12.22" height="14.67" viewBox="11.9 14.75 10 12" fill="none" overflow="visible" style="color:var(--btn2-arrow)"><path d="M12.3984 20.747H21.3984M17.8726 23.7109L21.3984 20.747L17.8726 17.7832" stroke="currentColor" stroke-width="1.2" vector-effect="non-scaling-stroke"></path></svg>
+        </div>
+        <div data-href="https://t.me/hellomonocreative" class="btn foot-btn ty-btn" data-h="48" data-pad="13" data-shift="12" data-comp="button/dark" role="link" tabindex="0">
+          <div class="btn-fluid"><svg class="btn-shape" width="172" height="48" viewBox="0 0 172 48" fill="none"><clipPath class="bclip" id="bclip2"><path d="M37.83 14.83C41.54 5.85 50.3 0 60.01 0L148 0C161.25 0 172 10.75 172 24C172 37.25 161.25 48 148 48L60.01 48C50.3 48 41.54 42.15 37.83 33.17L37.83 33.17C34.25 43.75 25.04 49.77 15.83 47.54C6.63 45.31 0 35.45 0 24C0 12.55 6.63 2.69 15.83 0.46C25.04 -1.77 34.25 4.25 37.83 14.83Z"></path></clipPath><path class="bpath" d="M37.83 14.83C41.54 5.85 50.3 0 60.01 0L148 0C161.25 0 172 10.75 172 24C172 37.25 161.25 48 148 48L60.01 48C50.3 48 41.54 42.15 37.83 33.17L37.83 33.17C34.25 43.75 25.04 49.77 15.83 47.54C6.63 45.31 0 35.45 0 24C0 12.55 6.63 2.69 15.83 0.46C25.04 -1.77 34.25 4.25 37.83 14.83Z" fill="var(--btn1-fill)" stroke="var(--btn1-stroke)" stroke-width="2.4" clip-path="url(#bclip2)"></path></svg><i class="btn-dot"></i></div>
+          <span class="btn-label" style="color:var(--btn1-label)">TG Follow-up</span>
+          <svg class="btn-arr al" width="12.22" height="14.67" viewBox="11.9 14.75 10 12" fill="none" overflow="visible" style="color:var(--btn1-arrow)"><path d="M12.3984 20.747H21.3984M17.8726 23.7109L21.3984 20.747L17.8726 17.7832" stroke="currentColor" stroke-width="1.2" vector-effect="non-scaling-stroke"></path></svg>
+          <svg class="btn-arr ar" width="12.22" height="14.67" viewBox="11.9 14.75 10 12" fill="none" overflow="visible" style="color:var(--btn1-arrow)"><path d="M12.3984 20.747H21.3984M17.8726 23.7109L21.3984 20.747L17.8726 17.7832" stroke="currentColor" stroke-width="1.2" vector-effect="non-scaling-stroke"></path></svg>
+        </div>
+      </div>
+    </main>
+
+    <section class="ty-contact ty-in" style="--i:3" aria-label="Write to us">
+      <div class="ty-write">
+        <span class="ty-label">Write to us</span>
+        <a class="ty-handle" href="https://t.me/hellomonocreative" target="_blank" rel="noopener">@hellomonocreative</a>
+        <p class="ty-note">For a quick chat on TG<svg width="17" height="17" viewBox="0 0 48 48" aria-hidden="true"><path d="M41.4193 7.30899C41.4193 7.30899 45.3046 5.79399 44.9808 9.47328C44.8729 10.9883 43.9016 16.2908 43.1461 22.0262L40.5559 39.0159C40.5559 39.0159 40.3401 41.5048 38.3974 41.9377C36.4547 42.3705 33.5408 40.4227 33.0011 39.9898C32.5694 39.6652 24.9068 34.7955 22.2086 32.4148C21.4531 31.7655 20.5897 30.4669 22.3165 28.9519L33.6487 18.1305C34.9438 16.8319 36.2389 13.8019 30.8426 17.4812L15.7331 27.7616C15.7331 27.7616 14.0063 28.8437 10.7686 27.8698L3.75342 25.7055C3.75342 25.7055 1.16321 24.0823 5.58815 22.459C16.3807 17.3729 29.6555 12.1786 41.4193 7.30899Z"/></svg></p>
+      </div>
+      <a class="ty-mail" href="mailto:hello.monocreative@gmail.com">hello.monocreative<span class="br-m"></span>@gmail.com</a>
+    </section>
+  </div>
+</div>
+</x-dc>
+<!-- SHARED:JS-BTN -->
+<script>
+(function(){
+  if(window.__mcBtn)return; window.__mcBtn=1;
+  var D2R=Math.PI/180, R=20.75, CY=20.75, PRX=126.25, DUR=460, SHIFT=5;
+  function f(n){return Math.round(n*100)/100;}
+  function lerp(a,b,t){return a+(b-a)*t;}
+  function pt(cx,cy,rx,ry,a){return [cx+rx*Math.cos(a*D2R),cy+ry*Math.sin(a*D2R)];}
+  function arc(cx,cy,rx,ry,a0,a1){
+    var n=Math.max(1,Math.ceil(Math.abs(a1-a0)/90)), step=(a1-a0)/n, d='';
+    for(var i=0;n>i;i++){
+      var s=(a0+step*i)*D2R, e=(a0+step*(i+1))*D2R, k=(4/3)*Math.tan((e-s)/4);
+      var x1=cx+rx*Math.cos(s), y1=cy+ry*Math.sin(s), x2=cx+rx*Math.cos(e), y2=cy+ry*Math.sin(e);
+      d+='C'+f(x1-k*rx*Math.sin(s))+' '+f(y1+k*ry*Math.cos(s))+' '+f(x2+k*rx*Math.sin(e))+' '+f(y2-k*ry*Math.cos(e))+' '+f(x2)+' '+f(y2);
+    }
+    return d;
+  }
+  /* geometria por alto del boton; sin data-h = 41.5, la original */
+  function geom(h,pad,shift){
+    pad=pad||0; shift=shift||0;          /* shift: separa la pildora del circulo (px) */
+    var r=h/2, k=r/R, w=147+pad+shift, prx=w-r, pl0=52.75*k-pad+shift, b0=17*k;
+    var g={R:r, CY:r, PRX:prx, pl0:pl0, b0:b0, at:200, ab:159.2, bt:340, bb:20.7};
+    if(pad||shift){
+      /* la pildora se abrio hacia el circulo: nueva union = interseccion pildora/circulo */
+      var lo=270, hi=360, m, x, y;
+      for(var i=0;i<40;i++){
+        m=(lo+hi)/2; x=b0+b0*Math.cos(m*D2R); y=r+r*Math.sin(m*D2R);
+        if(Math.sqrt((x-pl0)*(x-pl0)+(y-r)*(y-r))>r)lo=m; else hi=m;
+      }
+      g.bt=m; g.bb=360-m;
+      g.at=Math.atan2(y-r,x-pl0)/D2R+360; g.ab=360-g.at;
+    }
+    g.lr=(pl0-r+w)/2-w/2+.5;           /* texto centrado en la pildora (+.5 del original) */
+    g.lh=(prx-7.75-52.5)-w/2;          /* en hover, misma distancia a la flecha derecha */
+    return g;
+  }
+  var G0=geom(41.5);
+  function morphPath(t,g){
+    g=g||G0; var R=g.R, CY=g.CY, PRX=g.PRX;
+    var pl_x=lerp(g.pl0,R,t), bx=lerp(g.b0,R,t), rx=lerp(g.b0,R,t), ry=R;
+    var a_top=lerp(g.at,270,t), a_bot=lerp(g.ab,90,t), b_top=lerp(g.bt,270,t), b_bot=lerp(g.bb,90,t);
+    var start=pt(pl_x,CY,R,R,a_top), blob_start=pt(bx,CY,rx,ry,b_bot);
+    return 'M'+f(start[0])+' '+f(start[1])+arc(pl_x,CY,R,R,a_top,270)+'L'+PRX+' '+f(CY-R)+
+      arc(PRX,CY,R,R,270,450)+'L'+f(pl_x)+' '+f(CY+R)+arc(pl_x,CY,R,R,90,a_bot)+
+      'L'+f(blob_start[0])+' '+f(blob_start[1])+arc(bx,CY,rx,ry,b_bot,b_top)+'Z';
+  }
+  function bezier(x1,y1,x2,y2){
+    return function(p){
+      var u=p,v,x,dx;
+      for(var i=0;i<8;i++){
+        v=1-u; x=3*v*v*u*x1+3*v*u*u*x2+u*u*u;
+        dx=3*v*v*x1+6*v*u*(x2-x1)+3*u*u*(1-x2);
+        if(Math.abs(dx)<1e-6)break;
+        u-=(x-p)/dx;
+      }
+      u=Math.max(0,Math.min(1,u)); v=1-u;
+      return 3*v*v*u*y1+3*v*u*u*y2+u*u*u;
+    };
+  }
+  var ease=bezier(.3,1.14,.3,1);
+  var FINE_MEDIA=window.matchMedia&&window.matchMedia('(hover:hover) and (pointer:fine)').matches;
+  // el hover solo cuenta en desktop; por debajo de 768 px manda el toque
+  function FINEnow(){ return FINE_MEDIA && window.innerWidth >= 768; }
+  var CALM=window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var OUT='opacity 20ms ease-out, transform 20ms ease-out';
+  var INN='opacity 175ms ease-out 180ms, transform 230ms cubic-bezier(.2,.85,.25,1) 180ms';
+  var W=new WeakMap();
+  function parts(b){
+    var st=W.get(b);
+    if(st&&st.path.isConnected)return st;
+    var path=b.querySelector('.bpath'), label=b.querySelector('.btn-label'),
+        al=b.querySelector('.al'), ar=b.querySelector('.ar');
+    if(!path||!label||!al||!ar)return null;
+    st={path:path, clip:b.querySelector('.bclip path'), label:label, al:al, ar:ar,
+        g:b.dataset.h?geom(+b.dataset.h,+b.dataset.pad||0,+b.dataset.shift||0):G0,
+        dot:b.querySelector('.btn-dot'), t:0, raf:0, hover:false,
+        rest:{fill:path.getAttribute('fill'),stroke:path.getAttribute('stroke'),
+              text:label.style.color||'',arrow:al.style.color||''}};
+    if(!st.rest.fill||st.rest.fill==='var(--accent)')st.rest.fill=path.dataset.restFill||st.rest.fill;
+    path.dataset.restFill=st.rest.fill;
+    W.set(b,st);
+    return st;
+  }
+  function draw(st){
+    var d=morphPath(st.t,st.g);
+    st.path.setAttribute('d',d); if(st.clip)st.clip.setAttribute('d',d);
+    st.label.style.transform='translateX(-50%) translateX('+f(lerp(st.g.lr,st.g.lh,st.t))+'px)';
+  }
+  function tween(st,h){
+    if(st.raf)cancelAnimationFrame(st.raf);
+    if(CALM){st.t=h?1:0;draw(st);if(st.done){var cb=st.done;st.done=null;cb();}return;}
+    var from=st.t, to=h?1:0, dur=Math.max(120,DUR*Math.max(.35,Math.abs(to-from))), t0=performance.now();
+    (function step(now){
+      var p=Math.min(1,(now-t0)/dur);
+      st.t=from+(to-from)*ease(p); draw(st);
+      st.raf=p<1?requestAnimationFrame(step):0;
+      if(p>=1&&st.done){var cb=st.done;st.done=null;cb();}
+    })(performance.now());
+  }
+  function colors(st,h){
+    if(st.colored===h)return;
+    st.colored=h;
+    st.path.setAttribute('fill',h?'var(--accent)':st.rest.fill);
+    st.path.setAttribute('stroke',h?'var(--accent)':st.rest.stroke);
+    st.label.style.color=h?'#101913':st.rest.text;
+    st.al.style.color=st.ar.style.color=h?'#101913':st.rest.arrow;
+  }
+  function set(b,h){
+    var st=parts(b); if(!st)return;
+    if(st.hover===h)return;
+    st.hover=h;
+    if(st.dot)st.dot.style.background='var(--accent)';
+    if(h)colors(st,true);
+    st.al.style.opacity=h?'0':'1'; st.al.style.transform='translateX('+(h?SHIFT:0)+'px)'; st.al.style.transition=h?OUT:INN;
+    st.ar.style.opacity=h?'1':'0'; st.ar.style.transform='translateX('+(h?2:2-SHIFT)+'px)'; st.ar.style.transition=h?INN:OUT;
+    tween(st,h);
+  }
+  /* clic en un .btn con data-href: se reproduce el cambio de estado (morph a círculo) y en
+     el frame en que termina se salta de página. Si ya está en hover (desktop), salto inmediato. */
+  function go(b){
+    var href=b.getAttribute('data-href'), st=parts(b);
+    function jump(){ window.location.href=href; }
+    if(!st){ jump(); return; }
+    /* forma completa → esperar también a las transiciones de COLOR (relleno, borde, flechas,
+       texto) → pintar ese último frame (2 rAF) → saltar. Sin esperas fijas. */
+    function nav(){
+      var an=[], gone=0;
+      [st.path,st.label,st.al,st.ar].forEach(function(el){ if(el&&el.getAnimations)an=an.concat(el.getAnimations()); });
+      an=an.filter(function(x){ return typeof CSSTransition==='undefined'||x instanceof CSSTransition; });
+      function fire(){ if(gone)return; gone=1; requestAnimationFrame(function(){ requestAnimationFrame(jump); }); }
+      Promise.all(an.map(function(x){return x.finished.catch(function(){})})).then(fire);
+      setTimeout(fire,700);   /* tope por si una transición no terminara nunca */
+    }
+    set(b,true);
+    colors(st,true);
+    if(!st.raf&&st.t>=1){ nav(); return; }
+    st.done=nav;
+  }
+  var BLUR=null;
+  function goo(b,p,x,y){
+    var st=parts(b); if(!st||!st.dot)return;
+    if(p>0){
+      var r=b.getBoundingClientRect();
+      var k=(b.offsetWidth&&r.width)?b.offsetWidth/r.width:1;
+      st.dot.style.transform='translate3d('+((x-r.left)*k)+'px,'+((y-r.top)*k)+'px,0) translate(-50%,-50%)';
+      st.dot.style.opacity=p.toFixed(3);
+      b.classList.add('goo');
+      if(!BLUR)BLUR=document.querySelector('#goo feGaussianBlur');
+      if(BLUR)BLUR.setAttribute('stdDeviation',(0.2+5.8*p).toFixed(2));
+      colors(st,true);
+    } else {
+      st.dot.style.opacity='0';
+      b.classList.remove('goo');
+      if(!st.hover)colors(st,false);
+    }
+  }
+  function init(){
+    if(!document.querySelector('.btn')||document.querySelector('x-dc'))return setTimeout(init,120);
+    var ZONE=40, tick=0, ev=null, focused=null;
+    function frame(){
+      tick=0;
+      var list=document.querySelectorAll('.btn'), any_near=0;
+      // fase de LECTURA primero: antes se leía un rect, se escribía y se volvía a
+      // leer, tres layouts síncronos por frame de scroll (y con el SVG del
+      // clúster sucio, así que cada uno recalculaba de más)
+      var rects=[];
+      if(ev)for(var q=0;q<list.length;q++)rects[q]=list[q].getBoundingClientRect();
+      for(var i=0;list.length>i;i++){
+        var b=list[i];
+        if(!ev){ if(b!==focused)set(b,false); goo(b,0); continue;}
+        var r=rects[i];
+        var dx=Math.max(r.left-ev.x,0,ev.x-r.right);
+        var dy=Math.max(r.top-ev.y,0,ev.y-r.bottom);
+        var inside=dx===0&&dy===0;
+        var d2=dx*dx+dy*dy;
+        var p=inside?1:(d2<=ZONE*ZONE?1-Math.sqrt(d2)/ZONE:0);
+        if(p>0)any_near=p>any_near?p:any_near;
+        if(!(b===focused&&!inside))set(b,inside);
+        if(FINEnow())goo(b,p,ev.x,ev.y);
+      }
+      window.__mcGooNear=any_near;
+    }
+    function schedule(){ if(!FINEnow())return; if(!tick)tick=requestAnimationFrame(frame); }
+    document.addEventListener('mousemove',function(e){
+      if(!FINEnow())return;
+      ev={x:e.clientX,y:e.clientY};
+      schedule();
+    },{passive:true});
+    window.addEventListener('scroll',function(){ if(ev)schedule(); },{passive:true});
+    window.addEventListener('resize',function(){ if(ev)schedule(); },{passive:true});
+    document.addEventListener('mouseleave',function(){
+      ev=null; window.__mcGooNear=0;
+      schedule();
+    });
+    document.addEventListener('focusin',function(e){
+      var b=e.target.closest&&e.target.closest('.btn');
+      if(b){focused=b; set(b,true);}
+    });
+    document.addEventListener('focusout',function(e){
+      var b=e.target.closest&&e.target.closest('.btn');
+      if(b){if(focused===b)focused=null; set(b,false); schedule();}
+    });
+    // ratón/trackpad: un .btn con data-href navega al hacer clic (en táctil lo
+    // hace el bloque de abajo, tras la animación del tap)
+    document.addEventListener('click',function(e){
+      if(!FINEnow())return;
+      var hb=e.target.closest&&e.target.closest('.btn[data-href]');
+      if(hb){ e.preventDefault(); go(hb); }
+    });
+    // Precarga del destino en cuanto el puntero o el dedo llegan al botón: al
+    // hacer clic la página ya está bajada y el salto es inmediato.
+    function precarga(e){
+      var hb=e.target.closest&&e.target.closest('.btn[data-href]');
+      if(!hb||hb.dataset.pf)return;
+      hb.dataset.pf='1';
+      var u=hb.getAttribute('data-href'), lst=[u];
+      if(/contact\.html/.test(u))lst=lst.concat(['./css/contact.css','./js/contact.js','./js/contact-rules.js','./js/contact-config.js']);
+      lst.forEach(function(h){ var l=document.createElement('link'); l.rel='prefetch'; l.href=h; document.head.appendChild(l); });
+    }
+    document.addEventListener('pointerover',precarga,{passive:true});
+    document.addEventListener('touchstart',precarga,{passive:true});
+    document.addEventListener('keydown',function(e){
+      if(e.key!=='Enter'&&e.key!==' ')return;
+      var hb=e.target.closest&&e.target.closest('.btn[data-href]');
+      if(hb){ e.preventDefault(); go(hb); }
+    });
+    document.addEventListener('click',function(e){
+      if(FINEnow())return;
+      var link=e.target.closest&&e.target.closest('.slink');
+      if(link){
+        var lh=link.getAttribute('data-href');
+        if(lh){ e.preventDefault(); window.open(lh,'_blank','noopener'); }
+        return;
+      }
+      var oval=e.target.closest&&e.target.closest('.oval');
+      if(oval){
+        var onv=oval.classList.contains('tap');
+        Array.prototype.forEach.call(document.querySelectorAll('.oval.tap'),function(o){o.classList.remove('tap');});
+        if(!onv){
+          oval.classList.add('tap');
+          setTimeout(function(){oval.classList.remove('tap');},1000);
+        }
+        return;
+      }
+      var card=e.target.closest&&e.target.closest('.card');
+      if(card){
+        var on=card.classList.contains('tap');
+        Array.prototype.forEach.call(document.querySelectorAll('.card.tap'),function(c){c.classList.remove('tap');});
+        if(!on)card.classList.add('tap');
+        return;
+      }
+      var b=e.target.closest&&e.target.closest('.btn');
+      if(!b||b.dataset.tapping)return;
+      // enlace a otra página: salto inmediato, sin esperar la animación del tap
+      if(b.getAttribute('data-href')&&!b.getAttribute('data-scroll')){ e.preventDefault(); go(b); return; }
+      e.preventDefault();
+      b.dataset.tapping='1';
+      set(b,true);
+      setTimeout(function(){
+        delete b.dataset.tapping;
+        var sel=b.getAttribute('data-scroll'), href=b.getAttribute('data-href')||b.getAttribute('href');
+        if(sel){
+          var t=document.querySelector(sel);
+          if(t)window.scrollTo({top:t.getBoundingClientRect().top+window.pageYOffset-32,behavior:'smooth'});
+        } else if(href){ window.location.href=href; }
+        set(b,false);
+      },400);
+    });
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
+<!-- /SHARED:JS-BTN -->
+<!-- SHARED:JS-CURSOR -->
+<script>
+(function(){
+  if(window.__mcCursor)return; window.__mcCursor=1;
+  function init(){
+    var page=document.querySelector('.page');
+    if(!page||document.querySelector('x-dc'))return setTimeout(init,120);
+    // El punto verde solo existe en desktop con ratón. En un teléfono el toque
+    // genera un mousemove sintético y el punto aparecía y se quedaba puesto,
+    // estorbando. Aquí ni siquiera se crea el elemento.
+    var fine=function(){
+      return !!(window.matchMedia && window.matchMedia('(hover:hover) and (pointer:fine)').matches)
+        && window.innerWidth>=768;
+    };
+    var d=null;
+    function dot(){
+      if(d)return d;
+      d=document.createElement('div'); d.id='cursor-dot';
+      document.body.appendChild(d);
+      return d;
+    }
+    document.addEventListener('mousemove',function(e){
+      if(!fine()){ if(d)d.style.opacity='0'; return; }
+      var el=dot();
+      el.style.transform='translate3d('+e.clientX+'px,'+e.clientY+'px,0) translate(-50%,-50%)';
+      el.style.opacity=e.target&&e.target.closest&&e.target.closest('.page')?(1-(window.__mcGooNear||0)).toFixed(3):'0';
+    });
+    document.addEventListener('mouseleave',function(){if(d)d.style.opacity='0';});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+})();
+</script>
+<!-- /SHARED:JS-CURSOR -->
+<!-- SHARED:GRAIN -->
+<!-- GRAIN-OVERLAY:START — 2a capa de grano sobre el .grain original. Ajuste aprobado 2026-09-20 -->
+<div class="grain-overlay" aria-hidden="true"></div>
+<style>
+  .grain-overlay{position:fixed;inset:0;pointer-events:none;z-index:2147483000;
+    background-image:url('./assets/shared/texture-grain.png');background-repeat:repeat;
+    background-size:281.6px 281.6px;   /* grano en pantalla 1.1 px */
+    opacity:.42;mix-blend-mode:overlay;will-change:transform}
+  /* light: overlay sobre fondo claro devuelve el mismo fondo y el grano
+     desaparece; multiply lo oscurece en cualquier fondo, al mismo coste.
+     Opacidades calibradas para el mismo contraste (ΔL*) que en dark. */
+  :root[data-theme="light"] .grain{mix-blend-mode:multiply;opacity:.056}
+  :root[data-theme="light"] .grain-overlay{mix-blend-mode:multiply;opacity:.14}
+</style>
+<!-- GRAIN-OVERLAY:END -->
+<!-- /SHARED:GRAIN -->
+</body>
+</html>
