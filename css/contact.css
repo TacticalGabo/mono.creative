@@ -460,6 +460,12 @@ body { margin: 0; }
    inyectan un "a:hover{color:#fff}" global (su <helmet>) que lo volvía blanco. */
 .contact-page .contact-symbol, .contact-page .contact-symbol:hover { color: var(--accent); }
 
-/* CTA blob en light: el degradado de los bordes va a CLARO (color de fondo), no al verde oscuro del dark */
-:root[data-theme="light"] #cta-blob-fill stop:nth-of-type(3){stop-color:color-mix(in srgb,#B8FF00 60%,var(--bg))}
-:root[data-theme="light"] #cta-blob-fill stop:nth-of-type(4){stop-color:var(--bg)}
+/* CTA blob: relleno #B8FF00 (dark) / #9BD700 (light) = --accent. Bordes: verde oscuro en dark; en
+   light #9BD700 que se vuelve TRANSPARENTE (deja ver el fondo real). Mismo cruce que el fondo de la
+   página: valores colgados de --fade-p (0,45 s) + transition .4s ease, igual que el
+   background-color del * en case-study.css. Así la bola y el fondo van exactamente al mismo ritmo. */
+#cta-blob-fill stop{transition:stop-color .4s ease,stop-opacity .4s ease}
+#cta-blob-fill stop:nth-of-type(1),#cta-blob-fill stop:nth-of-type(2){stop-color:var(--accent)}
+#cta-blob-fill stop:nth-of-type(3){stop-color:#9BD700;stop-opacity:calc(1 - .4 * var(--fade-p,0))}
+#cta-blob-fill stop:nth-of-type(4){stop-color:color-mix(in oklab,#9BD700 calc(var(--fade-p,0) * 100%),#7BAA00);stop-opacity:calc(1 - var(--fade-p,0))}
+@media (prefers-reduced-motion:reduce){#cta-blob-fill stop{transition:none}}
