@@ -265,7 +265,7 @@
       setTimeout(go_round,4000);   /* red de seguridad */
     }
 
-    /* ---- carga diferida: cada [data-asset] pide su archivo a ~1,2 pantallas (.ld); las
+    /* ---- carga diferida: cada [data-asset] pide su archivo a ~3 pantallas (.ld); el resto, en tiempo libre tras la carga; las
        internas (pantallas dentro de un fondo) cargan con su fondo; hero y avatares, ya ---- */
     var lazy=[].slice.call(main.querySelectorAll('[data-asset]:not([data-asset="hero"]):not(.avatar)'))
       .filter(function(el){return !el.parentElement.closest('[data-asset]')});
