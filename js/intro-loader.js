@@ -168,7 +168,7 @@
     };
   }
 
-  var BG_LIGHT='#9BD700', BG_DARK='#152B1D', SWAP_AT=1.2, PAD_X=72, PAD_Y=30;
+  var BG_LIGHT='#9BD700', BG_DARK='#101913', SWAP_AT=1.2, PAD_X=72, PAD_Y=30;
   var leaving=false, minOk=false, t0=0, host, cv, worker=null, raf=0;
 
   // tapa también los clics: debajo la página aún no está lista (se liberan al salir)
