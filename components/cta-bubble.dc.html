@@ -73,12 +73,25 @@ var self = this;
     const idle = typeof window.requestIdleCallback === 'function'
       ? function (fn) { window.requestIdleCallback(fn, { timeout: 120 }); }
       : function (fn) { setTimeout(fn, 0); };
+    // (2026-10-16) la burbuja está al final de la página: ya no se prepara al montar (competía
+    // con el hero y el header en el móvil), sino al acercarse (observer, 400px) o en un hueco
+    // libre de verdad tras la carga, lo que llegue antes.
+    this.watchVisibility();
     window.MCgeom(function(g){
       if (self.dead) return;
-      idle(function () { if (!self.dead) self.prepare(g.bubble); });
+      self.prep = function(){
+        if (self.dead || self.prepped) return; self.prepped = true;
+        idle(function () { if (!self.dead) self.prepare(g.bubble); });
+      };
+      if (self.visible !== false) return self.prep();
+      const late = function(){
+        if (typeof window.requestIdleCallback === 'function') window.requestIdleCallback(self.prep, { timeout: 5000 });
+        else setTimeout(self.prep, 2000);
+      };
+      if (document.readyState === 'complete') setTimeout(late, 1500);
+      else window.addEventListener('load', function(){ setTimeout(late, 1500); }, { once: true });
     });
     this.raf = requestAnimationFrame(this.loop);
-    this.watchVisibility();
   }
 
   componentWillUnmount() { this.dead = true; cancelAnimationFrame(this.raf); if (this.io) this.io.disconnect(); }
@@ -94,12 +107,16 @@ var self = this;
     if (!ref || typeof IntersectionObserver !== 'function') return;
     let node = ref.ownerSVGElement || ref;
     node = node.parentElement || node;
-    this.visible = true;
+    // (2026-10-16) arranca como NO visible: nada se dibuja ni se prepara hasta el primer aviso del
+    // observer (llega en el siguiente frame). Antes los de fuera de pantalla (footer, CTA, el logo
+    // desktop en display:none en el móvil) calculaban sus primeros frames al montar la página
+    this.visible = false;
     // 400px y no 150: el SVG va en position:absolute y sobresale hasta
     // top:-48% de la caja observada, así que con 150px podía congelarse
     // estando todavía a la vista.
     this.io = new IntersectionObserver((es) => {
       for (const e of es) this.visible = e.isIntersecting;
+      if (this.visible && this.prep) this.prep();
       if (this.visible && !this.raf && !this.dead) this.raf = requestAnimationFrame(this.loop);
       this.geomKey = null;   // al despertar hay que redibujar sí o sí
     }, { rootMargin: '400px' });

@@ -69,6 +69,13 @@
   function init(){
     var sec=document.querySelector('.cs-constraints');
     if(!sec||sec.closest('x-dc')||!sec.querySelector('.curve--v path'))return setTimeout(init,120);
+    /* (2026-10-16) lo de abajo (700 muestras de la curva + medidas de layout forzadas) se hace al
+       acercarse la sección (1,5 pantallas), no al montar la página: en el móvil tomaba el hilo
+       justo cuando salían el header y el hero */
+    if(!init.go&&'IntersectionObserver' in window){
+      var wo=new IntersectionObserver(function(es){if(es[0].isIntersecting){wo.disconnect();init.go=1;init()}},{rootMargin:'150% 0px'});
+      return wo.observe(sec);
+    }
     var items=[].slice.call(sec.querySelectorAll('.ci'));
     var svgh=sec.querySelector('.curve--h'), svgv=sec.querySelector('.curve--v');
     var ph=svgh.querySelector('path'), pv=svgv.querySelector('path');

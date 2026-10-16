@@ -133,7 +133,10 @@ class Component extends DCLogic {
     if (!ref || typeof IntersectionObserver !== 'function') return;
     let node = ref.ownerSVGElement || ref;
     node = node.parentElement || node;
-    this.visible = true;
+    // (2026-10-16) arranca como NO visible: nada se dibuja ni se prepara hasta el primer aviso del
+    // observer (llega en el siguiente frame). Antes los de fuera de pantalla (footer, CTA, el logo
+    // desktop en display:none en el móvil) calculaban sus primeros frames al montar la página
+    this.visible = false;
     this.io = new IntersectionObserver((es) => {
       for (const e of es) this.visible = e.isIntersecting;
       if (this.visible && !this.raf && !this.dead) this.raf = requestAnimationFrame(this.loop);

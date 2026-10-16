@@ -74,14 +74,21 @@ var self = this;
     // se cede el hueco al navegador. El bucle ya está protegido por this.ready.
     // El sondeo de MCgeom no es cancelable: por eso el guard de self.dead, para
     // no escribir sobre nodos ya desconectados.
+    // (2026-10-16) y solo cuando el logo se ve: en el móvil va en display:none y aun así
+    // preparaba (varias veces 40-90 ms en un teléfono) justo al aparecer la página: el hilo
+    // quedaba tomado y el toque al logo no respondía. Lo dispara el observer (watchVisibility).
+    this.watchVisibility();
     window.MCgeom(function(g){
       if (self.dead) return;
-      const run = function(){ if (!self.dead) self.prepare(g.brandmarks); };
-      if (typeof requestIdleCallback === 'function') requestIdleCallback(run, { timeout: 120 });
-      else setTimeout(run, 0);
+      self.prep = function(){
+        if (self.dead || self.prepped) return; self.prepped = true;
+        const run = function(){ if (!self.dead) self.prepare(g.brandmarks); };
+        if (typeof requestIdleCallback === 'function') requestIdleCallback(run, { timeout: 120 });
+        else setTimeout(run, 0);
+      };
+      if (self.visible !== false) self.prep();
     });
     this.raf = requestAnimationFrame(this.loop);
-    this.watchVisibility();
     // el hover se escucha en el contenedor real: cubre todo el hueco del logotipo
     const host = (this.rootEl && this.rootEl.parentElement) || this.rootEl;
     if (host) {
@@ -140,9 +147,13 @@ var self = this;
     if (!ref || typeof IntersectionObserver !== 'function') return;
     let node = ref.ownerSVGElement || ref;
     node = node.parentElement || node;
-    this.visible = true;
+    // (2026-10-16) arranca como NO visible: nada se dibuja ni se prepara hasta el primer aviso del
+    // observer (llega en el siguiente frame). Antes los de fuera de pantalla (footer, CTA, el logo
+    // desktop en display:none en el móvil) calculaban sus primeros frames al montar la página
+    this.visible = false;
     this.io = new IntersectionObserver((es) => {
       for (const e of es) this.visible = e.isIntersecting;
+      if (this.visible && this.prep) this.prep();
       if (this.visible && !this.raf && !this.dead) this.raf = requestAnimationFrame(this.loop);
       // el SVG está en position:absolute con overflow:visible y sobresale mucho
       // de la caja observada: con 150 px se congelaba estando todavía a la vista
