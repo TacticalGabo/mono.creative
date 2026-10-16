@@ -534,7 +534,7 @@ html .page .sc-placeholder::before{display:none}
 .avatar{width:49px;height:49px;border-radius:50%;background-color:var(--neutral-100);background-size:cover;background-position:center;border:3px solid var(--bg)}
 .avatar+.avatar{margin-left:-13px}
 /* fotos del team (mismas del home): 1 Gabriel, 2 Ale, 3 Romina, 4 David */
-[data-asset="team-1"]{background-image:url(../assets/shared/team/avatar-1.webp)}
+[data-asset="team-1"]{background-image:url(../assets/shared/team/avatar-1.webp?v=3)}
 [data-asset="team-2"]{background-image:url(../assets/shared/team/avatar-2.webp)}
 [data-asset="team-3"]{background-image:url(../assets/shared/team/avatar-3.webp)}
 [data-asset="team-4"]{background-image:url(../assets/shared/team/avatar-4.webp)}
