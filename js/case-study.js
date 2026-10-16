@@ -364,4 +364,37 @@
   });
   /* al volver con "atrás" (bfcache) la página no debe seguir fundida */
   addEventListener('pageshow',function(){ leaving=0; h.classList.remove('mc-leaving'); });
+  /* (2026-10-16) vuelta al home sin esperar a la red, igual que el home con las entries (solo
+     descarga, NO prerender: arrancar el home entero en segundo plano le roba CPU a esta página).
+     1) Al apoyar el dedo / pasar el ratón por un enlace al home: prefetch de su HTML; corre
+        durante el fundido de salida (.28 s).
+     2) Con la página cargada y el hilo libre: su HTML y lo que el home pide para quitar su
+        telón (componente del icono del hero, intro-loader y la fuente del hero). React,
+        support.js y los logos ya están en caché desde esta página. */
+  var home=new URL('./index.html',location.href).href, warmed=0;
+  function warm(e){
+    if(warmed)return;
+    var a=e.target.closest&&e.target.closest('a[href]'); if(!a)return;
+    var u=new URL(a.href,location.href); if(u.origin!==location.origin||!/\/(index\.html)?$/.test(u.pathname))return;
+    warmed=1;
+    var sp=window.HTMLScriptElement&&HTMLScriptElement.supports&&HTMLScriptElement.supports('speculationrules');
+    var el=document.createElement(sp?'script':'link');
+    if(sp){el.type='speculationrules';el.textContent=JSON.stringify({prefetch:[{source:'list',urls:[home]}]})}
+    else{el.rel='prefetch';el.href=home}
+    document.head.appendChild(el);
+  }
+  document.addEventListener('pointerdown',warm,{passive:true});
+  document.addEventListener('touchstart',warm,{passive:true});
+  document.addEventListener('mouseover',warm,{passive:true});
+  function pre(u,font){var l=document.createElement('link');l.rel='prefetch';l.href=u;if(font){l.as='font';l.crossOrigin='anonymous'}document.head.appendChild(l)}
+  function idle_warm(){
+    var ric=window.requestIdleCallback?function(f){requestIdleCallback(f,{timeout:5000})}:function(f){setTimeout(f,300)};
+    ric(function(){
+      pre(home);
+      pre('./components/hero-icon-sequence.dc.html');
+      pre('./js/intro-loader.js?v=8');
+      pre('./fonts/google/plusjakartasans-v12-LDIoaomQNQcsA88c7O9yZ4KMCoOg4Ko20yygg_vb.woff2',1);
+    });
+  }
+  if(document.readyState==='complete')setTimeout(idle_warm,3000); else addEventListener('load',function(){setTimeout(idle_warm,3000)},{once:true});
 })();
