@@ -157,7 +157,7 @@ var self = this;
       if (this.visible && !this.raf && !this.dead) this.raf = requestAnimationFrame(this.loop);
       // el SVG está en position:absolute con overflow:visible y sobresale mucho
       // de la caja observada: con 150 px se congelaba estando todavía a la vista
-    }, { rootMargin: '400px' });
+    }, { rootMargin: '100% 400px' });   // (2026-10-16) despierta una pantalla antes (arriba/abajo): con 400px un scroll rápido lo mostraba congelado y luego saltaba
     this.io.observe(node);
   }
 

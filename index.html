@@ -492,7 +492,7 @@ html.mc-leaving .page{opacity:0;transition:opacity .28s ease-out}
    en GPU y sin recomposición cuando el cruce le cambia la opacidad. La marca
    un observer propio (script del __mcGlowIO) sobre CADA mancha, no sobre su
    sección: varias sobresalen de su sección (top:-320px y similares) y con el
-   rect de la sección se ocultarían estando aún a la vista. El margen de 320px
+   rect de la sección se ocultarían estando aún a la vista. El margen (una pantalla)
    tiene dos trabajos: cubrir el halo del desenfoque (blur de 100px se ve mucho
    más allá de la caja del div) y dar pista para reconstruir la textura ANTES
    de que la mancha asome, que ese es el único coste de esto: un re-desenfoque
@@ -716,6 +716,9 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
    otra regla. Eso pasaba: la tercera línea se veía desde el primer frame, sin
    entrada, y por tanto antes que las otras dos. Las dos animaciones tienen que
    ir juntas en la misma lista. */
+/* (2026-10-16) la frase verde anima background-position (se repinta en cada frame): capa propia para
+   que ese repintado sea solo su franja y no todo el bloque del titular (mismo aspecto, medido píxel a píxel) */
+.h1.accent{will-change:transform}
 @keyframes acc-blobs{
   0%{background-position:2% 18%,74% 82%,58% 4%}
   27%{background-position:38% 62%,26% 22%,88% 70%}
@@ -1340,7 +1343,10 @@ html.ov-arm .oval.ov-in span{transition:color .5s ease,opacity .4s ease .65s}
         setTimeout(entra,Math.max(0,t_fin-Date.now()));
       },204);
     });
-    // portadas de las otras pestañas: se piden y decodifican en tiempo libre tras la carga
+    // portadas de las otras pestañas: tras la carga solo se DESCARGAN (prefetch, en tiempo libre).
+    // (2026-10-16) Antes además se decodificaban: la decodificación usa los mismos hilos que
+    // rasterizan la pantalla y, justo al empezar a scrollear, portadas y hero salían a medio pintar.
+    // Se decodifican al tocar la pestaña (precarga), ya desde caché.
     var cache={};
     function precarga(idx){
       return Promise.all((SHOTS[idx]||[]).filter(Boolean).map(function(u){
@@ -1351,9 +1357,14 @@ html.ov-arm .oval.ov-in span{transition:color .5s ease,opacity .4s ease .65s}
         return cache[u];
       }));
     }
+    function baja(idx){
+      (SHOTS[idx]||[]).filter(Boolean).forEach(function(u){
+        var l=document.createElement('link'); l.rel='prefetch'; l.as='image'; l.href=u; document.head.appendChild(l);
+      });
+    }
     function precarga_resto(){
       var ric=window.requestIdleCallback?function(f){requestIdleCallback(f,{timeout:4000});}:function(f){setTimeout(f,300);};
-      ric(function(){ precarga(1).then(function(){ ric(function(){ precarga(2); }); }); });
+      ric(function(){ baja(1); ric(function(){ baja(2); }); });
     }
     function tras_carga(){ setTimeout(precarga_resto,2000); }
     if(document.readyState==='complete')tras_carga(); else addEventListener('load',tras_carga,{once:true});
@@ -1734,7 +1745,7 @@ html.ov-arm .oval.ov-in span{transition:color .5s ease,opacity .4s ease .65s}
     // re-desenfoque de la reentrada ocurra antes de asomar, no en pantalla.
     var iog=new IntersectionObserver(function(es){
       for(var i=0;es.length>i;i++)es[i].target.classList.toggle('lejos',!es[i].isIntersecting);
-    },{rootMargin:'320px 0px'});
+    },{rootMargin:'100% 0px'});   // una pantalla: con 320px un scroll rápido llegaba antes que el aviso y la mancha asomaba oculta
     var manchas=document.querySelectorAll('.glow');
     for(var g=0;g<manchas.length;g++)iog.observe(manchas[g]);
   }

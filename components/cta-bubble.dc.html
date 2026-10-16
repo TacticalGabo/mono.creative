@@ -119,7 +119,7 @@ var self = this;
       if (this.visible && this.prep) this.prep();
       if (this.visible && !this.raf && !this.dead) this.raf = requestAnimationFrame(this.loop);
       this.geomKey = null;   // al despertar hay que redibujar sí o sí
-    }, { rootMargin: '400px' });
+    }, { rootMargin: '100% 400px' });   // (2026-10-16) despierta una pantalla antes (arriba/abajo): con 400px un scroll rápido lo mostraba congelado y luego saltaba
     this.io.observe(node);
   }
 
