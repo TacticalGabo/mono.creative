@@ -459,3 +459,7 @@ body { margin: 0; }
 /* (2026-10-05) el símbolo no cambia de color al pasar el cursor: los componentes del header
    inyectan un "a:hover{color:#fff}" global (su <helmet>) que lo volvía blanco. */
 .contact-page .contact-symbol, .contact-page .contact-symbol:hover { color: var(--accent); }
+
+/* CTA blob en light: el degradado de los bordes va a CLARO (color de fondo), no al verde oscuro del dark */
+:root[data-theme="light"] #cta-blob-fill stop:nth-of-type(3){stop-color:color-mix(in srgb,#B8FF00 60%,var(--bg))}
+:root[data-theme="light"] #cta-blob-fill stop:nth-of-type(4){stop-color:var(--bg)}

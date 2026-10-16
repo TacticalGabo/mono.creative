@@ -2636,6 +2636,18 @@ class Component extends DCLogic {
 .ck-menu{left:0;right:0;min-width:0}
 .ck-x{position:absolute;top:4px;left:128.4px}
 }
+/* LIGHT (standalone mono-home-light-cookies): glass claro = blanco 55% + blur 16 + saturate 160, borde #bec8c2, sombra suave + brillo interior */
+:root[data-theme="light"] .ck{background:rgba(255,255,255,.55);-webkit-backdrop-filter:blur(16px) saturate(160%);backdrop-filter:blur(16px) saturate(160%);border:1px solid #bec8c2;box-shadow:0 10px 30px rgba(16,25,19,.08),inset 0 1px 0 rgba(255,255,255,.8)}
+:root[data-theme="light"] .ck p{color:#87918b}
+:root[data-theme="light"] .ck-ok{background:#9bd700;border-color:#9bd700;color:#232825}
+:root[data-theme="light"] .ck-ok:hover{background:#7baa00;border-color:#7baa00}
+:root[data-theme="light"] .ck-x:hover{color:#101913}
+:root[data-theme="light"] .ck-dd{background:#fff;border-color:#bec8c2;color:#414b45}
+:root[data-theme="light"] .ck-dd:hover{border-color:#7baa00}
+:root[data-theme="light"] .ck-menu{background:#fff;border:1px solid #bec8c2}
+:root[data-theme="light"] .ck-menu button{color:#232825}
+:root[data-theme="light"] .ck-menu button:hover{background:#eef4f0}
+:root[data-theme="light"] .ck-menu button.on{color:#5f8300}
 @media (prefers-reduced-motion:reduce){.ck,.ck.in{animation:none;transition:none}}
 </style>
 <script>
