@@ -392,7 +392,7 @@
     ric(function(){
       pre(home);
       pre('./components/hero-icon-sequence.dc.html');
-      pre('./js/intro-loader.js?v=8');
+      pre('./js/intro-loader.js?v=9');
       pre('./fonts/google/plusjakartasans-v12-LDIoaomQNQcsA88c7O9yZ4KMCoOg4Ko20yygg_vb.woff2',1);
     });
   }

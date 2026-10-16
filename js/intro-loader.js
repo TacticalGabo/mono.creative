@@ -180,15 +180,38 @@
     st.textContent='@keyframes mci-bg{to{background-color:'+BG_DARK+'}}'+
       '@keyframes mci-zoom{from{transform:scale(1.1)}to{transform:scale(.4)}}';
     document.head.appendChild(st);
+    /* (2026-10-16) Cambio de fondo y zoom anclados al mismo reloj que las formas (t0).
+       Antes eran animaciones CSS: arrancaban cuando el navegador estilaba #boot0 por
+       primera vez (tarde si el hilo principal seguía parseando/bajando scripts), y
+       background-color se pinta en el hilo principal (se frenaba al montar React) ->
+       el fondo cambiaba después que el color de las formas. Ahora: una capa oscura que
+       sube de opacidad (compositor; mismo color resultante que interpolar el fondo) y
+       Web Animations con startTime = t0. Sin element.animate: las CSS de antes. */
+    var waapi=!!host.animate;
     host.style.cssText=BASE+'display:flex;align-items:center;justify-content:center;overflow:hidden;background-color:'+BG_LIGHT+
-      ';animation:mci-bg 700ms cubic-bezier(.65,0,.35,1) '+SWAP_AT+'s forwards;transition:opacity 600ms ease;';
+      ';'+(waapi?'':'animation:mci-bg 700ms cubic-bezier(.65,0,.35,1) '+SWAP_AT+'s forwards;')+'transition:opacity 600ms ease;';
+    var dk;
+    if(waapi){
+      dk=document.createElement('div');
+      dk.style.cssText='position:absolute;inset:0;background-color:'+BG_DARK+';opacity:0;';
+      host.appendChild(dk);
+    }
     cv=document.createElement('canvas');
     cv.width=Math.round((716+2*PAD_X)*k); cv.height=Math.round((296+2*PAD_Y)*k);
     /* zoom: -10 %/s desde 1.1 hasta el tope .4 (7 s), lineal como el original */
-    cv.style.cssText='display:block;flex:none;width:'+(cv.width/dpr)+'px;height:'+(cv.height/dpr)+'px;'+
-      'animation:mci-zoom 7s linear forwards;transition:opacity 700ms cubic-bezier(.4,0,.2,1);';
+    cv.style.cssText='position:relative;display:block;flex:none;width:'+(cv.width/dpr)+'px;height:'+(cv.height/dpr)+'px;'+
+      (waapi?'':'animation:mci-zoom 7s linear forwards;')+'transition:opacity 700ms cubic-bezier(.4,0,.2,1);';
     host.appendChild(cv);
     t0=Date.now();
+    if(waapi){
+      var p0=performance.now();
+      try{
+        dk.animate([{opacity:0},{opacity:1}],
+          {duration:700,delay:SWAP_AT*1000,easing:'cubic-bezier(.65,0,.35,1)',fill:'forwards'}).startTime=p0;
+        cv.animate([{transform:'scale(1.1)'},{transform:'scale(.4)'}],
+          {duration:7000,easing:'linear',fill:'forwards'}).startTime=p0;
+      }catch(_){}
+    }
     var src='var draw=('+engine.toString()+')(),ctx,k,t0,on=1,'+
       'tick=self.requestAnimationFrame?function(f){self.requestAnimationFrame(f)}:function(f){setTimeout(f,16)};'+
       'onmessage=function(e){if(e.data==="stop"){on=0;close();return;}'+
