@@ -162,6 +162,7 @@ class Component extends DCLogic {
     if (this.io) this.io.disconnect();
     if (this.ro) this.ro.disconnect();
     if (this.preIdle) { if (window.cancelIdleCallback) cancelIdleCallback(this.preIdle); clearTimeout(this.preIdle); }
+    if (this.armIdle) { if (window.cancelIdleCallback) cancelIdleCallback(this.armIdle); clearTimeout(this.armIdle); }
     if (this.onDragMove) window.removeEventListener('pointermove', this.onDragMove);
     if (this.onDragUp) {
       window.removeEventListener('pointerup', this.onDragUp);
@@ -316,7 +317,9 @@ class Component extends DCLogic {
     defs.innerHTML = merged.map(b =>
       '<' + 'mask id="wbm-cut-' + b.id + '" maskUnits="userSpaceOnUse" x="' + (-MPAD) + '" y="' + (-MPAD) + '" width="' + MW + '" height="' + MH + '">'
       + '<' + 'rect x="' + (-MPAD) + '" y="' + (-MPAD) + '" width="' + MW + '" height="' + MH + '" fill="#fff"></rect>'
-      + '<' + 'path data-cut="' + b.id + '" fill="#000" d=""></path></mask>').join('');
+      + '<' + 'path data-cut="' + b.id + '" fill="#000" d=""></path></mask>'
+      + '<' + 'clipPath id="wbm-clip-' + b.id + '" clipPathUnits="userSpaceOnUse">'
+      + '<' + 'path data-clip="' + b.id + '" clip-rule="evenodd" d=""></path></clipPath>').join('');
     layer.innerHTML = merged.map(b => {
       const st = b.shape.style.stroke || 'var(--wb-stroke,#414B45)';
       return '<' + 'path data-stroke="' + b.id + '" mask="url(#wbm-cut-' + b.id + ')" fill="none" style="stroke:'
@@ -328,7 +331,15 @@ class Component extends DCLogic {
       b.maskEl = b.cutP.parentNode;
       b.maskRect = b.maskEl.querySelector('rect');
       b.maskUrl = 'url(#wbm-cut-' + b.id + ')';   // para poder quitar y devolver la máscara
-      b.cutOn = true;
+      b.cutMode = 1;   // 0 sin corte, 1 máscara (fusión parcial), 2 recorte (fusión completa)
+      // Fusión completa (k = 1): la máscara es binaria (el trazo desaparece
+      // dentro de la pareja), y eso mismo lo hace un clip-path evenodd
+      // "caja menos silueta de la pareja". El recorte es un path de Skia, sin
+      // la capa intermedia ni la conversión de luminancia que la máscara pide
+      // en cada frame; la máscara queda solo para el tramo 0 < k < 1.
+      b.clipP = defs.querySelector('[data-clip="' + b.id + '"]');
+      b.clipUrl = 'url(#wbm-clip-' + b.id + ')';
+      b.clipBox = 'M' + (-MPAD) + ' ' + (-MPAD) + 'H' + (W + MPAD) + 'V' + (H + MPAD) + 'H' + (-MPAD) + 'Z';
       b.shape.style.stroke = 'none';   // el trazo vive ahora en la capa de arriba
     });
   }
@@ -429,6 +440,7 @@ class Component extends DCLogic {
     // la página scrollea como si los blobs no estuvieran. Desde LIVE_AT sí, y
     // si aún se estaban moviendo, se pasa a la física viva en este paso.
     if (!this.toSvg || !this.interactive) return;
+    if (!this.armed) this.armInteraction();
     if (this.playing) this.handover();
     // El rect se vuelve a medir en cada gesto, y tiene que ser ANTES del toSvg
     // de abajo, no después: entre un gesto y el siguiente la página sí pudo
@@ -576,9 +588,21 @@ class Component extends DCLogic {
 
   // Se llama en LIVE_AT (ver advance): a partir de aquí el clúster responde al
   // tacto con la física de siempre (arrastre con correa, tap para el verde).
+  // El paso LIVE_AT cae casi en el choque con el suelo: cursor, touch-action y
+  // el touchmove no pasivo (que obliga a rehacer las regiones de eventos) se
+  // cuelgan en tiempo libre, fuera del frame de la caída. Un toque antes de
+  // eso los cuelga en el acto (grab).
   enableInteraction() {
     if (this.interactive || !this.blobs) return;
     this.interactive = true;
+    const ric = window.requestIdleCallback;
+    this.armIdle = ric ? ric(() => this.armInteraction(), { timeout: 250 }) : setTimeout(() => this.armInteraction(), 50);
+  }
+
+  armInteraction() {
+    this.armIdle = 0;
+    if (this.armed || this.stopped || !this.blobs) return;
+    this.armed = true;
     this.blobs.forEach(b => {
       b.g.style.cursor = 'grab';
       b.g.style.touchAction = 'none';   // inútil en Chrome, correcto donde sí se respeta
@@ -682,12 +706,18 @@ class Component extends DCLogic {
     // no se reescribe. Reescribirla igual la volvía a parsear y repintar.
     const ds = dOf(b);
     if (ds !== b.lastSD) { b.strokeP.setAttribute('d', ds); b.lastSD = ds; }
-    if (k <= 0) {
-      if (b.cutOn !== false) { b.strokeP.removeAttribute('mask'); b.cutOn = false; }
+    const mode = k <= 0 ? 0 : k >= 1 ? 2 : 1;
+    if (mode !== b.cutMode) {
+      if (mode === 1) b.strokeP.setAttribute('mask', b.maskUrl); else b.strokeP.removeAttribute('mask');
+      if (mode === 2) b.strokeP.setAttribute('clip-path', b.clipUrl); else b.strokeP.removeAttribute('clip-path');
+      b.cutMode = mode;
+    }
+    if (!mode) return;
+    const dc = dOf(b.mate);
+    if (mode === 2) {
+      if (dc !== b.lastKD) { b.clipP.setAttribute('d', b.clipBox + dc); b.lastKD = dc; }
       return;
     }
-    if (b.cutOn !== true) { b.strokeP.setAttribute('mask', b.maskUrl); b.cutOn = true; }
-    const dc = dOf(b.mate);
     if (dc !== b.lastCD) { b.cutP.setAttribute('d', dc); b.lastCD = dc; }
     if (b.cutK !== k) { b.cutP.setAttribute('fill-opacity', k.toFixed(3)); b.cutK = k; }
     this.fitMask(b);
@@ -1000,10 +1030,9 @@ class Component extends DCLogic {
     // Un solo ringPath por blob y frame. Antes se recalculaba también para el
     // trazo de la fusión y para la máscara de la pareja: 14 trazados por frame
     // en vez de 6, cada uno con ~100 toFixed.
-    // Durante la reproducción las 'd' ya vienen hechas (dsNow), salvo en el
-    // frame del aterrizaje: ahí manda el estado final copiado en P.
-    const ds = this.playing ? this.dsNow : null;
-    if (!atRest) this.blobs.forEach((b, i) => { b.dNow = ds ? ds[i] : ringPath(b.P); });
+    // (Las 'd' ya no se precalculan: con el dibujo interpolado cada frame
+    // muestra un estado intermedio entre dos pasos, ver drawLerp.)
+    if (!atRest) for (const b of this.blobs) b.dNow = ringPath(b.P);
     else this.labelMode(false);
     this.drawMerge(atRest ? (b => b.restD) : (b => b.dNow), atRest);
     for (const b of this.blobs) {
@@ -1115,7 +1144,7 @@ class Component extends DCLogic {
     }));
     sim.capPairs = (this.capPairs || []).map(pr => ({ A: byId[pr.A.id], B: byId[pr.B.id] }));
     sim.frames = 0; sim.wakeF = 0; sim.drag = null; sim.restSnap = null; sim.restFrame = 0;
-    this.pre = { sim: sim, xy: [], ds: [], done: false, end: 0, cut: 0, fin: null };
+    this.pre = { sim: sim, xy: [], done: false, end: 0, cut: 0, fin: null };
   }
 
   // Cada paso guarda x, y, px, py de los 96 puntos: con las velocidades se
@@ -1127,8 +1156,6 @@ class Component extends DCLogic {
     let j = 0;
     for (const b of sim.blobs) for (const p of b.P) { a[j++] = p.x; a[j++] = p.y; a[j++] = p.px; a[j++] = p.py; }
     pre.xy.push(a);
-    // también la 'd' de cada forma: en la reproducción no se genera nada
-    pre.ds.push(sim.blobs.map(b => ringPath(b.P)));
     // 1800 pasos = 30 s: red de seguridad por si algo no llegara a posarse
     if ((sim.frames > 140 && sim.atRest()) || sim.frames >= 1800) {
       pre.done = true; pre.end = sim.frames;
@@ -1165,7 +1192,9 @@ class Component extends DCLogic {
       if (this.stopped || !pre || pre.done) return;
       const t0 = performance.now(), slack = dl && !dl.didTimeout;
       do { this.preStep(); } while (!pre.done && (slack ? dl.timeRemaining() > 4 : performance.now() - t0 < 4));
-      if (!pre.done) this.preIdle = ric ? ric(go, { timeout: 1000 }) : setTimeout(go, 16);
+      // con la caída ya en marcha no se fuerza ningún trozo (el timeout metía
+      // 4 ms dentro de un frame ocupado): lo que falte lo da advance()
+      if (!pre.done) this.preIdle = ric ? ric(go, this.playing ? undefined : { timeout: 1000 }) : setTimeout(go, 16);
     };
     this.preIdle = ric ? ric(go, { timeout: 1000 }) : setTimeout(go, 16);
   }
@@ -1180,7 +1209,6 @@ class Component extends DCLogic {
     if (a) {
       let j = 0;
       for (const b of this.blobs) for (const p of b.P) { p.x = a[j]; p.y = a[j + 1]; j += 4; }
-      this.dsNow = pre.ds[this.frames];
       this.frames++;
     }
     // INTERACTIVOS desde el paso LIVE_AT (0,78 s), aunque sigan cayendo y
@@ -1204,7 +1232,7 @@ class Component extends DCLogic {
       for (const b of this.blobs) for (const p of b.P) { p.x = a[j++]; p.y = a[j++]; p.px = a[j++]; p.py = a[j++]; }
     }
     this.playing = false;
-    this.pre = null; this.dsNow = null;
+    this.pre = null;
   }
 
   // Fin de la caída: estado completo (con velocidades) en los blobs de verdad,
@@ -1216,7 +1244,7 @@ class Component extends DCLogic {
       p.x = f[0]; p.y = f[1]; p.px = f[2]; p.py = f[3];
     }));
     this.playing = false;
-    this.pre = null; this.dsNow = null;   // ~2 MB de posiciones y trazados que ya no hacen falta
+    this.pre = null;   // ~1 MB de posiciones que ya no hacen falta
     this.frames = Math.max(this.frames, end);   // el contador sigue desde el reposo real
     this.restSnap = null;
     this.frozen = true;
@@ -1303,15 +1331,21 @@ class Component extends DCLogic {
       let acc = (this.acc || 0) + Math.min(200, t - this.tprev);
       this.tprev = t;
       let n = 0;
-      while (acc >= DT && n < MAXSTEPS && !this.frozen) { this.advance(); acc -= DT; n++; }
+      while (acc >= DT && n < MAXSTEPS && !this.frozen) { this.savePrev(); this.advance(); acc -= DT; n++; }
       // Antes, si un frame se pasaba de tiempo (p. ej. el recálculo de estilo del
       // cruce), se agotaban los 3 pasos y el resto del tiempo simulado SE TIRABA.
       // Eso no hace la caída más lenta: le borra trozos, y eso es justo lo que se
       // ve como tirón. Ahora se guarda hasta dos frames de deuda y se recupera en
       // los siguientes, que es lo que el ojo lee como continuo.
       this.acc = acc > DT * 2 ? DT * 2 : acc;
-      if (!n) return this.kick();
-      this.draw(false);
+      // Pantallas de 90/120 Hz: la física va a 60 pasos/s, así que hay frames
+      // sin paso. Antes no se dibujaba nada en ellos (la caída se veía a 60 o a
+      // saltos 1-1-0, peor justo antes del choque, que es cuando más corre).
+      // Ahora se dibuja en cada frame el estado intermedio entre los dos
+      // últimos pasos según el tiempo sobrante. La trayectoria es la misma.
+      const alpha = this.frozen ? 1 : Math.min(1, this.acc / DT);
+      if (!n) { this.drawLerp(alpha); return this.kick(); }
+      this.drawLerp(alpha);
       // durante la caída los p.px no se copian (no hacen falta para dibujar):
       // este cálculo de "quieto" solo tiene sentido con la física viva
       if (!this.playing && !this.settled && this.frames > 140) {
@@ -1327,11 +1361,42 @@ class Component extends DCLogic {
       // Posado: se duerme en vez de seguir simulando a 60 fps para siempre
       // (era lo que fundía el móvil al llegar a esta sección).
       if (!this.playing && !this.frozen && !this.drag && this.frames > 140 && this.atRest()) this.frozen = true;
-      // quieto: las etiquetas vuelven al <svg> con el atributo de siempre
-      if (this.frozen) this.labelMode(false);
+      // quieto: lo último dibujado tiene que ser el estado exacto, y las
+      // etiquetas vuelven al <svg> con el atributo de siempre
+      if (this.frozen) {
+        if (this.lerpDirty) this.draw(false);
+        this.lerpDirty = false;
+        this.labelMode(false);
+      }
     }
     this.kick();
   };
+
+  // Posiciones del paso anterior, para interpolar el dibujo (buffers fijos).
+  savePrev() {
+    for (const b of this.blobs) {
+      const Q = b.prevXY || (b.prevXY = new Float64Array(N * 2));
+      for (let i = 0; i < N; i++) { Q[i * 2] = b.P[i].x; Q[i * 2 + 1] = b.P[i].y; }
+    }
+  }
+
+  // Dibuja el estado entre el paso anterior y el actual (alpha 0..1). draw()
+  // solo lee b.P, así que durante el dibujo b.P apunta al anillo interpolado
+  // y se devuelve al terminar: la física nunca ve esas posiciones.
+  drawLerp(alpha) {
+    if (alpha >= 1 || !this.blobs[0].prevXY) { this.draw(false); this.lerpDirty = false; return; }
+    for (const b of this.blobs) {
+      const R = b.lerpP || (b.lerpP = b.P.map(() => ({ x: 0, y: 0 }))), Q = b.prevXY, P = b.P;
+      for (let i = 0; i < N; i++) {
+        R[i].x = Q[i * 2] + (P[i].x - Q[i * 2]) * alpha;
+        R[i].y = Q[i * 2 + 1] + (P[i].y - Q[i * 2 + 1]) * alpha;
+      }
+      b.simP = P; b.P = R;
+    }
+    try { this.draw(false); }
+    finally { for (const b of this.blobs) { b.P = b.simP; b.simP = null; } }
+    this.lerpDirty = true;
+  }
 
   renderVals() {
     return { rootRef: this.rootRef, statusRef: this.statusRef, detailRef: this.detailRef, onReplay: this.onReplay };
