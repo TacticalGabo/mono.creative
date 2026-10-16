@@ -90,7 +90,11 @@ const THEMES = {
   }
 };
 
-const allowed = (a, b) => PAIRS.some(p => (p[0] === a && p[1] === b) || (p[0] === b && p[1] === a));
+// Tabla de parejas permitidas: allowed() se consulta ~540 veces por frame en
+// el bucle de colisiones y el PAIRS.some con cierre era una búsqueda por llamada.
+const PAIR_OK = {};
+PAIRS.forEach(p => { PAIR_OK[p[0] * 16 + p[1]] = 1; PAIR_OK[p[1] * 16 + p[0]] = 1; });
+const allowed = (a, b) => PAIR_OK[a * 16 + b] === 1;
 
 // Math.hypot es ~9x mas lento que sqrt en V8 (hace escalado anti-desbordamiento
 // que aqui no hace falta: las coordenadas van de 0 a ~700). En el bucle de
@@ -796,7 +800,7 @@ class Component extends DCLogic {
     // era un objeto nuevo por paso y forzaba a V8 a modo diccionario.
     for (const b of bs) b.hold = 0;
     if (sk > 0 && ramp > 0) for (const b of bs) {
-      const c = this.centroid(b), tg = TARGET[b.id];
+      const c = this.centroidI(b, _cC), tg = TARGET[b.id];
       const dist = hyp(tg[0] - c.x, tg[1] - c.y);
       // captura: al acercarse al destino la gravedad se apaga para ese blob
       b.hold = Math.min(1, Math.max(0, 1 - dist / 120)) * Math.min(1, sk * 1.6) * ramp;
@@ -812,7 +816,7 @@ class Component extends DCLogic {
     }
 
     if (kMag > 0) for (const b of bs) {
-      const c = this.centroid(b), tg = TARGET[b.id];
+      const c = this.centroidI(b, _cC), tg = TARGET[b.id];
       const fx = (tg[0] - c.x) * kMag, fy = (tg[1] - c.y) * kMag;
       const brake = 1 - 0.10 * b.hold;
       for (const p of b.P) {
@@ -906,6 +910,16 @@ class Component extends DCLogic {
         const cdx = ca.x - cb.x, cdy = ca.y - cb.y;
         if (cdx * cdx + cdy * cdy > lim * lim) continue;
         const reach2 = reach * reach, need2 = need * need;
+        // Caja de B: un punto fuera de ella no puede estar dentro del polígono,
+        // así que pointInPoly sobra (da false igual). La caja solo CRECE cuando
+        // se empujan puntos de B más abajo: sigue conteniéndolo, el test es exacto.
+        let bx0 = 1e18, by0 = 1e18, bx1 = -1e18, by1 = -1e18;
+        for (const q of B.P) {
+          if (q.x < bx0) bx0 = q.x;
+          if (q.x > bx1) bx1 = q.x;
+          if (q.y < by0) by0 = q.y;
+          if (q.y > by1) by1 = q.y;
+        }
         for (const p of A.P) {
           const px = p.x - cb.x, py = p.y - cb.y;
           if (px * px + py * py > reach2) continue;
@@ -922,7 +936,7 @@ class Component extends DCLogic {
             const ex = p.x - sx, ey = p.y - sy, dd = ex * ex + ey * ey;
             if (dd < bd2) { bd2 = dd; bx = sx; by = sy; bk = k; }
           }
-          const ins = pointInPoly(p.x, p.y, B.P);
+          const ins = p.x >= bx0 && p.x <= bx1 && p.y >= by0 && p.y <= by1 && pointInPoly(p.x, p.y, B.P);
           if (!ins && bd2 >= need2) continue;
           let nx = p.x - bx, ny = p.y - by;
           const d = hyp(nx, ny) || 1e-6;
@@ -932,6 +946,8 @@ class Component extends DCLogic {
           const q = B.P[bk], r = B.P[(bk + 1) % N];
           q.x -= nx * mv * 0.25; q.y -= ny * mv * 0.25;
           r.x -= nx * mv * 0.25; r.y -= ny * mv * 0.25;
+          if (q.x < bx0) bx0 = q.x; if (q.x > bx1) bx1 = q.x; if (q.y < by0) by0 = q.y; if (q.y > by1) by1 = q.y;
+          if (r.x < bx0) bx0 = r.x; if (r.x > bx1) bx1 = r.x; if (r.y < by0) by0 = r.y; if (r.y > by1) by1 = r.y;
         }
       }
 
@@ -1066,7 +1082,7 @@ class Component extends DCLogic {
   detail(txt) { if (this.detailRef.current) this.detailRef.current.textContent = txt; }
 
   start() {
-    this.started = true; this.settled = false; this.frames = 0; this.frozen = false; this.tprev = null; this.acc = 0;
+    this.started = true; this.settled = false; this.frames = 0; this.wakeF = 0; this.frozen = false; this.tprev = null; this.acc = 0;
     // la caída se reproduce desde lo precalculado (o se calcula en el acto lo
     // que aún falte): el resultado es el mismo paso a paso
     if (!this.pre) { this.preInit(); this.preRun(); }
@@ -1098,7 +1114,7 @@ class Component extends DCLogic {
       cradle: b.cradle, seq: b.seq, hold: 0
     }));
     sim.capPairs = (this.capPairs || []).map(pr => ({ A: byId[pr.A.id], B: byId[pr.B.id] }));
-    sim.frames = 0; sim.drag = null; sim.restSnap = null; sim.restFrame = 0;
+    sim.frames = 0; sim.wakeF = 0; sim.drag = null; sim.restSnap = null; sim.restFrame = 0;
     this.pre = { sim: sim, xy: [], ds: [], done: false, end: 0, cut: 0, fin: null };
   }
 
@@ -1215,7 +1231,7 @@ class Component extends DCLogic {
     this.raf = requestAnimationFrame(this.loop);
   }
 
-  wake() { this.restSnap = null; this.frozen = false; this.tprev = null; this.acc = 0; this.labelMode(true); this.kick(); }
+  wake() { this.wakeF = this.frames; this.restSnap = null; this.frozen = false; this.tprev = null; this.acc = 0; this.labelMode(true); this.kick(); }
 
   // ¿Está quieto? Nadie se ha alejado más de REST_EPS px de donde estaba hace
   // REST_WIN frames. Durante la caída el desvío es de decenas de px; una vez
@@ -1227,7 +1243,11 @@ class Component extends DCLogic {
   // residuo del solver de restricciones, no movimiento real, y se queda
   // clavado en ~0,2 para siempre.
   atRest() {
-    const REST_EPS = 0.05, REST_WIN = 90;
+    // Red de seguridad: tras 8 s de física viva sin posarse (imán, tope de
+    // solape y enderezado pueden quedar empatados en un temblor residual), se
+    // acepta 0,3 u (~0,3 px, invisible) para dormir el bucle en vez de simular
+    // a 60 fps mientras el clúster siga en pantalla.
+    const REST_EPS = this.frames - (this.wakeF || 0) > 480 ? 0.3 : 0.05, REST_WIN = 90;
     const snap = this.restSnap;
     if (!snap || snap.length !== this.blobs.length) { this.snapRest(); return false; }
     for (let i = 0; i < this.blobs.length; i++) {
