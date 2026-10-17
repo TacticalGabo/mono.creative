@@ -19,7 +19,7 @@
 <!-- (2026-10-05) las dos fuentes del primer pantallazo, pedidas ya con el HTML (sin esperar al CSS) -->
 <link rel="preload" as="font" type="font/woff2" crossorigin href="./fonts/plus-jakarta-sans/webfont/PlusJakartaSans-200-800-normal-latin.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="./fonts/space-mono/webfont/SpaceMono-400-normal-latin.woff2">
-<link rel="stylesheet" href="./css/case-study.css?v=14">
+<link rel="stylesheet" href="./css/case-study.css?v=16">
 <link rel="stylesheet" href="./css/contact.css?v=20">
 <!-- (2026-10-04) CARGA: React desde el propio dominio, igual que el home (mismos bytes,
      sha384 idéntico al SRI de support.js). Además, con window.__resources definido
@@ -689,7 +689,8 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
   .grain-overlay{position:fixed;inset:0;pointer-events:none;z-index:2147483000;
     background-image:url('./assets/shared/texture-grain.png');background-repeat:repeat;
     background-size:281.6px 281.6px;   /* grano en pantalla 1.1 px */
-    opacity:.42;mix-blend-mode:overlay;will-change:transform}
+    opacity:.42;mix-blend-mode:overlay;will-change:transform;
+    min-height:100lvh}                 /* móvil: cubre también la franja que destapa la barra del navegador al scrollear */
   /* light: overlay sobre fondo claro devuelve el mismo fondo y el grano
      desaparece; multiply lo oscurece en cualquier fondo, al mismo coste.
      Opacidades calibradas para el mismo contraste (ΔL*) que en dark. */

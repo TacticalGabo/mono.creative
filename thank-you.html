@@ -394,7 +394,8 @@ if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.
   .grain-overlay{position:fixed;inset:0;pointer-events:none;z-index:2147483000;
     background-image:url('./assets/shared/texture-grain.png');background-repeat:repeat;
     background-size:281.6px 281.6px;   /* grano en pantalla 1.1 px */
-    opacity:.42;mix-blend-mode:overlay;will-change:transform}
+    opacity:.42;mix-blend-mode:overlay;will-change:transform;
+    min-height:100lvh}                 /* móvil: cubre también la franja que destapa la barra del navegador al scrollear */
   /* light: overlay sobre fondo claro devuelve el mismo fondo y el grano
      desaparece; multiply lo oscurece en cualquier fondo, al mismo coste.
      Opacidades calibradas para el mismo contraste (ΔL*) que en dark. */

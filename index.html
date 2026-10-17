@@ -97,6 +97,11 @@ if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.
     try{ F('./components/blobs-cluster-'+(se_ve('d')?'desktop':'mobile')+'.dc.html',{priority:'low'}).then(function(r){ return r.arrayBuffer(); }).catch(function(){}); }catch(e){}
     if(document.readyState==='complete')tras_load(); else addEventListener('load',tras_load,{once:true});
     ['scroll','touchstart','wheel','keydown','pointerdown'].forEach(function(e){ addEventListener(e,soltar,{once:true,passive:true}); });
+    // (2026-10-17) SOLO desktop: se sueltan ya, en el primer hueco libre tras quitar la pantalla de
+    // carga (el hero ya está pintado), y no con el primer scroll: compilar y montar el clúster
+    // (~93 KB de plantilla) caía justo en el scroll rápido y Chrome dejaba capas sin pintar.
+    // Móvil sin cambios.
+    if(se_ve('d')){ if(window.requestIdleCallback)requestIdleCallback(soltar,{timeout:400}); else setTimeout(soltar,200); }
   }
   if(window.__mcArrancado)arrancada(); else addEventListener('mc:arranca',arrancada,{once:true});
   setTimeout(soltar,16000);   // red de seguridad, pase lo que pase
@@ -405,6 +410,10 @@ html.mc-leaving .page{opacity:0;transition:opacity .28s ease-out}
    congelaba la entrada si se bajaba antes de que terminase: la tercera línea
    se quedaba a opacidad 0 y al subir el hero salía incompleto. */
 .idle .h1.accent{animation-play-state:running,paused!important}
+/* (2026-10-17) .quieta = igual que .idle pero con margen 0 (script __mcGlowIO), solo para lo que
+   se repinta en hilo principal: arranca cuando la sección ya está en pantalla. */
+.quieta .fig,.quieta .shot{animation-play-state:paused!important}
+.quieta .h1.accent{animation-play-state:running,paused!important}
 /* El cruce ocurre en .about, y aun así cada escritura de --fade-p recalcula el
    estilo de TODO el documento: .team y el pie están a miles de píxeles del
    viewport y se recalculan igual. Son 116 de los 277 nodos estáticos, un 42 %.
@@ -700,7 +709,7 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
 .hero{position:relative;padding-top:61px}
 .hero-lines{display:flex;flex-direction:column;gap:5.03px}
 .hero-lines .h1:nth-child(2){margin-left:1.4545em}
-.hero-anim{position:relative;top:-3px;display:inline-block;vertical-align:-.18em;margin-left:.34em;left:-6px;width:1.7136em;height:.7085em;color:var(--accent);animation:fx-in .5s ease .85s both}
+.hero-anim{position:relative;top:-3px;display:inline-block;vertical-align:-.18em;margin-left:.34em;left:-6px;width:1.7136em;height:.7085em;color:var(--accent);animation:fx-in .5s ease .85s backwards}
 .hero-anim>*{background:transparent}
 .hero-anim>*{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible}
 .hero-l3{display:flex;flex-wrap:wrap;align-items:flex-start;column-gap:8px;row-gap:44px}
@@ -722,7 +731,9 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
    ir juntas en la misma lista. */
 /* (2026-10-16) la frase verde anima background-position (se repinta en cada frame): capa propia para
    que ese repintado sea solo su franja y no todo el bloque del titular (mismo aspecto, medido píxel a píxel) */
-.h1.accent{will-change:transform}
+/* (2026-10-17) SIN capa propia (se quitó el will-change del 2026-10-16): texto con
+   background-clip:text en capa propia = el fallo documentado arriba (2026-10-04), en Chrome
+   desaparecía al volver por scroll. Repinta su franja dentro de la capa del titular. */
 @keyframes acc-blobs{
   0%{background-position:2% 18%,74% 82%,58% 4%}
   27%{background-position:38% 62%,26% 22%,88% 70%}
@@ -963,6 +974,13 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
   .cluster-m{display:none}
   .cluster-d{display:block;position:relative;width:100%;max-width:302.699px;aspect-ratio:302.699/557;container-type:inline-size;--wb-stage:transparent;--wb-bg:transparent;--wb-blob:var(--bg);--wb-ghost:transparent;--wb-ghost-opacity:0;--wb-stroke:var(--border);--wb-line:var(--border);--wb-label:var(--sticker);--wb-label-alt:var(--sticker);--wb-label-on-accent:var(--sticker-lime);--wb-accent:var(--accent)}
   .cluster-d>*{position:absolute;left:50%;top:50%;transform:translate(-50%,calc(-50% - 70px));width:100%;height:calc(100cqw * 756 / 303)}
+  /* (2026-10-17) Frontera de layout en desktop, igual que .cluster-m (2026-10-04). Faltaba: durante
+     la caída cada frame cambia la 'd' y el script de proximidad de los .btn lee rects en CADA
+     frame de scroll -> layout síncrono del DOCUMENTO ENTERO por frame. El hilo principal se
+     atrasaba y Chrome activaba capas del hero / Selected Work sin rasterizar (desaparecían).
+     Su tamaño ya sale de width + aspect-ratio, no del contenido: el layout no se mueve. Sin
+     'paint': no recorta nada (el SVG sobresale de la caja a propósito). */
+  .cluster-d{contain:size layout}
   .cluster-d img{position:absolute}
   .rule{display:block;order:0;margin-top:0;width:89.2%;max-width:270px;border-top-color:transparent}
   .about-p{grid-column:3;grid-row:1;order:0}
@@ -1123,6 +1141,9 @@ html.ov-arm .oval.ov-in span{transition:color .5s ease,opacity .4s ease .65s}
 .legal{font-family:var(--mono);font-size:11px;line-height:1.47;letter-spacing:.48px;white-space:nowrap;color:var(--footer-legal)}
 .legal-c{grid-row:2;grid-column:2;justify-self:end}
 .legal-r{grid-row:2;grid-column:1;justify-self:start}
+.legal-link{text-decoration:underline;text-underline-offset:2px;transition:color .3s ease}   /* hovers = "Learn more" del tooltip de cookies */
+.legal-link:hover{color:#fff}
+:root[data-theme="light"] .legal-link:hover{color:#5f8300}
 @media (min-width:768px){
   .foot .h7{max-width:520px}
   .foot{margin-top:50px;padding-top:29.244px;padding-bottom:40.8px}
@@ -1152,8 +1173,15 @@ html.ov-arm .oval.ov-in span{transition:color .5s ease,opacity .4s ease .65s}
    sigue respetando cada delay desde cero.
    Si se añade otra animación de entrada, va también en esta lista. */
 .espera .nav,.espera .work,.espera .about,.espera .team,.espera .more,.espera .cta,.espera .foot,.espera .hint,.espera .hero-lines>.h1,.espera .hero-l3>.h1,.espera .hero-anim,.espera .capsule-line,.espera .hero .gA,.espera .hero .gB{animation-play-state:paused!important}
-.nav,.work,.about,.team,.more,.cta,.foot{animation:fx-in .7s ease .1s both}
-.hint{animation:fx-in .7s ease .1s both,hint-bob 1.5s ease-in-out .8s infinite}
+/* (2026-10-17) Entradas en 'backwards', no 'both'. Medido en Chrome (LayerTree): con 'both', al
+   terminar la entrada cada elemento quedaba PARA SIEMPRE en su propia capa de GPU
+   (ActiveOpacityAnimation): nav, work 2048x1108, about, team, more 2048x1443, cta, foot, líneas
+   del hero... ~10 capas gigantes. Mientras caen los blobs, Chrome se quedaba sin memoria de
+   tiles y mostraba esas capas vacías al volver por scroll (el parpadeo; Edge no lo hace).
+   El estado final de fx-in / fx-line / cap-arc es idéntico al estilo base: no cambia nada visible,
+   y durante el delay 'backwards' aplica el primer frame igual que 'both' (.espera intacto). */
+.nav,.work,.about,.team,.more,.cta,.foot{animation:fx-in .7s ease .1s backwards}
+.hint{animation:fx-in .7s ease .1s backwards,hint-bob 1.5s ease-in-out .8s infinite}
 /* Las tres líneas entran EN ORDEN, de arriba abajo. Separación de 300 ms: con
    150 ms se solapaban casi enteras (cada una dura .85 s) y se leían como
    simultáneas. Con el easing de salida, a los ~340 ms una línea ya está puesta,
@@ -1161,9 +1189,12 @@ html.ov-arm .oval.ov-in span{transition:color .5s ease,opacity .4s ease .65s}
    El icono del paréntesis va con la tercera línea, no después: es parte de ella.
    Si se cambian estos tiempos, revisar .capsule-line (1.71 s), que entra justo
    al terminar la tercera. */
-.hero-lines>.h1:nth-child(1){animation:fx-line .85s cubic-bezier(.22,.7,.2,1) .25s both}
-.hero-lines>.h1:nth-child(2){animation:fx-line .85s cubic-bezier(.22,.7,.2,1) .55s both}
-.hero-l3>.h1{animation:fx-line .85s cubic-bezier(.22,.7,.2,1) .85s both}
+/* (2026-10-17) líneas 1-2 en 'backwards', igual que la 3.ª (ver nota de fx-line del 2026-10-04):
+   con 'both' se quedaban para siempre con filter:blur(0)+transform y Chrome (GPU)
+   las dejaba sin repintar al volver de golpe por scroll. Estado final = estilo base. */
+.hero-lines>.h1:nth-child(1){animation:fx-line .85s cubic-bezier(.22,.7,.2,1) .25s backwards}
+.hero-lines>.h1:nth-child(2){animation:fx-line .85s cubic-bezier(.22,.7,.2,1) .55s backwards}
+.hero-l3>.h1{animation:fx-line .85s cubic-bezier(.22,.7,.2,1) .85s backwards}
 
 
 
@@ -1174,9 +1205,9 @@ html.ov-arm .oval.ov-in span{transition:color .5s ease,opacity .4s ease .65s}
 @media (prefers-reduced-motion:reduce){.hero .glow{animation:none!important}}
 .hero .gA{animation:fx-glow 1.1s ease .3s both}
 .hero .gB{animation:fx-glow 1.1s ease .5s both}
-.capsule .arc-l{animation:cap-arc-l .96s cubic-bezier(.22,.75,.25,1) .8s both}
-.capsule .cap-arc:not(.arc-l){animation:cap-arc-r .96s cubic-bezier(.22,.75,.25,1) .8s both}
-.capsule-line{animation:fx-in .7s ease 1.71s both}
+.capsule .arc-l{animation:cap-arc-l .96s cubic-bezier(.22,.75,.25,1) .8s backwards}
+.capsule .cap-arc:not(.arc-l){animation:cap-arc-r .96s cubic-bezier(.22,.75,.25,1) .8s backwards}
+.capsule-line{animation:fx-in .7s ease 1.71s backwards}
 @keyframes hint-bob{0%,100%{transform:translateY(-2px)}50%{transform:translateY(3px)}}
 @keyframes mq-right{from{transform:translateX(-50%)}to{transform:translateX(0)}}
 @keyframes mq-left{from{transform:translateX(0)}to{transform:translateX(-50%)}}
@@ -1372,6 +1403,15 @@ html.ov-arm .oval.ov-in span{transition:color .5s ease,opacity .4s ease .65s}
     }
     function tras_carga(){ setTimeout(precarga_resto,2000); }
     if(document.readyState==='complete')tras_carga(); else addEventListener('load',tras_carga,{once:true});
+    // (2026-10-17) portadas de la pestaña VISIBLE: decodificadas en tiempo libre al quitar la pantalla
+    // de carga (antes del primer scroll), con la misma caché que usa el clic en la pestaña. Las de
+    // las otras pestañas siguen solo con prefetch (9908d9d).
+    function tab0(){
+      if(window.innerWidth<768)return;   // solo desktop (móvil sin cambios)
+      var ric=window.requestIdleCallback?function(f){requestIdleCallback(f,{timeout:3000});}:function(f){setTimeout(f,300);};
+      ric(function(){ precarga(0); });
+    }
+    if(window.__mcArrancado)tab0(); else addEventListener('mc:arranca',tab0,{once:true});
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
@@ -1742,6 +1782,15 @@ html.ov-arm .oval.ov-in span{transition:color .5s ease,opacity .4s ease .65s}
     var secs=document.querySelectorAll('.hero,.work,.about,.more,.cta,.team,.foot');
     for(var k=0;k<secs.length;k++)io.observe(secs[k]);
     if(!secs.length)io.observe(hero);
+    // (2026-10-17) .quieta: lo que se REPINTA en hilo principal (frase verde acc-blobs, mosaico)
+    // solo arranca con la sección YA en pantalla (margen 0). Durante la caída de los blobs el
+    // hilo principal va tarde: si arrancaba antes (120px), Chrome activaba esas capas sin
+    // rasterizar y al volver de golpe desaparecían unos frames. Las manchas siguen con .idle.
+    var ioq=new IntersectionObserver(function(es){
+      for(var i=0;es.length>i;i++)es[i].target.classList.toggle('quieta',!es[i].isIntersecting);
+    });
+    var rep=document.querySelectorAll('.hero,.work');
+    for(var q=0;q<rep.length;q++)ioq.observe(rep[q]);
     // Segundo observer, sobre cada mancha y con más margen que el de .idle:
     // .idle pausa la animación de la sección; esto quita la mancha del
     // pipeline (.glow.lejos, ver el CSS). Se observa la mancha y no la sección
@@ -1789,6 +1838,11 @@ html.ov-arm .oval.ov-in span{transition:color .5s ease,opacity .4s ease .65s}
       c.className = 'cap-caret';
       el.appendChild(c);
     }
+    // (2026-10-17) con el hero fuera de pantalla (.quieta, margen 0) no se escribe NI UNA letra:
+    // antes solo se miraba al empezar la frase y el tecleo seguía fuera de vista, repintando la
+    // fila del titular mientras Chrome la daba por invisible (al volver de golpe desaparecía).
+    // Se espera y se sigue en la misma letra al volver.
+    function fuera(){ var hr=document.querySelector('.hero'); return !!(hr&&hr.classList.contains('quieta')); }
     function type(from,to,done){
       var el=document.querySelector('.capsule-line');
       if(!el)return done&&done();
@@ -1799,11 +1853,13 @@ html.ov-arm .oval.ov-in span{transition:color .5s ease,opacity .4s ease .65s}
       (function erase(){
         var e=document.querySelector('.capsule-line');
         if(!e)return done&&done();
+        if(fuera())return setTimeout(erase,200);
         if(back<=0){
           var fwd=0, writems=34;
           setTimeout(function write(){
             var w=document.querySelector('.capsule-line');
             if(!w)return done&&done();
+            if(fuera())return setTimeout(write,200);
             fwd++;
             paint(w, to.slice(0,fwd));
             if(fwd<to.length)setTimeout(write, beat(to.charAt(fwd-1), writems));
@@ -2436,7 +2492,7 @@ Then we set the base for launch and growth, with clear files, clean rules and <b
     <div class="legal-row">
       <span class="foot-marks"><span class="foot-anim"><dc-import name="brandmark-fusion" hint-size="100%,100%"></dc-import></span></span>
       <span class="legal legal-c">© 2026 mono.creative</span>
-      <span class="legal legal-r">All rights reserved</span>
+      <a class="legal legal-r legal-link" href="./terms.html">Privacy &amp; Cookies</a>
     </div>
   </footer>
 </div>
@@ -2586,6 +2642,12 @@ class Component extends DCLogic {
 <style>
   .glow.pre{filter:none!important;background:none!important}
   .glow>img.glow-px{position:absolute;pointer-events:none;max-width:none;will-change:transform}
+  /* (2026-10-17) Manchas del tema claro (.gl) fuera del raster mientras el tema es dark:
+     a opacidad 0 Chrome las seguía rasterizando (will-change) = 5 texturas grandes en GPU que,
+     a 2048px, le hacían soltar las del hero/Selected Work -> parpadeo al volver de golpe.
+     visibility (no display, no will-change): sin layout ni capas nuevas. El retardo .45s =
+     el del fundido de --fade-p, así al pasar a dark se ocultan cuando ya están a 0. */
+  :root:not([data-theme="light"]) .glow.gl{visibility:hidden;transition:visibility 0s .45s}
 </style>
 <script>
 (function(){
@@ -2605,7 +2667,8 @@ class Component extends DCLogic {
     return {x:px(p[0],w),y:px(p[1],h)};
   }
   function horno(el){
-    if(el.querySelector('img.glow-px'))return;
+    if(el.querySelector('img.glow-px')||el.__horno)return;
+    el.__horno=1;   // (2026-10-17) corre() puede entrar dos veces (montaje + mc:arranca): una sola imagen por mancha
     var w=parseFloat(el.style.width), h=parseFloat(el.style.height);
     var m=/blur\(\s*([\d.]+)px/.exec(el.style.filter||'');
     if(!(w>0)||!(h>0)||!m)return;
@@ -2633,10 +2696,21 @@ class Component extends DCLogic {
     if(ok===null)ok=soporta();
     if(!ok)return;
     var cola=[].slice.call(document.querySelectorAll('.glow')).filter(function(g){ return getComputedStyle(g).display!=='none'; });
-    var ric=window.requestIdleCallback||function(f){ return setTimeout(f,40); };
+    // (2026-10-17) timeout 120 (como prepare() de los componentes): sin él, durante la caída
+    // de los blobs (desktop, hilo principal sin idle) la cola se paraba y los cambios a imagen
+    // caían todos al volver de golpe al hero = parpadeo del hero y de Selected Work.
+    var ric=window.requestIdleCallback?function(f){ return requestIdleCallback(f,{timeout:120}); }:function(f){ return setTimeout(f,40); };
     (function paso(){ var g=cola.shift(); if(!g)return; try{ horno(g); }catch(e){} ric(paso); })();
   }
   if(window.__mcArrancado)corre(); else addEventListener('mc:arranca',corre,{once:true});
+  // (2026-10-17) se empieza en cuanto la página está montada, DEBAJO de la pantalla de carga: cada
+  // cambio a imagen crea una capa nueva sin pintar, y hecho mientras se scrollea salía cortada
+  // (mancha con un corte recto). mc:arranca queda de red por si el montaje llega después.
+  (function montada(n){
+    if(window.__mcArrancado||window.innerWidth<768)return;   // solo desktop: móvil sigue horneando tras mc:arranca
+    if(document.querySelector('.page')&&!document.querySelector('x-dc'))return corre();
+    if(n<300)setTimeout(function(){ montada(n+1); },50);
+  })(0);
   // las manchas del otro ancho (.g-d / .g-m) se hornean si ese ancho llega a verse
   if(window.matchMedia){
     var mq=matchMedia('(min-width:768px)');
@@ -2650,7 +2724,8 @@ class Component extends DCLogic {
   .grain-overlay{position:fixed;inset:0;pointer-events:none;z-index:2147483000;
     background-image:url('./assets/shared/texture-grain.png');background-repeat:repeat;
     background-size:281.6px 281.6px;   /* grano en pantalla 1.1 px */
-    opacity:.42;mix-blend-mode:overlay;will-change:transform}
+    opacity:.42;mix-blend-mode:overlay;will-change:transform;
+    min-height:100lvh}                 /* móvil: cubre también la franja que destapa la barra del navegador al scrollear */
   /* light: overlay sobre fondo claro devuelve el mismo fondo y el grano
      desaparece; multiply lo oscurece en cualquier fondo, al mismo coste.
      Opacidades calibradas para el mismo contraste (ΔL*) que en dark. */
@@ -2661,10 +2736,12 @@ class Component extends DCLogic {
 <!-- COOKIE-TOOLTIP:START (solo primera visita; flag localStorage 'mc-ck') -->
 <style>
 .ck{position:fixed;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:900;display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;padding:12px 12px 12px 16px;background:rgba(16,25,19,.87);-webkit-backdrop-filter:blur(14px) saturate(140%);backdrop-filter:blur(14px) saturate(140%);border:.8px solid #2c513a;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.06);transition:opacity .4s ease,transform .4s ease,background-color .45s ease,border-color .45s ease,box-shadow .45s ease}
-.ck.in{animation:ck-in .6s cubic-bezier(.22,.7,.2,1) both}
+.ck.in{animation:ck-in .6s cubic-bezier(.22,.7,.2,1) backwards}   /* backwards, no both: el fill final tapaba la salida de .off */
 @keyframes ck-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-.ck.off{opacity:0;transform:translateY(12px);pointer-events:none}
+.ck.off{opacity:0;transform:translateY(6px);pointer-events:none}
 .ck p{flex:1 1 160px;margin:0;font-family:var(--sans);font-size:13px;font-weight:300;line-height:20px;color:#87918BEB}
+.ck-more{color:inherit;text-decoration:underline;text-underline-offset:2px;transition:color .3s ease}
+.ck-more:hover{color:#fff}
 .ck-a{display:flex;align-items:center;gap:8px}
 .ck-btn{height:36px;padding:0 14px;border-radius:999px;font-family:var(--mono);font-size:12px;line-height:1;cursor:pointer;white-space:nowrap;transition:background .3s ease,border-color .3s ease}
 .ck-ok{background:#b8ff00;border:1px solid #b8ff00;color:#101913}
@@ -2693,11 +2770,12 @@ class Component extends DCLogic {
 .ck-x{position:absolute;top:4px;left:128.4px}
 }
 /* LIGHT (standalone mono-home-light-cookies): glass claro = blanco 55% + blur 16 + saturate 160, borde #bec8c2, sombra suave + brillo interior */
-:root[data-theme="light"] .ck{background:rgba(255,255,255,.70);-webkit-backdrop-filter:blur(16px) saturate(160%);backdrop-filter:blur(16px) saturate(160%);border:1px solid #bec8c2;box-shadow:0 10px 30px rgba(16,25,19,.08)}
+:root[data-theme="light"] .ck{background:rgba(255,255,255,.80);-webkit-backdrop-filter:blur(16px) saturate(160%);backdrop-filter:blur(16px) saturate(160%);border:1px solid #bec8c2;box-shadow:0 10px 30px rgba(16,25,19,.08)}
 :root[data-theme="light"] .ck p{color:#101913}
 :root[data-theme="light"] .ck-ok{background:#9bd700;border-color:#9bd700;color:#232825}
 :root[data-theme="light"] .ck-ok:hover{background:#7baa00;border-color:#7baa00}
 :root[data-theme="light"] .ck-x:hover{color:#101913}
+:root[data-theme="light"] .ck-more:hover{color:#5f8300}
 :root[data-theme="light"] .ck-dd{border-color:#bec8c2;color:#414b45}
 :root[data-theme="light"] .ck-dd:hover{border-color:#7baa00}
 :root[data-theme="light"] .ck-menu{background:#fff;border:1px solid #bec8c2}
@@ -2710,7 +2788,7 @@ class Component extends DCLogic {
 (function(){
   var K='mc-ck';
   try{if(localStorage.getItem(K))return}catch(_){}
-  var HTML='<p>Cookies make our<br>site better.</p><div class="ck-a"><div class="ck-lang"><button class="ck-btn ck-dd" type="button" aria-haspopup="listbox"><span>English</span><svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.2"></path></svg></button><div class="ck-menu" role="listbox"><button type="button" class="on">English</button><button type="button">Spanish</button></div></div><button class="ck-btn ck-ok" type="button">Accept cookies</button></div><button class="ck-x" type="button" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 1l8 8M9 1L1 9" stroke="currentColor" stroke-width="1.2"></path></svg></button>';
+  var HTML='<p>Cookies make our<br>site better. <a class="ck-more" href="./terms.html">Learn more</a></p><div class="ck-a"><div class="ck-lang"><button class="ck-btn ck-dd" type="button" aria-haspopup="listbox"><span>English</span><svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.2"></path></svg></button><div class="ck-menu" role="listbox"><button type="button" class="on">English</button><button type="button">Spanish</button></div></div><button class="ck-btn ck-ok" type="button">Accept cookies</button></div><button class="ck-x" type="button" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 1l8 8M9 1L1 9" stroke="currentColor" stroke-width="1.2"></path></svg></button>';
   function show(){
     if(document.documentElement.classList.contains('espera'))return setTimeout(show,300);
     var c=document.createElement('div');c.className='ck in';c.setAttribute('role','region');c.setAttribute('aria-label','Cookies');c.innerHTML=HTML;
@@ -2725,8 +2803,10 @@ class Component extends DCLogic {
     });
     document.addEventListener('click',function(e){if(!e.target.closest('.ck-lang'))lang.classList.remove('open')});
   }
-  function start(){setTimeout(show,1200)}
-  if(document.readyState==='complete')start();else addEventListener('load',start);
+  // entra al acabar la coreografía de entrada: 2 s desde que se suelta la pantalla de carga
+  // (mc:arranca; la línea de la cápsula, última, arranca a 1,71 s). Antes: load + 1,2 s.
+  function start(){setTimeout(show,2000)}
+  if(window.__mcArrancado)start();else addEventListener('mc:arranca',start,{once:true});
 })();
 </script>
 <!-- COOKIE-TOOLTIP:END -->
