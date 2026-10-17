@@ -255,12 +255,28 @@ html.mc-leaving .page{opacity:0;transition:opacity .28s ease-out}
    .hs = tira con scroll horizontal (annotation Dev de Figma); .xc = recorte fijo */
 @media (max-width:767.98px){
   .hs,.xc{width:100cqw;overflow:hidden}
-  .hs{overflow-x:auto;scrollbar-width:none;overscroll-behavior-x:contain}
+  .hs{overflow-x:auto;scrollbar-width:none;overscroll-behavior-x:contain;display:grid}   /* grid: celda de la barra (abajo); fijo desde la carga para no rehacer la caja (y su scrollLeft) al activarla */
   .hs::-webkit-scrollbar{display:none}
   :is(.hs,.xc)>.media{flex:none}
   .wrap :is(.hs,.xc){margin-left:calc(-1 * var(--m))}
   .hs.hs-on>.media{margin-left:0}   /* con JS: pieza entera recorrible; arranca con el offset de Figma (scrollLeft) */
+  /* barra de scroll propia (2026-10-17; .hs-sb la pone js/case-study.js si la tira desborda): track ::before y
+     thumb ::after en una 2a fila del grid, sticky a la izquierda (no viajan con la pieza: su celda mide lo que la
+     pieza), 6 px montados sobre el borde inferior (alto del bloque igual). Ancho del thumb = --hs-w (JS); posición
+     por scroll-timeline (compositor) o, sin soporte, --hs-x (JS). Entra con la imagen (ir-in / ir-done) */
+  .hs.hs-sb::before,.hs.hs-sb::after{content:"";grid-area:2/1;position:sticky;left:0;z-index:1;height:6px;margin-top:-6px;pointer-events:none;
+    transition:opacity 1s cubic-bezier(.33,0,.2,1),background-color .4s ease}
+  .hs.hs-sb::before{width:100cqw;background-color:rgb(35 40 37/.7)}
+  :root[data-theme="dark"] .hs.hs-sb::before{background-color:rgb(35 40 37/.5)}
+  .hs.hs-sb::after{width:var(--hs-w);background-color:#BEC8C2;transform:translateX(var(--hs-x,0px))}
+  html.js .hs.hs-sb:has(>.media:not(.ir-in):not(.ir-done))::before,
+  html.js .hs.hs-sb:has(>.media:not(.ir-in):not(.ir-done))::after{opacity:0}
+  @supports (animation-timeline:scroll()){
+    .hs.hs-sb::after{animation-name:hs-x;animation-timing-function:linear;animation-fill-mode:both;
+      animation-duration:1ms;animation-duration:auto;animation-timeline:scroll(nearest inline)}
+  }
 }
+@keyframes hs-x{from{transform:translateX(0)}to{transform:translateX(calc(100cqw - var(--hs-w)))}}
 @media (min-width:768px){.hs,.xc{display:contents}}
 .accent{color:var(--accent)}
 .br-d{display:none}

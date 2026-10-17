@@ -278,6 +278,22 @@
        como en Figma (su margin-left negativo pasa a scrollLeft) */
     [].forEach.call(main.querySelectorAll('.hs'),function(h){var m=h.firstElementChild,x=m?-parseFloat(getComputedStyle(m).marginLeft):0;
       if(x>0){h.classList.add('hs-on');h.scrollLeft=x}});
+    /* barra de scroll de esas tiras (.hs-sb, CSS en case-study.css): se mide al iniciar y en resize con cambio de
+       ancho (no con la barra del navegador); ancho del thumb = vista/pieza. Con scroll-timeline la posición va por
+       CSS; sin él, por frame mientras se arrastra la tira: lee solo scrollLeft y escribe --hs-x */
+    var hss=[].slice.call(main.querySelectorAll('.hs')), hsTl=!!(window.CSS&&CSS.supports&&CSS.supports('animation-timeline','scroll()')), hsW=0;
+    function hsPos(h){if(h.__sbm)h.style.setProperty('--hs-x',(Math.min(1,Math.max(0,h.scrollLeft/h.__sbm))*(h.__sbc-h.__sbw)).toFixed(1)+'px')}
+    function hsMeasure(){
+      if(window.innerWidth===hsW)return; hsW=window.innerWidth;
+      hss.forEach(function(h){var c=h.clientWidth,s=h.scrollWidth,on=c>0&&s>c+1;
+        if(on){h.__sbc=c;h.__sbm=s-c;h.__sbw=Math.max(24,Math.round(c*c/s));h.style.setProperty('--hs-w',h.__sbw+'px');if(!hsTl)hsPos(h)}
+        else h.__sbm=0;
+        h.classList.toggle('hs-sb',on)});
+    }
+    if(hss.length){
+      hsMeasure(); addEventListener('resize',hsMeasure);
+      if(!hsTl)hss.forEach(function(h){var q=0;h.addEventListener('scroll',function(){if(!q){q=1;requestAnimationFrame(function(){q=0;hsPos(h)})}},{passive:true})});
+    }
     /* vídeos con buffer acotado: src (preload metadata) a <=3 pantallas; play solo visibles (+25 %),
        pausa fuera; a más de 3 pantallas se suelta el src (libera descarga, decodificador y memoria) y
        se vuelve a pedir al acercarse (caché HTTP). El poster es el fondo del hueco: nunca queda vacío */
