@@ -274,10 +274,6 @@
         var m=/url\(["']?([^"')]+)["']?\)/.exec(getComputedStyle(n).backgroundImage||'');if(m)out.push(m[1])});
       return out;
     }
-    /* tiras con scroll horizontal (mobile, .hs): la pieza se puede recorrer entera y arranca desplazada
-       como en Figma (su margin-left negativo pasa a scrollLeft) */
-    [].forEach.call(main.querySelectorAll('.hs'),function(h){var m=h.firstElementChild,x=m?-parseFloat(getComputedStyle(m).marginLeft):0;
-      if(x>0){h.classList.add('hs-on');h.scrollLeft=x}});
     /* barra de scroll de esas tiras (.hs-sb, CSS en case-study.css): se mide al iniciar y en resize con cambio de
        ancho (no con la barra del navegador); ancho del thumb = vista/pieza. Con scroll-timeline la posición va por
        CSS; sin él, por frame mientras se arrastra la tira: lee solo scrollLeft y escribe --hs-x */

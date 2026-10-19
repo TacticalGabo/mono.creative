@@ -259,7 +259,7 @@ html.mc-leaving .page{opacity:0;transition:opacity .28s ease-out}
   .hs::-webkit-scrollbar{display:none}
   :is(.hs,.xc)>.media{flex:none}
   .wrap :is(.hs,.xc){margin-left:calc(-1 * var(--m))}
-  .hs.hs-on>.media{margin-left:0}   /* con JS: pieza entera recorrible; arranca con el offset de Figma (scrollLeft) */
+  /* el margin-left negativo de Figma se mantiene: la tira arranca ahí y no se puede volver más a la izquierda (2026-10-19) */
   /* barra de scroll propia (2026-10-17; .hs-sb la pone js/case-study.js si la tira desborda): track ::before y
      thumb ::after en una 2a fila del grid, sticky a la izquierda (no viajan con la pieza: su celda mide lo que la
      pieza), 6 px montados sobre el borde inferior (alto del bloque igual). Ancho del thumb = --hs-w (JS); posición

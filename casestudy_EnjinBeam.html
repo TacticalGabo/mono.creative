@@ -16,7 +16,7 @@
 @font-face{font-family:'Plus Jakarta Sans';font-style:italic;font-weight:200 800;font-display:swap;src:url(./fonts/plus-jakarta-sans/webfont/PlusJakartaSans-200-800-italic-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 @font-face{font-family:'Space Mono';font-style:normal;font-weight:400;font-display:swap;src:url(./fonts/space-mono/webfont/SpaceMono-400-normal-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 </style>
-<link rel="stylesheet" href="./css/case-study.css?v=17">
+<link rel="stylesheet" href="./css/case-study.css?v=18">
 <!-- ASSETS — hero (LCP): precarga solo la del breakpoint activo -->
 <link rel="preload" as="image" href="./assets/casestudy_EnjinBeam/01-hero.webp" media="(min-width:768px)" fetchpriority="high">
 <link rel="preload" as="image" href="./assets/casestudy_EnjinBeam/01-hero-mobile.webp" media="(max-width:767.98px)" fetchpriority="high">
@@ -40,7 +40,7 @@ if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.
 <link rel="preload" as="font" type="font/woff2" crossorigin href="./fonts/plus-jakarta-sans/webfont/PlusJakartaSans-200-800-normal-latin.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="./fonts/space-mono/webfont/SpaceMono-400-normal-latin.woff2">
 <script src="./vendor/support.js"></script>
-<script src="./js/case-study.js?v=15" defer></script>
+<script src="./js/case-study.js?v=16" defer></script>
 </head>
 <body>
 <x-dc>
@@ -167,6 +167,9 @@ html.js main .dc__vid.media.ir-in:not(.ba__img){animation:ir-fade 1s cubic-bezie
   .im__col{width:calc(100% * 718 / 1056);margin:40px auto 0}
   .im__vid{width:100%;margin:0;aspect-ratio:718/409;border-radius:30px}
   .im__col .csc__bullets{max-width:none;margin-top:40px}
+}
+@media (max-width:767.98px){ /* tira .hs: tope derecho = margen visible izquierdo; recorte 86 de 710 por la derecha, misma escala/posición (2026-10-19) */
+  .hs>.acc__left[data-asset="access-left"]{width:calc(100cqw * 624 / 360);aspect-ratio:624/460;background-size:calc(100cqw * 711.62 / 360) calc(100cqw * 460.00 / 360);background-position:calc(100cqw * -0.81 / 360) 0}
 }
 </style>
 
