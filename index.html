@@ -2733,7 +2733,7 @@ class Component extends DCLogic {
   :root[data-theme="light"] .grain-overlay{mix-blend-mode:multiply;opacity:.14}
 </style>
 <!-- GRAIN-OVERLAY:END -->
-<!-- COOKIE-TOOLTIP:START (solo primera visita; flag localStorage 'mc-ck') -->
+<!-- COOKIE-TOOLTIP:START (sale hasta aceptar; flag localStorage 'mc-ck' solo al aceptar) -->
 <style>
 .ck{position:fixed;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:900;display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;padding:12px 12px 12px 16px;background:rgba(16,25,19,.87);-webkit-backdrop-filter:blur(14px) saturate(140%);backdrop-filter:blur(14px) saturate(140%);border:.8px solid #2c513a;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.06);transition:opacity .4s ease,transform .4s ease,background-color .45s ease,border-color .45s ease,box-shadow .45s ease}
 .ck.in{animation:ck-in .6s cubic-bezier(.22,.7,.2,1) backwards}   /* backwards, no both: el fill final tapaba la salida de .off */
@@ -2794,9 +2794,11 @@ class Component extends DCLogic {
     var c=document.createElement('div');c.className='ck in';c.setAttribute('role','region');c.setAttribute('aria-label','Cookies');c.innerHTML=HTML;
     document.body.appendChild(c);
     var lang=c.querySelector('.ck-lang');
-    function done(){try{localStorage.setItem(K,'1')}catch(_){}c.classList.add('off');setTimeout(function(){c.remove()},500)}
+    // aceptar guarda el flag (no vuelve); cerrar con la X solo lo oculta (vuelve en la próxima carga)
+    function done(ok){if(ok)try{localStorage.setItem(K,'1')}catch(_){}c.classList.add('off');setTimeout(function(){c.remove()},500)}
     c.addEventListener('click',function(e){
-      if(e.target.closest('.ck-ok')||e.target.closest('.ck-x'))return done();
+      if(e.target.closest('.ck-ok'))return done(true);
+      if(e.target.closest('.ck-x'))return done(false);
       if(e.target.closest('.ck-dd')){lang.classList.toggle('open');return}
       var o=e.target.closest('.ck-menu button');
       if(o){lang.querySelectorAll('.ck-menu button').forEach(function(b){b.classList.toggle('on',b===o)});lang.querySelector('.ck-dd span').textContent=o.textContent;lang.classList.remove('open')}
