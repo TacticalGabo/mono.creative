@@ -493,6 +493,13 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
 .legal{font-family:var(--mono);font-size:11px;line-height:1.47;letter-spacing:.48px;white-space:nowrap;color:var(--footer-legal)}
 .legal-c{grid-row:2;grid-column:2;justify-self:end}
 .legal-r{grid-row:2;grid-column:1;justify-self:start}
+/* toggle de idioma (reemplaza "© 2026 mono.creative"; ref. reference.svg 56x18): globo 13/12 em + 4px + En/Es, activo en Space Mono 700 */
+.lang-tg{display:inline-flex;align-items:center}
+.lang-ico{width:1.0833em;height:1.0833em;margin-right:4px;flex:none;background:currentColor;-webkit-mask:url(../assets/shared/icon-language-13x13.svg) center/100% 100% no-repeat;mask:url(../assets/shared/icon-language-13x13.svg) center/100% 100% no-repeat}
+.lang-b{font:inherit;letter-spacing:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer;transition:color .3s ease}
+.lang-b[aria-pressed="true"]{font-weight:700;cursor:default}
+.lang-b[aria-pressed="false"]:hover{color:#fff}
+:root[data-theme="light"] .lang-b[aria-pressed="false"]:hover{color:#5f8300}
 .legal-link{text-decoration:underline;text-underline-offset:2px;transition:color .3s ease}   /* hovers = "Learn more" del tooltip de cookies */
 .legal-link:hover{color:#fff}
 :root[data-theme="light"] .legal-link:hover{color:#5f8300}
