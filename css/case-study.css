@@ -291,9 +291,12 @@ html .page,html .page *{cursor:none}
 .glow{position:absolute;background:var(--glow);border-radius:54% 46% 38% 62%/56% 44% 62% 38%;pointer-events:none;will-change:transform,opacity}
 @media (min-width:768px){.cta .glow.g-d{animation:blot 25s ease-in-out .6s infinite}}
 .cta .glow.g-m{animation:blot 26s ease-in-out .8s infinite}
-.idle .cta .glow.g-d,.idle .cta .glow.g-m{animation-play-state:paused}
+.idle .cta .glow.g-d,.idle .cta .glow.g-m,.cta.idle .glow.g-d,.cta.idle .glow.g-m{animation-play-state:paused}   /* .cta.idle: js/case-study.js (__mcGlowPx) */
 @keyframes blot{0%{translate:0 0;scale:1}23%{translate:4% -7%;scale:1.14}47%{translate:-5% 5%;scale:.92}72%{translate:6% 3%;scale:1.09}100%{translate:0 0;scale:1}}
 @media (prefers-reduced-motion:reduce){.cta .glow.g-d,.cta .glow.g-m{animation:none}}
+/* (2026-10-19) manchas pre-desenfocadas (script __mcGlowPx de js/case-study.js, igual que el home) */
+.glow.pre{filter:none!important;background:none!important}
+.glow>img.glow-px{position:absolute;pointer-events:none;max-width:none;will-change:transform}
 @media (max-width:767.98px){.g-d{display:none}}
 @media (min-width:768px){.g-m{display:none}}
 @media (min-width:441px) and (max-width:767.9px){.cta{overflow:visible;clip-path:inset(-400px 0)}}
@@ -539,6 +542,7 @@ html .page .sc-placeholder::before{display:none}
 @keyframes fx-in-b{from{opacity:0}to{opacity:1}}
 .js .fx{opacity:0}
 .js .fx.is-in{animation:fx-in-b .6s ease both}
+.js .fx.is-in.fx-w{animation-delay:.1s}   /* entra con el header (ver "HEADER Y CONTENIDO A LA VEZ"): mismo .1s de retardo que .nav */
 .js .fx-line{opacity:0}
 .js .is-in .fx-line{animation:fx-in-b .7s ease both;animation-delay:calc(.1s + var(--i) * .3s)}
 @media (prefers-reduced-motion:reduce){.js .fx,.js .fx.is-in,.js .fx-line,.js .is-in .fx-line{opacity:1;animation:none}}
@@ -769,6 +773,16 @@ html.js:not(.hero-ok) main .cs-hero .media{animation-play-state:paused}
    componente por JS) tenga trazo: html.logo-ok (o tope de 1,2 s). El logo además tiene su
    propio fade (html.logo-drawn): si llega tarde, entra suave y no de golpe. */
 html.js:not(.logo-ok) .page .nav{animation-play-state:paused}
+/* (2026-10-19) HEADER Y CONTENIDO A LA VEZ, como el home (que congela todo bajo su pantalla de carga con .espera):
+   mientras el header espera a su logo (html.logo-ok: logo con trazo o tope de 1,2 s), todas las entradas de la
+   página esperan con él, congeladas en su primer frame; al llegar logo-ok arrancan juntas desde cero (play-state,
+   no animation:none: cada delay se respeta). Solo páginas con header (:has(.nav)): thank-you carga este CSS sin
+   header ni case-study.js y nunca tendría logo-ok. Sin :has() la regla se descarta = comportamiento anterior.
+   Las transiciones no se congelan (las de entrada por transición, Constraints, están bajo el pliegue). */
+html.js:not(.logo-ok) .page:has(.nav) :is(main,.cta,.foot),
+html.js:not(.logo-ok) .page:has(.nav) :is(main,.cta,.foot) *,
+html.js:not(.logo-ok) .page:has(.nav) :is(main,.cta,.foot) *::before,
+html.js:not(.logo-ok) .page:has(.nav) :is(main,.cta,.foot) *::after{animation-play-state:paused!important}
 html.js .page .nav :is(.nav-anim,.nav-anim-m){opacity:0;transition:opacity .6s ease}
 html.js.logo-drawn .page .nav :is(.nav-anim,.nav-anim-m){opacity:1}
 @keyframes ir-wipe{from{clip-path:inset(0 0 100% 0)}}

@@ -1,0 +1,45 @@
+/* ==========================================================================
+   mono.creative — 404 (404.html)
+   Fuente: assets "404 Desktop.html" (1440) y "404 Mobile.html" (360), 2026-10-19.
+   Header, botón, footer y tokens = los del sitio (case-study.css). Aquí solo el bloque 404.
+   < 768 (Figma 360): 404 de 140px, texto y botón apilados (gap 32).
+   ≥ 768 (Figma 1440): 404 de 420px a 1440 (escala con el ancho, 29.17cqw), botón centrado sobre el 404.
+   ========================================================================== */
+:root{--e404-num:var(--forest-700)}
+:root[data-theme="dark"]{--e404-num:var(--neutral-0)}
+
+/* la página ocupa al menos la pantalla: el 404 se centra entre header y footer */
+.page{min-height:100vh;min-height:100svh;display:flex;flex-direction:column}
+.e404-main{flex:1;display:flex;flex-direction:column;position:relative}
+.e404{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:32px;padding:48px 16px 64px;text-align:center}
+.e404__mark{display:contents}
+.e404__num{display:flex;margin-top:-16px;font:600 140px/.83 var(--ff-sans);color:color-mix(in srgb,var(--e404-num) 10%,transparent);user-select:none}
+.e404__num span+span{margin-left:-.05em}
+.e404 .e404__btn{order:2;margin:0;flex:none}
+.e404__text{order:1;max-width:300px;font:var(--t-body-m);color:var(--cap-weak);text-wrap:pretty}
+.e404__text strong{font-weight:700;color:var(--cap-strong)}
+
+/* footer: solo la fila legal, pegada al bloque 404 */
+.e404-foot{margin-top:0}
+.e404-foot .foot-rule{margin-top:0}
+
+@media (min-width:768px){
+  .e404{gap:48px;padding:0 0 64px}
+  /* 404 y botón en la misma celda: el botón queda centrado sobre el "0" (el 404 es simétrico) */
+  .e404__mark{display:grid;place-items:center;margin-top:-16px}
+  .e404__mark>*{grid-area:1/1}
+  .e404__num{margin-top:0;font-size:min(420px,29.17cqw)}
+  .e404 .e404__btn{order:0;translate:0 17.2px}
+  .e404__text{max-width:360px}
+  .e404-foot{padding-top:0}
+}
+
+/* mancha superior del home (hero .gB): detrás del 404; misma animación que el home */
+.e404{position:relative;z-index:1}
+@keyframes fx-glow{from{opacity:0}}
+.e404-main .gB{will-change:transform,opacity}
+.e404-main .gB.g-m{animation:fx-glow 1.1s ease .5s both,blot 21s ease-in-out 1.5s infinite reverse}
+@media (min-width:768px){.e404-main .gB.g-d{animation:fx-glow 1.1s ease .5s both,blot 22s ease-in-out 1.6s infinite reverse}}
+/* sin pausa fuera de pantalla: la página mide ~1 pantalla (scroll máx. = alto del footer), la mancha siempre está a la vista */
+@media (prefers-reduced-motion:reduce){.e404-main .glow{animation:none!important}}
+:root:not([data-theme="light"]) .glow.gl{visibility:hidden;transition:visibility 0s .45s}

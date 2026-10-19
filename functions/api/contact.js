@@ -3,7 +3,6 @@ import rules from '../../js/contact-rules.js';
 const MAX_FILE_BYTES = 20 * 1024 * 1024;
 const MAX_JSON_BYTES = 32 * 1024;
 const AUTH_LIFETIME_MS = 15 * 60 * 1000;
-const DELIVERY_LEASE_MS = 45 * 1000;
 const SERVICE_OPTIONS = ['UX/UI Design', 'Brand Direction', 'Illustration', 'Packaging', 'Motion design', '3D Art', 'Not sure yet'];
 const TIME_OPTIONS = ['09:00', '10:00', '11:00', '14:00', '15:00', '16:00'];
 const ID_PATTERN = /^[A-Za-z0-9_-]{16,80}$/;
@@ -29,9 +28,8 @@ function json(value, status = 200, extraHeaders = {}) {
 
 function configuration(env) {
   const origins = String(env.CONTACT_ALLOWED_ORIGINS || '').split(',').map((value) => value.trim()).filter(Boolean);
-  if (!env.CONTACT_BUCKET || !env.TURNSTILE_SITE_KEY || !env.TURNSTILE_SECRET_KEY ||
-      typeof env.CONTACT_SIGNING_KEY !== 'string' || env.CONTACT_SIGNING_KEY.length < 32 ||
-      typeof env.MAKE_DOWNLOAD_TOKEN !== 'string' || env.MAKE_DOWNLOAD_TOKEN.length < 32 || !origins.length) {
+  if (!env.TURNSTILE_SITE_KEY || !env.TURNSTILE_SECRET_KEY ||
+      typeof env.CONTACT_SIGNING_KEY !== 'string' || env.CONTACT_SIGNING_KEY.length < 32 || !origins.length) {
     fail(503, 'not_configured', 'The contact form is not configured yet.');
   }
   for (const origin of origins) {
@@ -235,9 +233,6 @@ async function verifyTurnstile(request, env, token, hostname) {
   if (result.success !== true || result.action !== 'contact' || result.hostname !== hostname) fail(403, 'verification_failed', 'The security check expired or failed. Please try again.');
 }
 
-function attachmentKey(claims) { return 'contact/attachments/' + claims.id + '/' + claims.hash; }
-function receiptKey(id) { return 'contact/receipts/' + id + '.json'; }
-
 async function authorize(request, env, url) {
   const data = await readJson(request);
   const payload = normalizePayload(data.payload);
@@ -250,8 +245,12 @@ async function authorize(request, env, url) {
   return json({ authorization, uploadUrl: attachment ? '/api/contact/upload' : null, expiresAt: new Date(claims.exp).toISOString() });
 }
 
-function matchesAttachment(object, claims) {
-  return object && object.size === claims.attachment.size && object.customMetadata?.requestId === claims.id && object.customMetadata?.payloadHash === claims.hash;
+// (2026-10-19) R2 removed. Attachment storage is pending: Google Drive (see mono.tech/contact-form-attachments-drive.md).
+// Implement storeAttachment() to stream the authorized PDF to Drive and return its reference
+// ({ provider: 'google_drive', id, name, size, mimeType, webViewLink }).
+async function storeAttachment(request, env, claims) {
+  await request.body?.cancel();
+  fail(501, 'attachment_storage_pending', 'File uploads are not available yet.');
 }
 
 async function upload(request, env, url) {
@@ -263,51 +262,8 @@ async function upload(request, env, url) {
   const length = request.headers.get('Content-Length');
   if (length && (!/^\d+$/.test(length) || Number(length) !== claims.attachment.size)) fail(413, 'attachment_size_mismatch', 'The file size does not match the authorization.');
   if (!request.body) fail(400, 'missing_attachment', 'The file is missing.');
-  const key = attachmentKey(claims);
-  const existing = await env.CONTACT_BUCKET.head(key);
-  if (existing) {
-    await request.body.cancel();
-    if (!matchesAttachment(existing, claims)) fail(409, 'attachment_conflict', 'This attachment cannot be replaced.');
-    return json({ ok: true, requestId: claims.id });
-  }
-  // Native exact-length enforcement avoids buffering a 20 MiB file in Worker memory.
-  // R2's conditional creation is the final guard against simultaneous uploads/replays.
-  const stream = new FixedLengthStream(claims.attachment.size);
-  const abort = new AbortController();
-  let pumpError;
-  const pumping = request.body.pipeTo(stream.writable, { signal: abort.signal }).catch((error) => { pumpError = error; });
-  let object;
-  try {
-    object = await env.CONTACT_BUCKET.put(key, stream.readable, {
-      onlyIf: new Headers({ 'If-None-Match': '*' }),
-      httpMetadata: { contentType: 'application/octet-stream', cacheControl: 'no-store' },
-      customMetadata: { requestId: claims.id, payloadHash: claims.hash, filename: claims.attachment.name, type: claims.attachment.type }
-    });
-    if (!object) abort.abort();
-    await pumping;
-    if (pumpError && object) fail(413, 'attachment_size_mismatch', 'The uploaded file was incomplete or exceeded its authorized size.');
-  } catch (error) {
-    abort.abort();
-    await pumping;
-    if (error instanceof ContactError) throw error;
-    if (pumpError) fail(413, 'attachment_size_mismatch', 'The uploaded file was incomplete or exceeded its authorized size.');
-    throw error;
-  }
-  if (!object && !matchesAttachment(await env.CONTACT_BUCKET.head(key), claims)) fail(409, 'attachment_conflict', 'This attachment could not be stored.');
+  await storeAttachment(request, env, claims);
   return json({ ok: true, requestId: claims.id });
-}
-
-async function readReceipt(bucket, id) {
-  const object = await bucket.get(receiptKey(id));
-  if (!object) return null;
-  return { value: await object.json(), etag: object.etag };
-}
-
-async function putReceipt(bucket, value, etag) {
-  return bucket.put(receiptKey(value.id), JSON.stringify(value), {
-    onlyIf: etag ? { etagMatches: etag } : new Headers({ 'If-None-Match': '*' }),
-    httpMetadata: { contentType: 'application/json', cacheControl: 'no-store' }
-  });
 }
 
 async function submit(request, env, url, config) {
@@ -315,63 +271,23 @@ async function submit(request, env, url, config) {
   const claims = await verifyAuthorization(data.authorization, env, url.origin);
   const payload = normalizePayload(data.payload);
   if (payload.id !== claims.id || await digest(JSON.stringify(payload)) !== claims.hash) fail(403, 'payload_changed', 'The form changed after authorization. Please try again.');
-  let receipt = await readReceipt(env.CONTACT_BUCKET, claims.id);
-  if (receipt?.value.hash !== undefined && receipt.value.hash !== claims.hash) fail(409, 'submission_conflict', 'This submission ID is already used. Reload the form to send another brief.');
-  if (receipt?.value.status === 'delivered') return json({ ok: true, requestId: claims.id });
-  if (receipt?.value.status === 'delivering' && receipt.value.leaseUntil > Date.now()) fail(409, 'submission_in_progress', 'Your brief is being delivered. Try again in a moment.', 5);
-  let attachment = null;
-  if (claims.attachment) {
-    const key = attachmentKey(claims);
-    if (!matchesAttachment(await env.CONTACT_BUCKET.head(key), claims)) fail(409, 'attachment_required', 'Upload the attachment before sending your brief.');
-    attachment = { ...claims.attachment, key, downloadUrl: url.origin + '/api/contact/attachment?id=' + encodeURIComponent(claims.id) };
-  }
-  const pending = {
-    id: claims.id, hash: claims.hash, status: 'delivering', attemptId: crypto.randomUUID(),
-    leaseUntil: Date.now() + DELIVERY_LEASE_MS, attachment, receivedAt: receipt?.value.receivedAt || new Date().toISOString()
-  };
-  const lock = await putReceipt(env.CONTACT_BUCKET, pending, receipt?.etag);
-  if (!lock) fail(409, 'submission_in_progress', 'Your brief is being delivered. Try again in a moment.', 5);
+  // (2026-10-19) No stored delivery records: each submission goes straight to Make.
+  // The attachment reference will come from Drive once storeAttachment() is implemented.
+  if (claims.attachment) fail(501, 'attachment_storage_pending', 'File uploads are not available yet.');
+  const attachment = null;
+  const receivedAt = new Date().toISOString();
   let accepted = false;
   try {
     const response = await fetch(config.webhook, {
       method: 'POST', redirect: 'error', signal: AbortSignal.timeout(15000),
       headers: { 'Content-Type': 'application/json', 'Idempotency-Key': claims.id },
-      body: JSON.stringify({ ...payload, attachment, receivedAt: pending.receivedAt })
+      body: JSON.stringify({ ...payload, attachment, receivedAt })
     });
     accepted = response.ok;
     await response.body?.cancel();
   } catch { /* An ambiguous timeout is retryable; Make must deduplicate payload.id. */ }
-  if (!accepted) {
-    await putReceipt(env.CONTACT_BUCKET, { ...pending, status: 'retryable', leaseUntil: 0 }, lock.etag);
-    fail(502, 'delivery_failed', 'Your brief could not be confirmed. Please try again.');
-  }
-  const saved = await putReceipt(env.CONTACT_BUCKET, { ...pending, status: 'delivered', leaseUntil: 0, deliveredAt: new Date().toISOString() }, lock.etag);
-  if (!saved) fail(503, 'delivery_unconfirmed', 'Delivery could not be confirmed. Please try again.');
+  if (!accepted) fail(502, 'delivery_failed', 'Your brief could not be confirmed. Please try again.');
   return json({ ok: true, requestId: claims.id });
-}
-
-async function download(request, env, url) {
-  // HMAC verification gives a constant-time comparison without exposing the secret.
-  const token = bearer(request);
-  const key = await signingKey(env.MAKE_DOWNLOAD_TOKEN, ['sign', 'verify']);
-  const expected = await crypto.subtle.sign('HMAC', key, encoder.encode(env.MAKE_DOWNLOAD_TOKEN));
-  if (!token || token.length > 1024 || !await crypto.subtle.verify('HMAC', key, expected, encoder.encode(token))) {
-    fail(401, 'download_unauthorized', 'A valid download credential is required.');
-  }
-  const id = url.searchParams.get('id') || '';
-  if (!ID_PATTERN.test(id)) fail(404, 'attachment_not_found', 'Attachment not found.');
-  const receipt = await readReceipt(env.CONTACT_BUCKET, id);
-  const attachment = receipt?.value.attachment;
-  if (!attachment) fail(404, 'attachment_not_found', 'Attachment not found.');
-  const object = await env.CONTACT_BUCKET.get(attachment.key);
-  if (!object || object.size !== attachment.size) fail(404, 'attachment_not_found', 'Attachment not found.');
-  const filename = attachment.name.replace(/[^\x20-\x7e]/g, '_').replace(/["\\]/g, '_');
-  const encodedName = encodeURIComponent(attachment.name).replace(/['()*]/g, (char) => '%' + char.charCodeAt(0).toString(16).toUpperCase());
-  return new Response(object.body, { headers: {
-    'Content-Type': 'application/octet-stream', 'Content-Length': String(object.size),
-    'Content-Disposition': 'attachment; filename="' + filename + '"; filename*=UTF-8\'\'' + encodedName,
-    'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff', 'Content-Security-Policy': "default-src 'none'; sandbox"
-  } });
 }
 
 export async function onRequest({ request, env }) {
@@ -379,10 +295,6 @@ export async function onRequest({ request, env }) {
     const config = configuration(env);
     const url = new URL(request.url);
     const route = url.pathname.replace(/\/$/, '');
-    if (route === '/api/contact/attachment' && request.method === 'GET') {
-      if (!config.origins.includes(url.origin)) fail(403, 'origin_forbidden', 'This origin cannot serve attachments.');
-      return await download(request, env, url);
-    }
     requireOrigin(request, config, ['POST', 'PUT'].includes(request.method));
     if (route === '/api/contact/config' && request.method === 'GET') return json({ turnstileSiteKey: env.TURNSTILE_SITE_KEY, maxFileBytes: MAX_FILE_BYTES });
     if (route === '/api/contact/authorize' && request.method === 'POST') return await authorize(request, env, url);

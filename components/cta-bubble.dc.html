@@ -95,7 +95,7 @@ var self = this;
     this.raf = requestAnimationFrame(this.loop);
   }
 
-  componentWillUnmount() { this.dead = true; cancelAnimationFrame(this.raf); if (this.io) this.io.disconnect(); }
+  componentWillUnmount() { this.dead = true; cancelAnimationFrame(this.raf); if (this.io) this.io.disconnect(); if (this.worker) { this.worker.terminate(); this.worker = null; } }
 
 
   // Fuera de pantalla no se dibuja nada. Estos campos de fusión (canvas +
@@ -235,6 +235,9 @@ var self = this;
     }
     this.bubbleStart = this.align(start, this.bubble);
     this.ready = true;
+    // (2026-10-19) los fotogramas de fusión se calculan YA, fuera del hilo principal (ver fuseWorker).
+    // Si no hay Worker/OffscreenCanvas, preFused queda en false y el bucle usa preFuse() como antes.
+    this.preFused = this.fuseWorker(this.props.fps ?? 24, this.props.detail ?? 0.55);
   }
 
   clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
@@ -429,6 +432,56 @@ var self = this;
       if (jobs.length) ric(go);
     };
     ric(go);
+  }
+
+  // (2026-10-19) LOS MISMOS fotogramas de preFuse(), pero en un Worker: en un portátil flojo cada uno
+  // cuesta decenas de ms y, en el hilo principal, la primera vuelta (al despertar una pantalla antes,
+  // mientras se scrollea por More stuff) se comía ~28 % del hilo. El Worker ejecuta EL MISMO código:
+  // su fuente se arma con los métodos de esta clase (fuseD, boxBlur, contours...) y las mismas
+  // constantes, con un OffscreenCanvas en vez del canvas; mismas claves, misma 'd'. Cada resultado
+  // entra en dCache al llegar; lo que el bucle necesite antes lo calcula él mismo, como siempre.
+  // Devuelve false si no se puede (sin Worker/OffscreenCanvas): entonces sigue preFuse().
+  fuseWorker(fps, detail) {
+    try {
+      if (typeof Worker !== 'function' || typeof OffscreenCanvas !== 'function' || typeof Blob !== 'function') return false;
+      const jobs = [];
+      for (const s of SEQ) {
+        if (s[0] !== 'merge' && s[0] !== 'defuse') continue;
+        const n = s[1] * fps;
+        for (let k = 0; k <= Math.ceil(n); k++) {
+          const q = Math.min(1, k / n);
+          jobs.push([s[0], s[0] === 'defuse' ? 1 - q : q]);
+        }
+      }
+      // método -> 'P.nombre=function(...){...};' (la fuente de un método empieza por su nombre)
+      const fn = (k) => {
+        let s = String(this[k]);
+        if (s.indexOf(k + '(') === 0) s = 'function' + s.slice(k.length);
+        else if (s.indexOf('function') !== 0) throw new Error('fuente');
+        return 'P.' + k + '=' + s + ';';
+      };
+      const src =
+        'const W=' + W + ',H=' + H + ',PX=' + PX + ',K_WELD=' + K_WELD + ',N=' + N +
+        ',VIEW=' + JSON.stringify(VIEW) + ',CASES=' + JSON.stringify(CASES) + ';const P={};' +
+        ['fuseD', 'boxBlur', 'contours', 'resample', 'curvePath', 'clamp01', 'spring', 'easeInOut'].map(fn).join('') +
+        'onmessage=function(e){var m=e.data;P.ctx=new OffscreenCanvas(W,H).getContext("2d",{willReadFrequently:true});' +
+        'P.f=new Float32Array(W*H);P.g=new Float32Array(W*H);P.dCache=new Map();P.fuseFrom=m.from;P.fuseTo=m.to;' +
+        'for(var i=0;i<m.jobs.length;i++){var j=m.jobs[i];postMessage([j[0]+"|"+j[1].toFixed(5)+"|"+m.detail,P.fuseD(j[0],j[1],m.detail)]);}' +
+        'postMessage(null);};';
+      const url = URL.createObjectURL(new Blob([src], { type: 'text/javascript' }));
+      const w = new Worker(url);
+      URL.revokeObjectURL(url);
+      this.worker = w;
+      const fin = () => { w.terminate(); if (this.worker === w) this.worker = null; };
+      w.onmessage = (e) => {
+        if (this.dead || e.data === null) return fin();
+        if (!this.dCache.has(e.data[0])) this.dCache.set(e.data[0], e.data[1]);
+      };
+      // si el Worker falla, vuelta al camino de siempre (tiempo libre del hilo principal)
+      w.onerror = () => { fin(); if (!this.dead) this.preFuse(fps, detail); };
+      w.postMessage({ from: this.fuseFrom, to: this.fuseTo, jobs: jobs, detail: detail });
+      return true;
+    } catch (e) { return false; }
   }
 
   loop(now) {

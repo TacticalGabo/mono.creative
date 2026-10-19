@@ -844,6 +844,12 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
 @keyframes fa-jupiter{0%,17.857%{aspect-ratio:1.7433}25%,42.857%{aspect-ratio:2}50%,67.857%{aspect-ratio:1.5433}75%,92.857%{aspect-ratio:1.3839}100%{aspect-ratio:1.7433}}
 @media (min-width:768px){
   .grid2 .col{position:relative;height:0;padding-bottom:calc(141.54% + 95.8px)}
+  /* (2026-10-19) Frontera de layout, igual que .cluster-d: el mosaico anima width/margin-left/
+     aspect-ratio en CADA frame y sin esto cada frame re-maquetaba desde el documento. La caja de
+     la columna ya es fija (ancho de la pista + height:0/padding-bottom) y sus figuras son absolutas
+     (no aportan tamaño): size+layout no cambia nada. Sin 'paint': no recorta (las figuras se salen
+     de la columna a propósito, hasta -15% de margen). */
+  .grid2 .col{contain:size layout}
   .grid2 .fig{position:absolute;left:0;margin-bottom:0}
   .f-gvrn,.f-bedrock{top:0}
   .f-beam,.f-jupiter{bottom:0}
@@ -1252,7 +1258,10 @@ html.ov-arm .oval.ov-in span{transition:color .5s ease,opacity .4s ease .65s}
   }
   addEventListener('resize',u);addEventListener('load',u);
   if(window.ResizeObserver){ try{ new ResizeObserver(u).observe(r); }catch(e){} }
-  setInterval(u,2000);   // red de seguridad, no un bucle de animación
+  // red de seguridad, no un bucle de animación. (2026-10-19) la lectura va justo DESPUÉS de pintar un frame
+  // (rAF + setTimeout 0), cuando el layout ya está limpio: antes caía en cualquier momento y forzaba un
+  // layout síncrono en mitad de una animación. Mismo valor, como mucho un frame después.
+  setInterval(function(){ requestAnimationFrame(function(){ setTimeout(u,0); }); },2000);
   u();
 })();
 </script>
@@ -2119,7 +2128,12 @@ html.ov-arm .oval.ov-in span{transition:color .5s ease,opacity .4s ease .65s}
     // y solo durante la visita (sessionStorage; cerrar la pestaña = sin elección).
     // Con ella abren home y entries; sin elección: home dark + swap, entries light
     if(e.isTrusted){try{sessionStorage.setItem('mc-theme',next)}catch(_){}}
-    ts.classList.remove('tt-breathe'); void ts.getBoundingClientRect(); ts.classList.add('tt-breathe');
+    // (2026-10-19) reinicio del "respira" SIN forzar estilo+layout de toda la página justo al cambiar el tema
+    // (el getBoundingClientRect era un recálculo extra en el primer frame del swap). Sin la clase: basta con
+    // ponerla. Con la animación en marcha: se rebobina a 0 (= quitar y volver a poner). Sin getAnimations: lo de antes.
+    if(!ts.classList.contains('tt-breathe'))ts.classList.add('tt-breathe');
+    else if(ts.getAnimations){ var an=ts.getAnimations(); for(var k=0;k<an.length;k++)if(an[k].animationName==='tt-breathe')an[k].currentTime=0; }
+    else{ ts.classList.remove('tt-breathe'); void ts.getBoundingClientRect(); ts.classList.add('tt-breathe'); }
     t.classList.add('tt-glow'); clearTimeout(t._g); t._g=setTimeout(function(){t.classList.remove('tt-glow')},1000);
   });
   document.addEventListener('animationend',function(e){
@@ -2511,7 +2525,7 @@ Then we set the base for launch and growth, with clear files, clean rules and <b
     <div class="legal-row">
       <span class="foot-marks"><span class="foot-anim"><dc-import name="brandmark-fusion" hint-size="100%,100%"></dc-import></span></span>
       <span class="legal legal-c lang-tg" role="group" aria-label="Language"><i class="lang-ico" aria-hidden="true"></i><button type="button" class="lang-b" data-lang="en" aria-pressed="true">En</button>/<button type="button" class="lang-b" data-lang="es" aria-pressed="false">Es</button></span>
-      <a class="legal legal-r legal-link" href="./terms.html">Privacy &amp; Cookies</a>
+      <a class="legal legal-r legal-link" href="./Privacy&amp;cookies.html">Privacy &amp; Cookies</a>
     </div>
   </footer>
 </div>
@@ -2754,7 +2768,7 @@ class Component extends DCLogic {
 <!-- GRAIN-OVERLAY:END -->
 <!-- COOKIE-TOOLTIP:START (sale hasta aceptar; flag localStorage 'mc-ck-ok' solo al aceptar) -->
 <style>
-.ck{position:fixed;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:900;display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;padding:12px 12px 12px 16px;background:rgba(16,25,19,.87);-webkit-backdrop-filter:blur(14px) saturate(140%);backdrop-filter:blur(14px) saturate(140%);border:.8px solid #2c513a;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.06);transition:opacity .4s ease,transform .4s ease,background-color .45s ease,border-color .45s ease,box-shadow .45s ease}
+.ck{position:fixed;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:900;display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;padding:12px 12px 12px 16px;background:rgba(16,25,19,.87);-webkit-backdrop-filter:blur(14px) saturate(140%);backdrop-filter:blur(14px) saturate(140%);border:.8px solid #2c513a;border-radius:14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.06);transition:opacity .4s ease,transform .4s ease,background-color .45s ease,border-color .45s ease,box-shadow .45s ease}
 .ck.in{animation:ck-in .6s cubic-bezier(.22,.7,.2,1) backwards}   /* backwards, no both: el fill final tapaba la salida de .off */
 @keyframes ck-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 .ck.off{opacity:0;transform:translateY(6px);pointer-events:none}
@@ -2779,7 +2793,7 @@ class Component extends DCLogic {
 .ck-menu button.on{color:#9bd700}
 @media (min-width:768px){.ck{left:24px;right:auto;bottom:calc(24px + env(safe-area-inset-bottom,0px));flex-wrap:nowrap}.ck p{flex:0 0 auto;white-space:nowrap}.ck p br{display:none}.ck-x{margin-left:-16px}.ck-x svg{width:11px;height:11px}}
 @media (max-width:767px){
-.ck{left:auto;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));width:165px;flex-direction:column;align-items:stretch;gap:8px;padding:12px;box-shadow:0 10px 30px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.06)}
+.ck{left:auto;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));width:165px;flex-direction:column;align-items:stretch;gap:8px;padding:12px;box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
 .ck p{flex:none;width:131px;line-height:18px;white-space:nowrap}
 .ck-a{flex-direction:column;align-items:stretch;gap:6px}
 .ck-btn{height:32px;width:100%;justify-content:center}
@@ -2789,7 +2803,7 @@ class Component extends DCLogic {
 .ck-x{position:absolute;top:4px;left:128.4px}
 }
 /* LIGHT (standalone mono-home-light-cookies): glass claro = blanco 55% + blur 16 + saturate 160, borde #bec8c2, sombra suave + brillo interior */
-:root[data-theme="light"] .ck{background:rgba(255,255,255,.80);-webkit-backdrop-filter:blur(16px) saturate(160%);backdrop-filter:blur(16px) saturate(160%);border:1px solid #bec8c2;box-shadow:0 10px 30px rgba(16,25,19,.08)}
+:root[data-theme="light"] .ck{background:rgba(255,255,255,.85);-webkit-backdrop-filter:blur(16px) saturate(160%);backdrop-filter:blur(16px) saturate(160%);border:1px solid #bec8c2;box-shadow:none}
 :root[data-theme="light"] .ck p{color:#101913}
 :root[data-theme="light"] .ck-ok{background:#9bd700;border-color:#9bd700;color:#232825}
 :root[data-theme="light"] .ck-ok:hover{background:#7baa00;border-color:#7baa00}
@@ -2807,7 +2821,7 @@ class Component extends DCLogic {
 (function(){
   var K='mc-ck-ok';   // clave nueva (2026-10-19): la vieja 'mc-ck' también la guardaba la X
   try{if(localStorage.getItem(K))return}catch(_){}
-  var HTML='<p>Cookies make our<br>site better. <a class="ck-more" href="./terms.html">Learn more</a></p><div class="ck-a"><div class="ck-lang"><button class="ck-btn ck-dd" type="button" aria-haspopup="listbox"><span>English</span><svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.2"></path></svg></button><div class="ck-menu" role="listbox"><button type="button" class="on">English</button><button type="button">Spanish</button></div></div><button class="ck-btn ck-ok" type="button">Accept cookies</button></div><button class="ck-x" type="button" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 1l8 8M9 1L1 9" stroke="currentColor" stroke-width="1.2"></path></svg></button>';
+  var HTML='<p>Cookies make our<br>site better. <a class="ck-more" href="./Privacy&amp;cookies.html">Learn more</a></p><div class="ck-a"><div class="ck-lang"><button class="ck-btn ck-dd" type="button" aria-haspopup="listbox"><span>English</span><svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.2"></path></svg></button><div class="ck-menu" role="listbox"><button type="button" class="on">English</button><button type="button">Spanish</button></div></div><button class="ck-btn ck-ok" type="button">Accept cookies</button></div><button class="ck-x" type="button" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 1l8 8M9 1L1 9" stroke="currentColor" stroke-width="1.2"></path></svg></button>';
   function show(){
     if(document.documentElement.classList.contains('espera'))return setTimeout(show,300);
     var c=document.createElement('div');c.className='ck in';c.setAttribute('role','region');c.setAttribute('aria-label','Cookies');c.innerHTML=HTML;

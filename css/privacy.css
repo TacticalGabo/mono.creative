@@ -1,0 +1,126 @@
+/* ==========================================================================
+   mono.creative — Privacy & Cookies (Privacy&cookies.html)
+   Contenido del asset "Privacy&cookies.html" (2026-10-19) sobre el sistema del sitio:
+   header, CTA y footer = bloques SHARED del home (case-study.css); aquí solo el cuerpo legal.
+   Breakpoints del sitio: < 768 mobile (Figma 360) · 768–1099 tablet · ≥ 1100 (container) 2 columnas.
+   Tema: tokens del home (--fade-p) + tokens del case study por data-theme.
+   ========================================================================== */
+:root{
+  --pv-h1:var(--neutral-900);
+  --pv-h2:var(--forest-600);
+  --pv-intro:var(--forest-600);
+  --pv-body:var(--neutral-900);
+  --pv-strong:var(--lime-500);
+  --pv-label:var(--neutral-400);
+  --pv-date:var(--neutral-900);
+  --pv-toc-label:var(--neutral-900);
+  --pv-toc-hover:var(--neutral-900);
+  --pv-idx:var(--lime-500);
+  --pv-link:var(--lime-500);
+  --pv-link-h:var(--lime-600);
+}
+:root[data-theme="dark"]{
+  --pv-h1:var(--neutral-0);
+  --pv-h2:var(--neutral-0);
+  --pv-intro:var(--neutral-0);
+  --pv-body:var(--neutral-400);
+  --pv-strong:var(--neutral-100);
+  --pv-date:var(--neutral-100);
+  --pv-toc-label:var(--neutral-100);
+  --pv-toc-hover:var(--neutral-0);
+  --pv-idx:var(--lime-500);
+  --pv-link:var(--lime-300);
+  --pv-link-h:var(--lime-400);
+}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* ---- hero ---- */
+.pv-hero__in{padding:56px 0 48px;border-bottom:1px solid var(--border)}
+.pv-label{font:var(--t-mono-tag);color:var(--text-muted)}
+.pv-title{margin-top:16px;font:500 32px/1.1 var(--ff-sans);letter-spacing:-1.2px;color:var(--pv-h1)}
+.pv-updated{margin-top:16px;display:flex;align-items:baseline;flex-wrap:wrap;gap:8px;font:var(--t-mono-label);letter-spacing:.2px;color:var(--pv-label)}
+.pv-updated span{font:var(--t-body-s);color:var(--pv-date)}
+.pv-intro{margin-top:24px;max-width:720px;font:400 18px/1.55 var(--ff-sans);letter-spacing:-.18px;color:var(--pv-intro);text-wrap:pretty}
+
+/* ---- cuerpo: índice + contenido ---- */
+.pv-body{display:grid;grid-template-columns:minmax(0,1fr);padding:48px 0 96px}
+.pv-toc{display:flex;flex-direction:column;gap:2px;margin-bottom:48px;padding-bottom:32px;border-bottom:1px solid var(--border)}
+.pv-toc__label{font:400 12px/16px var(--ff-mono);letter-spacing:.48px;color:var(--pv-toc-label);margin-bottom:16px}
+.pv-toc__list{display:flex;flex-direction:column;gap:2px}
+.pv-toc a{display:grid;grid-template-columns:28px 1fr;padding:6px 0;font:400 13px/20px var(--ff-mono);letter-spacing:.2px;color:var(--text-muted)}
+.pv-toc a:hover{color:var(--pv-toc-hover)}
+.pv-toc a.on{color:var(--pv-idx)}
+.pv-toc a .n{opacity:.7}
+
+.pv-content{min-width:0}
+.pv-block{padding-bottom:48px;margin-bottom:48px;border-bottom:1px solid var(--border);scroll-margin-top:32px}
+.pv-block:last-child{border-bottom:0;margin-bottom:0;padding-bottom:0}
+.pv-idx{display:block;font:var(--t-mono-index-s);letter-spacing:.2px;color:var(--pv-idx)}
+.pv-h2{margin:8px 0 24px;font:500 24px/32px var(--ff-sans);letter-spacing:-.5px;color:var(--pv-h2);text-wrap:balance}
+.pv-content p{font:var(--t-body-s);color:var(--pv-body);text-wrap:pretty}
+.pv-content :is(p,.pv-list,.pv-tbl)+:is(p,.pv-list,.pv-tbl){margin-top:20px}
+.pv-content strong{font-weight:600;color:var(--pv-strong)}
+.pv-content a{color:var(--pv-link);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+.pv-content a:hover{color:var(--pv-link-h)}
+.pv-content a.mail{color:var(--email);font-weight:600}
+.pv-content a.mail:hover{color:var(--pv-link-h)}
+.pv code{font:400 13px/1 var(--ff-mono);letter-spacing:.2px;color:var(--pv-link);white-space:nowrap}
+.pv-intro code{font-size:15px}
+/* listas: bullet del sitio (.bullet / .bullet__ic de case-study.css) */
+.pv-list{display:flex;flex-direction:column;gap:12px}
+.pv-list .bullet{color:var(--pv-body)}
+
+/* ---- tablas: mobile = tarjetas apiladas con su etiqueta ---- */
+.pv-tbl table{width:100%;border-collapse:collapse}
+.pv-tbl thead{display:none}
+.pv-tbl table,.pv-tbl tbody,.pv-tbl tr,.pv-tbl td{display:block;width:100%}
+.pv-tbl tr{padding:16px 0;border-top:1px solid var(--border)}
+.pv-tbl tr:last-child{border-bottom:1px solid var(--border)}
+.pv-tbl td{padding:4px 0;font:var(--t-body-s);line-height:1.6;color:var(--pv-body);text-wrap:pretty}
+.pv-tbl td::before{content:attr(data-label);display:block;margin-bottom:2px;font:400 12px/16px var(--ff-mono);letter-spacing:.48px;color:var(--text-muted)}
+
+/* footer: el enlace a esta página queda marcado como actual */
+.foot .legal-link{color:var(--nav-link-on)}
+
+@media (min-width:768px){
+  .pv-hero__in{padding:96px 0 72px}
+  .pv-title{margin-top:24px;font:var(--t-hero);font-size:60px;line-height:1.09;letter-spacing:-2.4px}
+  .pv-intro{margin-top:40px;font-size:22px;line-height:1.45;letter-spacing:-.22px}
+  .pv-body{padding:72px 0 120px}
+  .pv-toc{margin-bottom:56px}
+  .pv-toc__list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:32px}
+  .pv-block{padding-bottom:64px;margin-bottom:64px}
+  .pv-h2{margin-bottom:32px;font-size:32px;line-height:40px;letter-spacing:-.8px}
+
+  .pv-tbl{border-top:1px solid var(--border)}
+  .pv-tbl table{display:table}
+  .pv-tbl thead{display:table-header-group}
+  .pv-tbl tbody{display:table-row-group}
+  .pv-tbl tr{display:table-row;padding:0;border:0}
+  .pv-tbl tr:last-child{border:0}
+  .pv-tbl th,.pv-tbl td{display:table-cell;width:auto;vertical-align:top;padding:16px 16px 16px 0;border-bottom:1px solid var(--border)}
+  .pv-tbl th{vertical-align:bottom;padding-block:14px;text-align:left;font:400 12px/16px var(--ff-mono);letter-spacing:.48px;color:var(--text-muted)}
+  .pv-tbl :is(th,td):last-child{padding-right:0}
+  .pv-tbl td::before{display:none}
+  .pv-tbl.c2 :is(th,td):first-child{width:46%}
+  .pv-tbl.cookies :is(th,td):first-child{width:22%}
+  .pv-tbl.cookies :is(th,td):nth-child(2){width:24%}
+}
+
+/* ≥ 1100: índice fijo a la izquierda (264) + contenido al resto del ancho del wrap */
+@container (min-width:1100px){
+  .pv-body{grid-template-columns:264px minmax(0,1fr);column-gap:72px}
+  .pv-toc{position:sticky;top:40px;align-self:start;margin-bottom:0;padding-bottom:0;border-bottom:0}
+  .pv-toc__list{display:flex}
+}
+
+/* mancha superior del home (hero .gB), solo desktop: .g-d se oculta < 768 en case-study.css.
+   Mismas medidas, opacidades (--g1 dark / .20 * --fade-p light) y animación que el home. */
+.pv-hero{position:relative}
+.pv-hero__in{position:relative;z-index:1}
+@keyframes fx-glow{from{opacity:0}}
+@media (min-width:768px){.pv-hero .gB.g-d{will-change:transform,opacity;animation:fx-glow 1.1s ease .5s both,blot 22s ease-in-out 1.6s infinite reverse}}
+.pv-hero.idle .glow{animation-play-state:paused!important}   /* fuera de pantalla (js/privacy.js), como .hero.idle del home */
+@media (prefers-reduced-motion:reduce){.pv-hero .glow{animation:none!important}}
+:root:not([data-theme="light"]) .glow.gl{visibility:hidden;transition:visibility 0s .45s}

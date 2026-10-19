@@ -13,9 +13,10 @@
     var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
     /* bloques */
     if('IntersectionObserver' in window){
-      var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('is-in');io.unobserve(e.target)}})},{threshold:0,rootMargin:'0px 0px -10% 0px'});   /* por el borde, no por % del bloque: en secciones altas el 10 % eran cientos de px en blanco */
+      var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){if(!document.documentElement.classList.contains('logo-ok'))e.target.classList.add('fx-w');e.target.classList.add('is-in');io.unobserve(e.target)}})},{threshold:0,rootMargin:'0px 0px -10% 0px'});   /* por el borde, no por % del bloque: en secciones altas el 10 % eran cientos de px en blanco */
       blocks.forEach(function(b){io.observe(b)});
     } else blocks.forEach(function(b){b.classList.add('is-in')});
+    /* .fx-w: bloque visible antes de logo-ok = entra con el header (case-study.css: mismo .1s de retardo que .nav) */
     /* barras de acento B09: la de la derecha con 150 ms de relevo; en mobile entran de dos en dos.
        (Las líneas del hero van con su columna: ver "hero por partes" más abajo.) */
     function live(q){return [].filter.call(document.querySelectorAll(q),function(el){return !el.closest('x-dc')})}
@@ -66,9 +67,10 @@
      en cualquier ancho (360, 420, tablet...). */
 (function(){
   if(window.__csCons)return; window.__csCons=1;
+  init.n=0;
   function init(){
     var sec=document.querySelector('.cs-constraints');
-    if(!sec||sec.closest('x-dc')||!sec.querySelector('.curve--v path'))return setTimeout(init,120);
+    if(!sec||sec.closest('x-dc')||!sec.querySelector('.curve--v path')){if(++init.n<250)setTimeout(init,120);return}   /* tope 30 s (2026-10-19): sin .cs-constraints (contact, privacy) sondeaba para siempre */
     /* (2026-10-16) lo de abajo (700 muestras de la curva + medidas de layout forzadas) se hace al
        acercarse la sección (1,5 pantallas), no al montar la página: en el móvil tomaba el hilo
        justo cuando salían el header y el hero */
@@ -250,7 +252,7 @@
       if(fired||!hero_img)return;
       /* el radio se anima con la imagen ya decodificada (html.hero-ok): si arranca antes, su repintado
          compite con la decodificación y se pierden los fotogramas (salta de cuadrada a redonda) */
-      if(!h.classList.contains('hero-ok'))return setTimeout(go_round,50);
+      if(!h.classList.contains('hero-ok')||!h.classList.contains('logo-ok'))return setTimeout(go_round,50);   /* logo-ok: el hero entra con el header (case-study.css) */
       fired=1;
       hero_img.classList.add('ir-r');   /* quita el radio 0: el destino es el radio de diseño */
       if(hero_img.animate&&!reduce)hero_img.animate([{borderRadius:'0px'},{}],{duration:1000,easing:'cubic-bezier(.8,0,.1,1)'});
@@ -383,7 +385,7 @@
      2) Con la página cargada y el hilo libre: su HTML y lo que el home pide para quitar su
         telón (componente del icono del hero, intro-loader y la fuente del hero). React,
         support.js y los logos ya están en caché desde esta página. */
-  var home=new URL('./index.html',location.href).href, warmed=0;
+  var home=new URL('./index.html',document.baseURI).href, warmed=0;   /* baseURI: en 404.html hay <base> (se sirve en cualquier URL) */
   function warm(e){
     if(warmed)return;
     var a=e.target.closest&&e.target.closest('a[href]'); if(!a)return;
@@ -409,4 +411,83 @@
     });
   }
   if(document.readyState==='complete')setTimeout(idle_warm,3000); else addEventListener('load',function(){setTimeout(idle_warm,3000)},{once:true});
+})();
+
+/* (2026-10-19) MANCHAS PRE-DESENFOCADAS, igual que el home (script __mcGlowPx de index.html, mismo
+   código): las .glow del CTA llevan filter:blur(84-100px) en vivo y la GPU las vuelve a desenfocar en
+   cada frame que se pintan. Se hornea UNA vez el mismo desenfoque en un canvas (mismo blur gaussiano
+   de Skia, misma forma y radios) y la imagen va DENTRO de la .glow: hereda su opacidad (--g*), su
+   animación blot y su capa. El cambio se hace con la imagen ya decodificada. Sin soporte de
+   ctx.filter/roundRect no se toca nada (sigue el blur CSS). CSS: .glow.pre en case-study.css. */
+(function(){
+  if(window.__mcGlowPx)return; window.__mcGlowPx=1;
+  function soporta(){
+    try{
+      var c=document.createElement('canvas'); c.width=c.height=32;
+      var x=c.getContext('2d'); if(!x||!('filter' in x)||!x.roundRect)return false;
+      x.filter='blur(4px)'; x.fillStyle='#000'; x.fillRect(12,12,8,8);
+      return x.getImageData(5,16,1,1).data[3]>0;   // fuera del cuadrado solo hay alfa si el blur se aplicó
+    }catch(e){return false}
+  }
+  // radio calculado ("54% 56%" o "12px") -> {x,y} en px de la caja dada
+  function radio(v,w,h){
+    var p=String(v).split(' '); if(p.length<2)p[1]=p[0];
+    function px(t,base){ return t.indexOf('%')>0 ? parseFloat(t)*base/100 : (parseFloat(t)||0); }
+    return {x:px(p[0],w),y:px(p[1],h)};
+  }
+  function horno(el){
+    if(el.querySelector('img.glow-px')||el.__horno)return;
+    el.__horno=1;
+    var w=parseFloat(el.style.width), h=parseFloat(el.style.height);
+    var m=/blur\(\s*([\d.]+)px/.exec(el.style.filter||'');
+    if(!(w>0)||!(h>0)||!m)return;
+    var s=parseFloat(m[1]), pad=Math.ceil(s*3), tw=w+pad*2, th=h+pad*2;
+    var k=Math.min(.5,320/Math.max(tw,th)), kw=w*k, kh=h*k;
+    var cs=getComputedStyle(el), c=document.createElement('canvas');
+    c.width=Math.ceil(tw*k); c.height=Math.ceil(th*k);
+    var x=c.getContext('2d');
+    x.filter='blur('+(s*k)+'px)';
+    x.fillStyle=cs.backgroundColor;
+    x.beginPath();
+    x.roundRect(pad*k,pad*k,kw,kh,[radio(cs.borderTopLeftRadius,kw,kh),radio(cs.borderTopRightRadius,kw,kh),radio(cs.borderBottomRightRadius,kw,kh),radio(cs.borderBottomLeftRadius,kw,kh)]);
+    x.fill();
+    c.toBlob(function(b){
+      if(!b)return;
+      var img=new Image();
+      img.className='glow-px'; img.alt=''; img.setAttribute('aria-hidden','true');
+      img.style.cssText='left:'+(-pad)+'px;top:'+(-pad)+'px;width:'+(c.width/k)+'px;height:'+(c.height/k)+'px';
+      img.src=URL.createObjectURL(b);
+      (img.decode?img.decode():Promise.resolve()).then(function(){ el.appendChild(img); el.classList.add('pre'); },function(){});
+    },'image/png');
+  }
+  var ok=null;
+  function corre(){
+    if(ok===null)ok=soporta();
+    if(!ok)return;
+    // solo las montadas (no la plantilla cruda dentro de <x-dc>) y del ancho visible (.g-d / .g-m)
+    var cola=[].filter.call(document.querySelectorAll('.glow'),function(g){ return !g.closest('x-dc')&&getComputedStyle(g).display!=='none'; });
+    var ric=window.requestIdleCallback?function(f){ return requestIdleCallback(f,{timeout:120}); }:function(f){ return setTimeout(f,40); };
+    (function paso(){ var g=cola.shift(); if(!g)return; try{ horno(g); }catch(e){} ric(paso); })();
+  }
+  // (2026-10-19) .cta.idle fuera de pantalla: pausa el blot de sus manchas, como el home (__mcGlowIO,
+  // mismo margen de 120px). Antes nadie ponía .idle en los case studies y la animación no paraba nunca.
+  function pausa(cta){
+    if(!('IntersectionObserver' in window))return;
+    new IntersectionObserver(function(es){
+      for(var i=0;es.length>i;i++)es[i].target.classList.toggle('idle',!es[i].isIntersecting);
+    },{rootMargin:'120px'}).observe(cta);
+  }
+  (function montada(n){
+    if(!n&&!document.querySelector('.cta, .glow'))return;   // solo en la 1.ª pasada (la plantilla aún está en el DOM): página sin CTA (contact.html carga este JS): nada que hacer
+    var cta=[].filter.call(document.querySelectorAll('.page .cta'),function(c){ return !c.closest('x-dc'); })[0];
+    if(cta){ pausa(cta); return corre(); }
+    /* (2026-10-19) página sin CTA pero con manchas (404): hornearlas en cuanto están montadas */
+    if(!document.querySelector('.cta')&&[].some.call(document.querySelectorAll('.page .glow'),function(g){ return !g.closest('x-dc'); }))return corre();
+    if(n<300)setTimeout(function(){ montada(n+1); },100);
+  })(0);
+  // las manchas del otro ancho se hornean si ese ancho llega a verse
+  if(window.matchMedia){
+    var mq=matchMedia('(min-width:768px)');
+    if(mq.addEventListener)mq.addEventListener('change',corre); else if(mq.addListener)mq.addListener(corre);
+  }
 })();
