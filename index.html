@@ -2733,7 +2733,7 @@ class Component extends DCLogic {
   :root[data-theme="light"] .grain-overlay{mix-blend-mode:multiply;opacity:.14}
 </style>
 <!-- GRAIN-OVERLAY:END -->
-<!-- COOKIE-TOOLTIP:START (sale hasta aceptar; flag localStorage 'mc-ck' solo al aceptar) -->
+<!-- COOKIE-TOOLTIP:START (sale hasta aceptar; flag localStorage 'mc-ck-ok' solo al aceptar) -->
 <style>
 .ck{position:fixed;left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:900;display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;padding:12px 12px 12px 16px;background:rgba(16,25,19,.87);-webkit-backdrop-filter:blur(14px) saturate(140%);backdrop-filter:blur(14px) saturate(140%);border:.8px solid #2c513a;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.06);transition:opacity .4s ease,transform .4s ease,background-color .45s ease,border-color .45s ease,box-shadow .45s ease}
 .ck.in{animation:ck-in .6s cubic-bezier(.22,.7,.2,1) backwards}   /* backwards, no both: el fill final tapaba la salida de .off */
@@ -2786,7 +2786,7 @@ class Component extends DCLogic {
 </style>
 <script>
 (function(){
-  var K='mc-ck';
+  var K='mc-ck-ok';   // clave nueva (2026-10-19): la vieja 'mc-ck' también la guardaba la X
   try{if(localStorage.getItem(K))return}catch(_){}
   var HTML='<p>Cookies make our<br>site better. <a class="ck-more" href="./terms.html">Learn more</a></p><div class="ck-a"><div class="ck-lang"><button class="ck-btn ck-dd" type="button" aria-haspopup="listbox"><span>English</span><svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.2"></path></svg></button><div class="ck-menu" role="listbox"><button type="button" class="on">English</button><button type="button">Spanish</button></div></div><button class="ck-btn ck-ok" type="button">Accept cookies</button></div><button class="ck-x" type="button" aria-label="Close"><svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 1l8 8M9 1L1 9" stroke="currentColor" stroke-width="1.2"></path></svg></button>';
   function show(){
