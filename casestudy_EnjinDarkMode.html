@@ -15,6 +15,11 @@
 @font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:200 800;font-display:swap;src:url(./fonts/plus-jakarta-sans/webfont/PlusJakartaSans-200-800-normal-latin-ext.woff2) format('woff2');unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
 @font-face{font-family:'Plus Jakarta Sans';font-style:italic;font-weight:200 800;font-display:swap;src:url(./fonts/plus-jakarta-sans/webfont/PlusJakartaSans-200-800-italic-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 @font-face{font-family:'Space Mono';font-style:normal;font-weight:400;font-display:swap;src:url(./fonts/space-mono/webfont/SpaceMono-400-normal-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+/* 2.9 caption (2026-10-19): 40 px bajo la pantalla; dentro de la escena (>=1100) en blanco y anclado 40 px bajo el borde inferior de .csc__inner
+   (escena 62.5cqw, inner arriba 14.236 + alto 29.099 -> su borde queda 19.165cqw sobre el fondo de la escena, que está 24 px sobre el fondo de la sección) */
+.csc--cap .csc__caption{margin-top:40px}
+.csc__br{display:none}
+@container (min-width:1100px){.csc__br{display:inline}.csc--cap .csc__caption{color:#fff;top:calc(100% + 16px - 19.165cqw);bottom:auto}}
 </style>
 <link rel="stylesheet" href="./css/case-study.css?v=18">
 <!-- ASSETS — hero (LCP): precarga solo la del breakpoint activo -->
@@ -712,7 +717,7 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
   <section class="cs-closing-scene csc--cap fx" data-block="2.9 Outcome (B02)">
     <div class="wrap"><div class="sh"><h2 class="sh__title"><span>Project</span><span class="accent">outcome</span></h2><p class="sh__desc">The project ultimately evolved beyond a dark mode implementation into a broader visual foundation for how Enjin could express itself across products and experiences.</p></div></div>
     <div class="csc__scene media" data-asset="closing-scene"><div class="csc__inner" data-asset="closing-screen"></div></div>
-    <div class="wrap"><p class="csc__caption">The result feels more immersive and connected to gaming culture while maintaining the clarity required by a large Web3 ecosystem.</p></div>
+    <div class="wrap"><p class="csc__caption">The result feels more immersive and connected to gaming culture while maintaining<br class="csc__br"> the clarity required by a large Web3 ecosystem.</p></div>
   </section>
 
   </main>
