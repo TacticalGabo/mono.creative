@@ -323,7 +323,7 @@
     async function sendBrief() {
       if (state.busy || state.sent || !validateProject()) return;
       let slotError = '';
-      if (!state.skip && state.date && !rules.eligibleDate(state.date)) slotError = 'Pick a weekday in the next 30 days';
+      if (!state.skip && state.date && !rules.eligibleDate(state.date)) slotError = 'Pick a weekday in the coming weeks';
       else if (!state.skip && state.date && !timeOptions.includes(state.time)) slotError = 'Pick a time, or choose email instead';
       find('#slot-error').textContent = slotError;
       if (slotError) {

@@ -471,3 +471,11 @@ body { margin: 0; }
 #cta-blob-fill stop:nth-of-type(3){stop-color:#9BD700;stop-opacity:calc(1 - .4 * var(--fade-p,0))}
 #cta-blob-fill stop:nth-of-type(4){stop-color:color-mix(in oklab,#9BD700 calc(var(--fade-p,0) * 100%),#7BAA00);stop-opacity:calc(1 - var(--fade-p,0))}
 @media (prefers-reduced-motion:reduce){#cta-blob-fill stop{transition:none}}
+
+/* (2026-10-19) Aviso de privacidad del paso 2: link absoluto bajo las horas, no desplaza nada.
+   Desktop: misma fila que "Skip, just email me" (margin-top 26), a la izquierda. Mobile: 16px bajo las horas. */
+.time-field{position:relative}
+.privacy-note{position:absolute;left:0;top:calc(100% + 16px);display:flex;align-items:center;gap:6px;font:400 14px/1.5 var(--mono);color:var(--body);text-decoration:underline;text-underline-offset:4px;white-space:nowrap}
+.privacy-note:hover{color:var(--accent)}
+.privacy-note svg{width:16px;height:16px}
+@media (min-width:768px){.privacy-note{top:calc(100% + 26px)}}

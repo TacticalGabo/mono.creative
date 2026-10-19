@@ -20,7 +20,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="./fonts/plus-jakarta-sans/webfont/PlusJakartaSans-200-800-normal-latin.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="./fonts/space-mono/webfont/SpaceMono-400-normal-latin.woff2">
 <link rel="stylesheet" href="./css/case-study.css?v=17">
-<link rel="stylesheet" href="./css/contact.css?v=20">
+<link rel="stylesheet" href="./css/contact.css?v=21">
 <!-- (2026-10-04) CARGA: React desde el propio dominio, igual que el home (mismos bytes,
      sha384 idéntico al SRI de support.js). Además, con window.__resources definido
      support.js NO vuelve a descargar la página entera (fetch(location.href)). -->
@@ -42,7 +42,7 @@ if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.
 <script src="./js/contact-config.js?v=4" defer></script>
 <script src="./js/contact-rules.js?v=3" defer></script>
 <script src="./js/contact-delivery.js?v=1" defer></script>
-<script src="./js/contact.js?v=13" defer></script>
+<script src="./js/contact.js?v=14" defer></script>
 </head>
 <body class="contact-page">
 <x-dc>
@@ -669,7 +669,7 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
               <div class="calendar-heading"><h3 id="calendar-month" aria-live="polite"></h3><div><button class="icon-button" id="previous-month" type="button" aria-label="Previous month" title="Previous month"><i data-lucide="chevron-left" aria-hidden="true"></i></button><button class="icon-button" id="next-month" type="button" aria-label="Next month" title="Next month"><i data-lucide="chevron-right" aria-hidden="true"></i></button></div></div>
               <div class="calendar-weekdays" aria-hidden="true"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
               <div class="calendar-grid" id="calendar-days" role="group" aria-label="Choose a weekday"></div>
-              <fieldset class="time-field"><legend id="time-label"><i data-lucide="clock-3" aria-hidden="true"></i>Pick a time</legend><div class="tz-picker"><button type="button" class="tz-btn" id="tz-btn" aria-haspopup="listbox" aria-expanded="false" aria-controls="tz-pop"><span id="timezone-label" class="timezone-label"></span><svg class="tz-chev" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2.5 4.25C4.2 6.4 5 7.6 6 7.6S7.8 6.4 9.5 4.25" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></button><div class="tz-pop" id="tz-pop" hidden="hidden"><input class="tz-search" id="tz-search" type="text" placeholder="Search city or offset" aria-label="Search time zone" autocomplete="off"><ul class="tz-list" id="tz-list" role="listbox" aria-label="Time zones"></ul></div></div><div id="time-slots" class="time-chips"></div><p class="field-error" id="slot-error" aria-live="polite"></p></fieldset>
+              <fieldset class="time-field"><legend id="time-label"><i data-lucide="clock-3" aria-hidden="true"></i>Pick a time</legend><div class="tz-picker"><button type="button" class="tz-btn" id="tz-btn" aria-haspopup="listbox" aria-expanded="false" aria-controls="tz-pop"><span id="timezone-label" class="timezone-label"></span><svg class="tz-chev" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2.5 4.25C4.2 6.4 5 7.6 6 7.6S7.8 6.4 9.5 4.25" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></button><div class="tz-pop" id="tz-pop" hidden="hidden"><input class="tz-search" id="tz-search" type="text" placeholder="Search city or offset" aria-label="Search time zone" autocomplete="off"><ul class="tz-list" id="tz-list" role="listbox" aria-label="Time zones"></ul></div></div><div id="time-slots" class="time-chips"></div><p class="field-error" id="slot-error" aria-live="polite"></p><a class="privacy-note" href="./terms.html" target="_blank" rel="noopener" title="Privacy &amp; Cookies">How we use your data<i data-lucide="arrow-up-right" aria-hidden="true"></i></a></fieldset>
               <button id="skip-call" type="button" class="skip-call" aria-pressed="false">Skip, just email me</button>
             </section>
           </div>
