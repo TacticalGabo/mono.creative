@@ -56,12 +56,12 @@
 .field-line input:-webkit-autofill { -webkit-text-fill-color: var(--body-strong); -webkit-box-shadow: 0 0 0 100px var(--bg-d) inset; caret-color: var(--accent); }
 .field-line input { flex: 1 1 auto; }
 .field-line .optional-note { padding-left: 6px; }
-.field-error { color: var(--contact-error); font-size: 10px; line-height: 17px; min-height: 18px; padding-top: 2px; overflow-wrap: anywhere; }
+.field-error { color: var(--contact-error); font-size: 12px; line-height: 17px; min-height: 18px; padding-top: 2px; overflow-wrap: anywhere; }
 .line-field, .link-row { min-height: 63px; }
 .is-invalid > .field-line, .link-row.is-invalid .field-line { border-color: var(--contact-error); }
 .is-invalid .required-mark { color: var(--contact-error); }
 .field-feedback { position: relative; min-height: 20px; }
-.email-suggestion { position: absolute; inset: 0 auto auto 0; max-width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; text-align: left; font-size: 10px; line-height: 18px; color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+.email-suggestion { position: absolute; inset: 0 auto auto 0; max-width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; text-align: left; font-size: 12px; line-height: 18px; color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
 .link-tools { display: flex; align-items: center; gap: 18px; margin-top: -3px; }
 .text-action { display: inline-flex; align-items: center; gap: 5px; font: 400 10px/1.6 var(--mono); color: var(--body); }
 .text-action:hover, .skip-call:hover { color: var(--accent); }
@@ -95,9 +95,10 @@
 .circle-cta:hover .circle-cta-inner, .circle-cta:focus-visible .circle-cta-inner { background: var(--lime400); color: var(--bg-d); border-color: var(--lime400); }
 .circle-cta:disabled { opacity: .55; }
 .circle-cta:disabled .circle-cta-inner { background: var(--accent); color: var(--bg-d); border-color: var(--accent); }
-.submit-feedback { font-size: 11px; line-height: 1.6; color: var(--body); max-width: 240px; }
+.submit-feedback { font-size: 12px; line-height: 1.6; color: var(--body); max-width: 240px; }
+.submit-feedback.is-error { color: var(--contact-error); }
 .submit-feedback:not(:empty) { margin-top: 7px; }
-.direct-submit { display: inline-flex; width: max-content; gap: 6px; align-items: center; color: var(--accent); font-size: 11px; margin-top: 6px; }
+.direct-submit { display: inline-flex; width: max-content; gap: 6px; align-items: center; color: var(--accent); font-size: 12px; margin-top: 6px; }
 .direct-submit svg { width: 13px; height: 13px; }
 .schedule-heading { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 26px; gap: 12px; }
 .schedule-heading h2 { font-size: 23px; font-weight: 400; line-height: 1.4; color: var(--body-strong); }

@@ -188,6 +188,7 @@
       find('#step-caption').hidden = step === 1;
       if (step === 2) find('#step-caption').append('Your next chapter starts here.', document.createElement('br'), "Let's make it a good one.");
       feedback.textContent = '';
+      feedback.classList.remove('is-error');
       find('#direct-submit').hidden = true;
       if (step === 2) {
         renderCalendar();
@@ -299,8 +300,9 @@
       };
     }
 
-    function offerEmail(data, message) {
+    function offerEmail(data, message, isError) {
       feedback.textContent = message;
+      feedback.classList.toggle('is-error', !!isError);
       const slot = data.callSlot;
       const body = [
         'Name: ' + data.name, 'Email: ' + data.email, 'Telegram: ' + (data.telegram || '-'),
@@ -343,6 +345,7 @@
       form.setAttribute('aria-busy', 'true');
       find('#cta-label').textContent = 'Sending';
       feedback.textContent = '';
+      feedback.classList.remove('is-error');
       find('#direct-submit').hidden = true;
       const controls = all('input, textarea, button');
       const disabledStates = controls.map((control) => control.disabled);
@@ -363,7 +366,7 @@
         controls.forEach((control, i) => { control.disabled = disabledStates[i]; });
         cta.disabled = false;
         find('#cta-label').textContent = "Let's do this";
-        offerEmail(data, 'Something went wrong. Try again or email us.');
+        offerEmail(data, 'Something went wrong. Try again or email us.', true);
       } finally {
         state.busy = false;
         form.setAttribute('aria-busy', 'false');
