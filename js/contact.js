@@ -363,7 +363,7 @@
         controls.forEach((control, i) => { control.disabled = disabledStates[i]; });
         cta.disabled = false;
         find('#cta-label').textContent = "Let's do this";
-        offerEmail(data, 'Your brief could not be delivered. Try again or send it by email.');
+        offerEmail(data, 'Something went wrong. Try again or email us.');
       } finally {
         state.busy = false;
         form.setAttribute('aria-busy', 'false');
@@ -653,20 +653,20 @@
    #goo compartido. Solo desktop con ratón (≥768); en táctil no hay nada que fundir. */
 (function(){
   if(window.__mcCtaGoo)return; window.__mcCtaGoo=1;
-  var ZONE=40, BLUR=null, ev=null, raf=0, b=null, dot=null, g=null;
+  var ZONE=40, BLUR=null, BLURL=null, ev=null, raf=0, b=null, dot=null, g=null, md=null;
   var FINE=window.matchMedia&&matchMedia('(hover:hover) and (pointer:fine)').matches;
   function fine(){return FINE&&window.innerWidth>=768}
   function frame(){
     raf=0;
     if(!b||!b.isConnected){
       b=[].find.call(document.querySelectorAll('.circle-cta'),function(x){return !x.closest('x-dc')});
-      dot=b&&b.querySelector('.btn-dot'); g=b&&b.querySelector('.cta-blob g');
+      dot=b&&b.querySelector('.btn-dot'); g=b&&b.querySelector('.cta-blob g'); md=b&&b.querySelector('.cta-mask-dot');
       /* Para que la gota y el blob sean el mismo líquido: la gota vive en el mismo <g> que el
          blob (gira con él) y el degradado pasa a coordenadas del SVG, así ambos se pintan con el
          mismo campo de color y la unión no deja costura. El runtime pierde el camelCase de
          gradientUnits al copiar el HTML, por eso se fija aquí. */
       if(dot&&g&&dot.parentNode!==g)g.appendChild(dot);
-      [].forEach.call(document.querySelectorAll('[id="cta-blob-fill"]'),function(x){x.setAttribute('gradientUnits','userSpaceOnUse')});
+      [].forEach.call(document.querySelectorAll('[id="cta-blob-fill"],[id="cta-blob-alpha"]'),function(x){x.setAttribute('gradientUnits','userSpaceOnUse')});
     }
     if(!dot||!g)return;
     var p=0, r=b.getBoundingClientRect();
@@ -681,13 +681,18 @@
       if(m&&m!=='none'){var v=new DOMMatrix(m); var t=Math.atan2(v.b,v.a); k=Math.cos(t); s=Math.sin(t);}
       dot.setAttribute('cx',(50+ux*k+uy*s).toFixed(2)); dot.setAttribute('cy',(50-ux*s+uy*k).toFixed(2));
       dot.style.opacity=p.toFixed(3);
+      /* light: la máscara de transparencia deja ver la gota por cualquier lado del blob, como en dark (en dark la máscara ya es blanca) */
+      if(md){md.setAttribute('cx',dot.getAttribute('cx')); md.setAttribute('cy',dot.getAttribute('cy')); md.style.opacity=dot.style.opacity;}
       b.classList.add('goo');
       if(!BLUR)BLUR=document.querySelector('#goo feGaussianBlur');
       if(BLUR)BLUR.setAttribute('stdDeviation',(0.2+5.8*p).toFixed(2));
+      /* light: #goo-l va en el <g> del SVG (unidades del viewBox 100), mismo desenfoque en px */
+      if(!BLURL)BLURL=document.querySelector('#goo-l feGaussianBlur');
+      if(BLURL)BLURL.setAttribute('stdDeviation',((0.2+5.8*p)*100/r.width).toFixed(2));
       window.__mcGooNear=Math.max(window.__mcGooNear||0,p);
       go();   /* el blob sigue girando: re-colocar la gota cada frame aunque el ratón esté quieto */
     } else if(b.classList.contains('goo')){
-      dot.style.opacity='0'; b.classList.remove('goo'); window.__mcGooNear=0;
+      dot.style.opacity='0'; if(md)md.style.opacity='0'; b.classList.remove('goo'); window.__mcGooNear=0;
     }
   }
   function go(){ if(!raf)raf=requestAnimationFrame(frame); }

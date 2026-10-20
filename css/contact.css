@@ -186,9 +186,10 @@ body { margin: 0; }
 .circle-cta-fluid { position: absolute; inset: 0; pointer-events: none; }
 .circle-cta .btn-dot { pointer-events: none; }
 @media (hover: hover) and (pointer: fine) and (min-width: 768px) { .circle-cta.goo .circle-cta-fluid { filter: url(#goo); }
-  /* (2026-10-19) light: el borde del blob es translúcido y la gota no se ve (stop final con opacidad 0);
-     el umbral de alfa del #goo solo lo volvía un círculo opaco. Sin filtro conserva el velo, como en dark. */
-  :root[data-theme="light"] .circle-cta.goo .circle-cta-fluid { filter: none; } }
+  /* (2026-10-19) light: el umbral de alfa del #goo sobre un blob translúcido lo volvía opaco / le recortaba
+     el borde. En light el goo (#goo-l) va en el <g>, antes de su máscara de transparencia (ver abajo). */
+  :root[data-theme="light"] .circle-cta.goo .circle-cta-fluid { filter: none; }
+  :root[data-theme="light"] .circle-cta.goo .cta-blob g { filter: url(#goo-l); } }
 .label-fade { animation: label-fade .4s ease both; }
 .cta-blob path { transform-origin: 50px 50px; transform-box: view-box; }
 .cta-blob path.blob-press { animation: blob-press .9s cubic-bezier(.22,1,.36,1); }
@@ -471,9 +472,15 @@ body { margin: 0; }
    background-color del * en case-study.css. Así la bola y el fondo van exactamente al mismo ritmo. */
 #cta-blob-fill stop{transition:stop-color .4s ease,stop-opacity .4s ease}
 #cta-blob-fill stop:nth-of-type(1),#cta-blob-fill stop:nth-of-type(2){stop-color:var(--accent)}
-#cta-blob-fill stop:nth-of-type(3){stop-color:#9BD700;stop-opacity:calc(1 - .4 * var(--fade-p,0))}
-#cta-blob-fill stop:nth-of-type(4){stop-color:color-mix(in oklab,#9BD700 calc(var(--fade-p,0) * 100%),#7BAA00);stop-opacity:calc(1 - var(--fade-p,0))}
-@media (prefers-reduced-motion:reduce){#cta-blob-fill stop{transition:none}}
+#cta-blob-fill stop:nth-of-type(3){stop-color:#9BD700}
+#cta-blob-fill stop:nth-of-type(4){stop-color:color-mix(in oklab,#9BD700 calc(var(--fade-p,0) * 100%),#7BAA00)}
+/* (2026-10-19) la transparencia ya no va en el relleno sino en la máscara del <g> (#cta-blob-mask, mismo
+   degradado animado): blob y gota se pintan opacos, así no se suman al solaparse y el goo funde formas
+   opacas como en dark. Mismos valores y mismo cruce con --fade-p; en dark la máscara es blanca = sin efecto. */
+#cta-blob-alpha stop{transition:stop-opacity .4s ease}
+#cta-blob-alpha stop:nth-of-type(3){stop-opacity:calc(1 - .4 * var(--fade-p,0))}
+#cta-blob-alpha stop:nth-of-type(4){stop-opacity:calc(1 - var(--fade-p,0))}
+@media (prefers-reduced-motion:reduce){#cta-blob-fill stop,#cta-blob-alpha stop{transition:none}}
 
 /* (2026-10-19) Aviso de privacidad del paso 2: link absoluto bajo las horas, no desplaza nada.
    Desktop: misma fila que "Skip, just email me" (margin-top 26), a la izquierda. Mobile: 16px bajo las horas. */
