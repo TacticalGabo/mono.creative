@@ -491,3 +491,200 @@
     if(mq.addEventListener)mq.addEventListener('change',corre); else if(mq.addListener)mq.addListener(corre);
   }
 })();
+
+/* (2026-10-20) MANCHAS EN CANVAS (desktop), en TODAS las secciones con manchas. Causa del parpadeo en Chrome
+   (aislada en TEST 2026-10-19): la animación CONTINUA blot de las manchas (transform animado); quietas no fallaba.
+   Probado primero solo en el hero del home (__mcHeroCv, TEST 8bb771f); ahora general: cada grupo de manchas
+   .g-d seguidas se pinta en UN canvas quieto (.glow-cv-c) en su mismo lugar del orden de pintado, que solo
+   cambia de contenido. Mismo bitmap desenfocado (horneado de __mcGlowPx), misma caja, rotación, opacidad
+   (--g*, --fade-p, tema), mismo blot (keyframes, ease-in-out, duración, retardo, reverse), mismo fundido
+   fx-glow (ease) y mismo reloj (currentTime de las animaciones CSS al cambiar). Se pausa leyendo el
+   animation-play-state del CSS (.idle, .espera, espera del logo...), así que para igual que antes.
+   Originales ocultos y sin animación (html.glow-cv + .cv-on). Móvil (.g-m) y reduced-motion siguen con el
+   CSS de siempre. Sin canvas filter/roundRect no se toca nada.
+   CSS: .glow-cv-c / .cv-on en case-study.css. Mismo código que el script __mcGlowCv de index.html. */
+(function(){
+  if(window.__mcGlowCv)return; window.__mcGlowCv=1;
+  var Q=.25, SMAX=1.14;   // resolución 1/4 (las manchas ya son bitmaps de baja resolución muy desenfocados); SMAX = mayor scale de blot
+  var KF=[[0,0,0,1],[.23,4,-7,1.14],[.47,-5,5,.92],[.72,6,3,1.09],[1,0,0,1]];   // = @keyframes blot (translate % de la caja, scale)
+  function bez(x1,y1,x2,y2){
+    return function(x){
+      if(x<=0)return 0; if(x>=1)return 1;
+      var t=x;
+      for(var i=0;i<10;i++){
+        var u=1-t, fx=3*x1*t*u*u+3*x2*t*t*u+t*t*t-x, d=3*x1*u*u+6*(x2-x1)*t*u+3*(1-x2)*t*t;
+        if(Math.abs(fx)<1e-7||Math.abs(d)<1e-7)break;
+        t=Math.min(1,Math.max(0,t-fx/d));
+      }
+      var v=1-t; return 3*y1*t*v*v+3*y2*t*t*v+t*t*t;
+    };
+  }
+  var EIO=bez(.42,0,.58,1), EASE=bez(.25,.1,.25,1);
+  function blot(p){
+    for(var i=0;i<KF.length-1;i++){
+      var a=KF[i], b=KF[i+1];
+      if(p<=b[0]){ var e=EIO((p-a[0])/(b[0]-a[0])); return [a[1]+(b[1]-a[1])*e,a[2]+(b[2]-a[2])*e,a[3]+(b[3]-a[3])*e]; }
+    }
+    return [0,0,1];
+  }
+  function soporta(){
+    try{
+      var c=document.createElement('canvas'); c.width=c.height=32;
+      var x=c.getContext('2d'); if(!x||!('filter' in x)||!x.roundRect)return false;
+      x.filter='blur(4px)'; x.fillStyle='#000'; x.fillRect(12,12,8,8);
+      return x.getImageData(5,16,1,1).data[3]>0;
+    }catch(e){return false}
+  }
+  function radio(v,w,h){
+    var p=String(v).split(' '); if(p.length<2)p[1]=p[0];
+    function px(t,base){ return t.indexOf('%')>0 ? parseFloat(t)*base/100 : (parseFloat(t)||0); }
+    return {x:px(p[0],w),y:px(p[1],h)};
+  }
+  // mismo horneado que __mcGlowPx: el desenfoque CSS de la mancha, una vez, en un bitmap
+  function hornea(el){
+    var w=parseFloat(el.style.width), h=parseFloat(el.style.height);
+    var m=/blur\(\s*([\d.]+)px/.exec(el.style.filter||'');
+    if(!(w>0)||!(h>0)||!m)return null;
+    var s=parseFloat(m[1]), pad=Math.ceil(s*3), tw=w+pad*2, th=h+pad*2;
+    var k=Math.min(.5,320/Math.max(tw,th)), kw=w*k, kh=h*k;
+    var cs=getComputedStyle(el), c=document.createElement('canvas');
+    c.width=Math.ceil(tw*k); c.height=Math.ceil(th*k);
+    var x=c.getContext('2d');
+    x.filter='blur('+(s*k)+'px)';
+    // si __mcGlowPx ya la horneó (.pre = background:none) se usa el verde de .glow (--glow en los case studies)
+    var bg=cs.backgroundColor;
+    if(!bg||bg==='rgba(0, 0, 0, 0)')bg=cs.getPropertyValue('--glow').trim()||'#9de14a';
+    x.fillStyle=bg;
+    x.beginPath();
+    x.roundRect(pad*k,pad*k,kw,kh,[radio(cs.borderTopLeftRadius,kw,kh),radio(cs.borderTopRightRadius,kw,kh),radio(cs.borderBottomRightRadius,kw,kh),radio(cs.borderBottomLeftRadius,kw,kh)]);
+    x.fill();
+    return {img:c,x:-pad,y:-pad,w:c.width/k,h:c.height/k};
+  }
+  function anim(el,n){ var a=el.getAnimations(); for(var i=0;i<a.length;i++)if(a[i].animationName===n)return a[i]; return null; }
+  var GR=[], on=false, raf=0, poll=0, last=0, mq, rm;
+  // caja de cada mancha (offsetLeft/Top, matriz de transform) y la del canvas que las cubre a todas en cualquier fase de blot
+  function geo(gr){
+    var x0=1/0, y0=1/0, x1=-1/0, y1=-1/0;
+    gr.G.forEach(function(g){
+      var el=g.el, w=el.offsetWidth, h=el.offsetHeight;
+      g.w=w; g.h=h; g.ox=el.offsetLeft+w/2; g.oy=el.offsetTop+h/2;
+      var t=getComputedStyle(el).transform, mm=/matrix\(([^)]+)\)/.exec(t);
+      g.M=mm?mm[1].split(',').map(parseFloat):[1,0,0,1,0,0];
+      var sp=g.sp, M=g.M, k=g.bl?SMAX:1, dx=g.bl?.06*w:0, dy=g.bl?.07*h:0;
+      [[sp.x,sp.y],[sp.x+sp.w,sp.y],[sp.x,sp.y+sp.h],[sp.x+sp.w,sp.y+sp.h]].forEach(function(p){
+        var px=p[0]-w/2, py=p[1]-h/2, X=g.ox+k*(M[0]*px+M[2]*py), Y=g.oy+k*(M[1]*px+M[3]*py);
+        x0=Math.min(x0,X-dx); x1=Math.max(x1,X+dx); y0=Math.min(y0,Y-dy); y1=Math.max(y1,Y+dy);
+      });
+    });
+    if(!(x1>x0)||!(y1>y0))return;
+    var L=Math.floor(x0)-2, T=Math.floor(y0)-2, W=Math.ceil(x1)+2-L, H=Math.ceil(y1)+2-T, cv=gr.cv;
+    cv.style.left=L+'px'; cv.style.top=T+'px'; cv.style.width=W+'px'; cv.style.height=H+'px';
+    var cw=Math.max(1,Math.ceil(W*Q)), ch=Math.max(1,Math.ceil(H*Q));
+    if(cv.width!==cw)cv.width=cw; if(cv.height!==ch)cv.height=ch;
+    gr.L=L; gr.T=T; gr.qx=cw/W; gr.qy=ch/H;
+  }
+  function pinta(gr){
+    var ctx=gr.ctx, qx=gr.qx, qy=gr.qy; if(!qx)return;
+    ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,gr.cv.width,gr.cv.height);
+    gr.G.forEach(function(g){
+      var sp=g.sp;
+      if(g.lazy){ if(!(g.lazy.complete&&g.lazy.naturalWidth))return; }
+      var t=g.t, f=1;
+      if(g.fx){ var u=(t-g.fx.delay)/g.fx.dur; f=u<=0?0:(u>=1?1:EASE(u)); }
+      var a=g.op*f; if(!(a>0))return;
+      var tx=0, ty=0, s=1;
+      if(g.bl&&t>=g.bl.delay){
+        var p=((t-g.bl.delay)%g.bl.dur)/g.bl.dur; if(g.bl.rev)p=1-p;
+        var v=blot(p); tx=v[0]/100*g.w; ty=v[1]/100*g.h; s=v[2];
+      }
+      var M=g.M, cx=g.w/2, cy=g.h/2;
+      ctx.setTransform(qx*s*M[0],qy*s*M[1],qx*s*M[2],qy*s*M[3],
+        qx*(g.ox-gr.L+tx-s*(M[0]*cx+M[2]*cy)), qy*(g.oy-gr.T+ty-s*(M[1]*cx+M[3]*cy)));
+      ctx.globalAlpha=a;
+      ctx.drawImage(sp.img,sp.x,sp.y,sp.w,sp.h);
+    });
+    ctx.globalAlpha=1;
+  }
+  // estado de cada mancha leído del CSS (animation-play-state sigue en cascada aunque el nombre sea none):
+  // así se pausa exactamente cuando pausaba su animación (.idle, .espera, espera del logo...). Opacidad = --g*, --fade-p, tema.
+  function lee(dt){
+    var vivo=false;
+    GR.forEach(function(gr){
+      var sucio=gr.sucio; gr.sucio=false;
+      gr.G.forEach(function(g){
+        var cs=getComputedStyle(g.el), op=parseFloat(cs.opacity)||0;
+        if(cs.animationPlayState.indexOf('paused')<0){ vivo=true; if(dt){ g.t+=dt; sucio=true; } }
+        if(op!==g.op){ g.op=op; sucio=true; }
+      });
+      if(sucio)pinta(gr);
+    });
+    return vivo;
+  }
+  function frame(now){
+    raf=0; if(!on)return;
+    var dt=last?Math.min(now-last,100):0; last=now;
+    if(!lee(dt)||document.hidden){ last=0; if(!poll)poll=setTimeout(function(){ poll=0; if(on&&!raf)raf=requestAnimationFrame(frame); },150); return; }
+    raf=requestAnimationFrame(frame);
+  }
+  function arranca(){
+    if(on||!GR.length||!mq.matches||rm.matches)return;
+    // reloj = el de las animaciones CSS en este instante (siguen exactamente donde iban)
+    GR.forEach(function(gr){
+      gr.G.forEach(function(g){
+        var b=anim(g.el,'blot'), f=anim(g.el,'fx-glow');
+        if(b){ var tb=b.effect.getTiming(); g.bl={delay:tb.delay,dur:tb.duration,rev:/reverse/.test(tb.direction)}; g.t=b.currentTime||0; }
+        else { g.bl=null; g.t=f?(f.currentTime||0):0; }
+        if(f){ var tf=f.effect.getTiming(); g.fx={delay:tf.delay,dur:tf.duration}; } else g.fx=null;
+        g.op=-1;
+      });
+      geo(gr); gr.sucio=true;
+    });
+    lee(0);
+    document.documentElement.classList.add('glow-cv');
+    on=true; last=0; raf=requestAnimationFrame(frame);
+  }
+  function para(){
+    if(!on)return; on=false; if(raf)cancelAnimationFrame(raf); raf=0;
+    document.documentElement.classList.remove('glow-cv');
+  }
+  function suelta(el){ return !el.closest('x-dc'); }
+  function init(n){
+    // página montada por el runtime (sin <x-dc>), como los demás init
+    if(!document.querySelector('.glow'))return;   // página sin manchas (contact): nada que hacer
+    if(document.querySelector('x-dc'))return n<250&&setTimeout(function(){ init(n+1); },120);
+    if(!soporta())return;
+    mq=matchMedia('(min-width:768px)'); rm=matchMedia('(prefers-reduced-motion:reduce)');
+    function cambio(){ if(mq.matches&&!rm.matches){ monta(); arranca(); } else para(); }
+    if(mq.addEventListener){ mq.addEventListener('change',cambio); rm.addEventListener('change',cambio); }
+    cambio();
+  }
+  // se monta solo cuando hace falta (desktop sin reduced-motion): en móvil no se hornea ni se crea nada
+  var hecho=false;
+  function monta(){
+    if(hecho)return; hecho=true;
+    var cur=null;
+    [].filter.call(document.querySelectorAll('.glow.g-d'),suelta).forEach(function(el){
+      var g={el:el,t:0,op:-1};
+      if(el.classList.contains('gl')){
+        var im=el.querySelector('img'); if(!im)return;
+        g.lazy=im; g.sp={img:im,x:0,y:0,get w(){return g.w},get h(){return g.h}};
+      } else {
+        g.sp=hornea(el); if(!g.sp)return;
+      }
+      // grupo = manchas seguidas del mismo padre (solo .glow entre ellas): un canvas en su lugar del orden de pintado
+      var sigue=!!cur&&el.parentElement===cur.par, s=el.previousElementSibling;
+      while(sigue&&s!==cur.fin){ if(!s||!s.classList.contains('glow'))sigue=false; else s=s.previousElementSibling; }
+      if(!sigue){ cur={par:el.parentElement,G:[],ini:el}; GR.push(cur); }
+      cur.fin=el; cur.G.push(g);
+      el.classList.add('cv-on');
+      if(g.lazy){ var gr=cur; g.lazy.addEventListener('load',function(){ gr.sucio=true; }); }
+    });
+    GR.forEach(function(gr){
+      var cv=document.createElement('canvas'); cv.className='glow-cv-c'; cv.setAttribute('aria-hidden','true');
+      gr.par.insertBefore(cv,gr.ini);
+      gr.cv=cv; gr.ctx=cv.getContext('2d'); gr.ctx.imageSmoothingEnabled=true; gr.ctx.imageSmoothingQuality='high';
+      new ResizeObserver(function(){ if(on){ geo(gr); gr.sucio=true; } }).observe(gr.par);
+    });
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){ init(0); });else init(0);
+})();

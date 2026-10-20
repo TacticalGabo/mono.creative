@@ -19,7 +19,7 @@
 <!-- (2026-10-05) las dos fuentes del primer pantallazo, pedidas ya con el HTML (sin esperar al CSS) -->
 <link rel="preload" as="font" type="font/woff2" crossorigin href="./fonts/plus-jakarta-sans/webfont/PlusJakartaSans-200-800-normal-latin.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="./fonts/space-mono/webfont/SpaceMono-400-normal-latin.woff2">
-<link rel="stylesheet" href="./css/case-study.css?v=20">
+<link rel="stylesheet" href="./css/case-study.css?v=21">
 <link rel="stylesheet" href="./css/contact.css?v=24">
 <!-- (2026-10-04) CARGA: React desde el propio dominio, igual que el home (mismos bytes,
      sha384 idéntico al SRI de support.js). Además, con window.__resources definido
@@ -38,7 +38,7 @@ if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.
 <link rel="preload" as="fetch" crossorigin href="./components/brandmark-fusion.dc.html">
 <link rel="preload" as="fetch" crossorigin href="./components/header-logo-hover.dc.html">
 <script src="./vendor/support.js"></script>
-<script src="./js/case-study.js?v=21" defer></script>
+<script src="./js/case-study.js?v=22" defer></script>
 <script src="./js/contact-config.js?v=4" defer></script>
 <script src="./js/contact-rules.js?v=3" defer></script>
 <script src="./js/contact-delivery.js?v=1" defer></script>
@@ -710,9 +710,10 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
 <!-- GRAIN-OVERLAY:END -->
 <!-- /SHARED:GRAIN -->
 <noscript>This form needs JavaScript. Email <a href="mailto:hello.monocreative@gmail.com">hello.monocreative@gmail.com</a> to get in touch.</noscript>
+<style>/* PREVIEW: prueba de errores a 12px */ .field-error,.submit-feedback{font-size:12px}</style>
 <script>
 // PREVIEW: abre el paso 2 y muestra el error de envio (solo local)
-window.addEventListener("load",function(){var f=document.getElementById("contact-form");f.requestSubmit();setTimeout(function(){document.getElementById("submit-feedback").textContent="Something went wrong. Try again or email us.";var l=document.getElementById("direct-submit");l.href="mailto:hello.monocreative@gmail.com";l.hidden=false;},400);});
+window.addEventListener("load",function(){var f=document.getElementById("contact-form");f.requestSubmit();setTimeout(function(){var fb=document.getElementById("submit-feedback"),se=document.getElementById("slot-error"),l=document.getElementById("direct-submit");setInterval(function(){fb.textContent="Something went wrong. Try again or email us.";se.textContent="Pick a time, or choose email instead";l.href="mailto:hello.monocreative@gmail.com";l.hidden=false;},150);},400);});
 </script>
 </body>
 </html>

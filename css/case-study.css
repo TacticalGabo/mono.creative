@@ -1007,3 +1007,10 @@ html.js.logo-drawn .page .nav :is(.nav-anim,.nav-anim-m){opacity:1}
   .csc--cap .csc__scene{align-content:start;padding-top:14.236cqw}
   .csc--cap .csc__caption{position:absolute;left:0;right:0;bottom:calc(24px + 14.236cqw);max-width:69.17cqw;margin:0 auto;text-align:center}
 }
+/* (2026-10-20) manchas desktop pintadas en canvas (js/case-study.js, __mcGlowCv): ver allí el porqué */
+.glow-cv-c{display:none}
+@media (min-width:768px){
+  html.glow-cv .glow-cv-c{display:block;position:absolute;pointer-events:none}
+  html.glow-cv .glow.cv-on{animation-name:none!important;will-change:auto!important;visibility:hidden!important}
+  html.glow-cv .glow.cv-on>img{will-change:auto!important}
+}
