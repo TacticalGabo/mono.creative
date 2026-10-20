@@ -185,7 +185,10 @@ body { margin: 0; }
 @keyframes cta-blob-spin { to { transform: rotate(360deg); } }
 .circle-cta-fluid { position: absolute; inset: 0; pointer-events: none; }
 .circle-cta .btn-dot { pointer-events: none; }
-@media (hover: hover) and (pointer: fine) and (min-width: 768px) { .circle-cta.goo .circle-cta-fluid { filter: url(#goo); } }
+@media (hover: hover) and (pointer: fine) and (min-width: 768px) { .circle-cta.goo .circle-cta-fluid { filter: url(#goo); }
+  /* (2026-10-19) light: el borde del blob es translúcido y la gota no se ve (stop final con opacidad 0);
+     el umbral de alfa del #goo solo lo volvía un círculo opaco. Sin filtro conserva el velo, como en dark. */
+  :root[data-theme="light"] .circle-cta.goo .circle-cta-fluid { filter: none; } }
 .label-fade { animation: label-fade .4s ease both; }
 .cta-blob path { transform-origin: 50px 50px; transform-box: view-box; }
 .cta-blob path.blob-press { animation: blob-press .9s cubic-bezier(.22,1,.36,1); }
