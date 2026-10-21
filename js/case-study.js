@@ -1,6 +1,10 @@
 /* mono.creative — JS común de los case studies (casestudy_*.html). Se carga con defer.
    Cada init espera a la página montada por el runtime (fuera de <x-dc>). */
 
+/* (2026-10-21) página ya montada por el runtime (sin <x-dc> y con su .page): si lo que busca un
+   init no está entonces, no va a llegar (contact, privacy, 404) y se deja de sondear. */
+function cs_montada(){return !document.querySelector('x-dc')&&!!document.querySelector('.page')}
+
 /* case study: entrada por bloques y barras de acento de Before / After.
    (La clase .js la pone cada página en su <head>, síncrona, antes de pintar.) */
 (function(){
@@ -70,7 +74,7 @@
   init.n=0;
   function init(){
     var sec=document.querySelector('.cs-constraints');
-    if(!sec||sec.closest('x-dc')||!sec.querySelector('.curve--v path')){if(++init.n<250)setTimeout(init,120);return}   /* tope 30 s (2026-10-19): sin .cs-constraints (contact, privacy) sondeaba para siempre */
+    if(!sec||sec.closest('x-dc')||!sec.querySelector('.curve--v path')){if(!sec&&cs_montada())return;if(++init.n<250)setTimeout(init,120);return}   /* tope 30 s (2026-10-19): sin .cs-constraints (contact, privacy) sondeaba para siempre */
     /* (2026-10-16) lo de abajo (700 muestras de la curva + medidas de layout forzadas) se hace al
        acercarse la sección (1,5 pantallas), no al montar la página: en el móvil tomaba el hilo
        justo cuando salían el header y el hero */
@@ -229,7 +233,7 @@
   var tries=0;
   function init(){
     var main=live('main[data-case]')[0];
-    if(!main){if(++tries<750)setTimeout(init,40);return}   /* sondeo cada 40 ms (el hero y los bloques salen en cuanto la página está montada); tope 30 s: contact.html carga este JS y no tiene main[data-case] */
+    if(!main){if(!cs_montada()&&++tries<750)setTimeout(init,40);return}   /* sondeo cada 40 ms (el hero y los bloques salen en cuanto la página está montada); tope 30 s: contact.html carga este JS y no tiene main[data-case] */
     var io_ok='IntersectionObserver' in window;
     var reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -500,7 +504,7 @@
    (--g*, --fade-p, tema), mismo blot (keyframes, ease-in-out, duración, retardo, reverse), mismo fundido
    fx-glow (ease) y mismo reloj (currentTime de las animaciones CSS al cambiar). Se pausa leyendo el
    animation-play-state del CSS (.idle, .espera, espera del logo...), así que para igual que antes.
-   Originales ocultos y sin animación (html.glow-cv + .cv-on). Móvil (.g-m) y reduced-motion siguen con el
+   Originales ocultos y sin animación (html.glow-cv + .cv-on). Móvil (.g-m, quietas desde 2026-10-21) y reduced-motion siguen con el
    CSS de siempre. Sin canvas filter/roundRect no se toca nada.
    CSS: .glow-cv-c / .cv-on en case-study.css. Mismo código que el script __mcGlowCv de index.html. */
 (function(){
@@ -561,7 +565,10 @@
     return {img:c,x:-pad,y:-pad,w:c.width/k,h:c.height/k};
   }
   function anim(el,n){ var a=el.getAnimations(); for(var i=0;i<a.length;i++)if(a[i].animationName===n)return a[i]; return null; }
-  var GR=[], on=false, raf=0, poll=0, last=0, mq, rm;
+  var GR=[], on=false, raf=0, poll=0, last=0, next=0, leerHasta=0, mo=null, mq, rm;
+  // (2026-10-21) 30 fps: a 60 Hz la mancha avanza <0,1 px por frame, a 30 fps no se nota y se pinta la mitad
+  // (un cuarto a 120 Hz). La cadencia se reparte sola en 75/90/144 Hz (next += INT, sin deriva).
+  var INT=1000/30;
   // caja de cada mancha (offsetLeft/Top, matriz de transform) y la del canvas que las cubre a todas en cualquier fase de blot
   function geo(gr){
     var x0=1/0, y0=1/0, x1=-1/0, y1=-1/0;
@@ -607,23 +614,31 @@
   }
   // estado de cada mancha leído del CSS (animation-play-state sigue en cascada aunque el nombre sea none):
   // así se pausa exactamente cuando pausaba su animación (.idle, .espera, espera del logo...). Opacidad = --g*, --fade-p, tema.
-  function lee(dt){
+  // (2026-10-21) Solo se lee (leer=true) tras un cambio de clase/estilo/tema en <html> o en los padres de las
+  // manchas (mira()) y durante el cruce de --fade-p (.45 s); el resto del tiempo se usa lo último leído.
+  function lee(dt,leer){
     var vivo=false;
     GR.forEach(function(gr){
       var sucio=gr.sucio; gr.sucio=false;
       gr.G.forEach(function(g){
-        var cs=getComputedStyle(g.el), op=parseFloat(cs.opacity)||0;
-        if(cs.animationPlayState.indexOf('paused')<0){ vivo=true; if(dt){ g.t+=dt; sucio=true; } }
-        if(op!==g.op){ g.op=op; sucio=true; }
+        if(leer){
+          var cs=getComputedStyle(g.el), op=parseFloat(cs.opacity)||0;
+          g.vivo=cs.animationPlayState.indexOf('paused')<0;
+          if(op!==g.op){ g.op=op; sucio=true; }
+        }
+        if(g.vivo){ vivo=true; if(dt){ g.t+=dt; sucio=true; } }
       });
       if(sucio)pinta(gr);
     });
     return vivo;
   }
+  function mira(){ leerHasta=performance.now()+700; }   // 700 = cruce de tema .45 s + margen
   function frame(now){
     raf=0; if(!on)return;
+    if(next&&now<next-1){ raf=requestAnimationFrame(frame); return; }
+    next=(next&&now-next<INT)?next+INT:now+INT;
     var dt=last?Math.min(now-last,100):0; last=now;
-    if(!lee(dt)||document.hidden){ last=0; if(!poll)poll=setTimeout(function(){ poll=0; if(on&&!raf)raf=requestAnimationFrame(frame); },150); return; }
+    if(!lee(dt,now<leerHasta)||document.hidden){ last=0; next=0; if(!poll)poll=setTimeout(function(){ poll=0; if(on&&!raf)raf=requestAnimationFrame(frame); },150); return; }
     raf=requestAnimationFrame(frame);
   }
   function arranca(){
@@ -639,9 +654,19 @@
       });
       geo(gr); gr.sucio=true;
     });
-    lee(0);
+    if(!mo){
+      mo=new MutationObserver(mira);
+      var vistos=[];
+      GR.forEach(function(gr){
+        for(var n=gr.par;n&&n.nodeType===1;n=n.parentElement){
+          if(vistos.indexOf(n)>=0)break; vistos.push(n);
+          mo.observe(n,{attributes:true,attributeFilter:['class','style','data-theme']});
+        }
+      });
+    }
+    mira(); lee(0,true);
     document.documentElement.classList.add('glow-cv');
-    on=true; last=0; raf=requestAnimationFrame(frame);
+    on=true; last=0; next=0; raf=requestAnimationFrame(frame);
   }
   function para(){
     if(!on)return; on=false; if(raf)cancelAnimationFrame(raf); raf=0;
@@ -687,4 +712,25 @@
     });
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){ init(0); });else init(0);
+})();
+
+(function(){
+  // ovalo del correo (seccion .cta): se dibuja al entrar en pantalla, una sola vez
+  if(window.__mcOval)return; window.__mcOval=1;
+  if(!('IntersectionObserver' in window)||(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches))return;
+  document.documentElement.classList.add('ov-arm');
+  var tries=0;
+  function init(){
+    var o=[].filter.call(document.querySelectorAll('.oval'),function(e){ return !e.closest('x-dc'); })[0];
+    // el footer puede montarse después (plantilla x-dc); sin óvalo tras ~6s (contact, 404...) se deja de buscar
+    if(!o)return ++tries<50&&setTimeout(init,120);
+    // (2026-10-21) .98 y no 1: en el móvil el óvalo es lo último de .cta (overflow:hidden) y su
+    // alto (86.185px) asoma ~0,03px por debajo de la sección al redondear el layout. Recortado
+    // así su ratio se queda en 0.9996, nunca llegaba a 1 y el óvalo no aparecía nunca.
+    var io=new IntersectionObserver(function(es){
+      for(var i=0;es.length>i;i++)if(es[i].isIntersecting&&es[i].intersectionRatio>=.98){es[i].target.classList.add('ov-in');io.unobserve(es[i].target);}
+    },{threshold:.98,rootMargin:'0px 0px -8% 0px'});
+    io.observe(o);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();

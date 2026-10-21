@@ -542,6 +542,13 @@
 /* ---- selector de zona horaria (paso 2) ---- */
 (function(){
   if(window.__mcTz)return; window.__mcTz=1;
+  /* (2026-10-21) iPhone/iPad: el buscador va a 14 px y Safari hace zoom al enfocarlo (< 16 px; open()
+     lo enfoca) y no lo deshace al cerrar. maximum-scale=1 solo quita ese zoom automático: en iOS el
+     pellizco sigue funcionando (Safari ignora el tope para el gesto). Solo iOS: en Android el tope sí
+     bloquearía el pellizco, y allí no hay zoom al enfocar. */
+  var vp=document.querySelector('meta[name="viewport"]');
+  if(vp&&(/iP(hone|od|ad)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1))&&!/maximum-scale/.test(vp.content))
+    vp.setAttribute('content',vp.content+', maximum-scale=1');
   var zones=null, cur=null;
   function live(s){return [].find.call(document.querySelectorAll(s),function(e){return !e.closest('x-dc')})}
   function build(){
@@ -647,6 +654,17 @@
       pa=path.animate([{transform:"scale(1)"},{transform:"scale(.9,.93)",offset:.18},{transform:"scale(1.05,1.02)",offset:.42},{transform:"scale(.98,1.01)",offset:.64},{transform:"scale(1)"}],{duration:900,easing:"cubic-bezier(.22,1,.36,1)"});
     }
     cta.addEventListener("pointerdown",press); cta.addEventListener("click",press); form.addEventListener("submit",press,true);
+    /* (2026-10-21) fuera de pantalla el blob no se anima: en móvil queda bajo el pliegue y su SMIL
+       (forma + degradados) y el giro CSS repintaban la página ~40 veces/s sin verse. Se pausa el
+       reloj del SVG y el giro, así al volver sigue donde estaba. En desktop siempre está a la vista. */
+    var svg=cta.querySelector(".cta-blob");
+    if(svg&&svg.pauseAnimations&&"IntersectionObserver" in window){
+      new IntersectionObserver(function(es){
+        var on=es[es.length-1].isIntersecting;
+        if(on)svg.unpauseAnimations(); else svg.pauseAnimations();
+        cta.classList.toggle("cta-quieta",!on);
+      },{rootMargin:"200px 0px"}).observe(cta);
+    }
   }
   init();
 })();

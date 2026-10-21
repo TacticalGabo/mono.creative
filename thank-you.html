@@ -6,6 +6,8 @@
 <link rel="icon" type="image/svg+xml" href="./assets/shared/logo-favicon-48x29.svg?v=3">
 <title>Thank you · mono.creative</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101913">
+<script>/* (2026-10-21) móvil: la barra del navegador toma el fondo del tema (dark #101913 / light #f8fbf9) y lo sigue al cambiar (toggle, swap por scroll, vuelta con atrás) */(function(){var h=document.documentElement,m=document.querySelector('meta[name="theme-color"]');if(!m||!window.MutationObserver)return;function c(){m.setAttribute('content',h.getAttribute('data-theme')==='light'?'#f8fbf9':'#101913')}c();new MutationObserver(c).observe(h,{attributes:true,attributeFilter:['data-theme']})})()</script>
 <meta name="robots" content="noindex">
 <meta name="description" content="Your brief reached mono.creative. We'll be in touch soon.">
 <style>
@@ -16,7 +18,7 @@
 </style>
 <link rel="preload" as="font" type="font/woff2" crossorigin href="./fonts/plus-jakarta-sans/webfont/PlusJakartaSans-200-800-normal-latin.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="./fonts/space-mono/webfont/SpaceMono-400-normal-latin.woff2">
-<link rel="stylesheet" href="./css/case-study.css?v=21">
+<link rel="stylesheet" href="./css/case-study.css?v=27">
 <link rel="stylesheet" href="./css/thank-you.css?v=24">
 <!-- (2026-10-04) CARGA: React desde el propio dominio, igual que el home (mismos bytes,
      sha384 idéntico al SRI de support.js). Además, con window.__resources definido
@@ -46,7 +48,6 @@ if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.
 <x-dc>
 <helmet></helmet>
 <div class="page" data-screen-label="thank-you">
-  <div class="grain"></div>
   <!-- SHARED:GOO -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="goo" x="-60%" y="-140%" width="220%" height="380%" color-interpolation-filters="sRGB"><feGaussianBlur in="SourceGraphic" stdDeviation="6" result="b"></feGaussianBlur><feColorMatrix in="b" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -9" result="g"></feColorMatrix><feComposite in="SourceGraphic" in2="g" operator="atop"></feComposite></filter></svg>
 <!-- /SHARED:GOO -->
@@ -220,20 +221,23 @@ if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.
     st.done=nav;
   }
   var BLUR=null;
-  function goo(b,p,x,y){
+  /* (2026-10-21) r y ow llegan medidos desde la fase de lectura de frame(): sin layout síncrono tras
+     escribir. Solo se escribe lo que cambia: un botón lejos y ya apagado (st.apagado) no se toca, y el
+     desenfoque se compara con el atributo real (contact.js también escribe en #goo). */
+  function goo(b,p,x,y,r,ow){
     var st=parts(b); if(!st||!st.dot)return;
     if(p>0){
-      var r=b.getBoundingClientRect();
-      var k=(b.offsetWidth&&r.width)?b.offsetWidth/r.width:1;
+      if(!r){ r=b.getBoundingClientRect(); ow=b.offsetWidth; }
+      var k=(ow&&r.width)?ow/r.width:1;
       st.dot.style.transform='translate3d('+((x-r.left)*k)+'px,'+((y-r.top)*k)+'px,0) translate(-50%,-50%)';
       st.dot.style.opacity=p.toFixed(3);
-      b.classList.add('goo');
+      if(st.apagado!==false){ b.classList.add('goo'); st.apagado=false; }
       if(!BLUR)BLUR=document.querySelector('#goo feGaussianBlur');
-      if(BLUR)BLUR.setAttribute('stdDeviation',(0.2+5.8*p).toFixed(2));
+      var sd=(0.2+5.8*p).toFixed(2);
+      if(BLUR&&BLUR.getAttribute('stdDeviation')!==sd)BLUR.setAttribute('stdDeviation',sd);
       colors(st,true);
     } else {
-      st.dot.style.opacity='0';
-      b.classList.remove('goo');
+      if(st.apagado!==true){ st.dot.style.opacity='0'; b.classList.remove('goo'); st.apagado=true; }
       if(!st.hover)colors(st,false);
     }
   }
@@ -246,8 +250,8 @@ if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.
       // fase de LECTURA primero: antes se leía un rect, se escribía y se volvía a
       // leer, tres layouts síncronos por frame de scroll (y con el SVG del
       // clúster sucio, así que cada uno recalculaba de más)
-      var rects=[];
-      if(ev)for(var q=0;q<list.length;q++)rects[q]=list[q].getBoundingClientRect();
+      var rects=[], ows=[];
+      if(ev)for(var q=0;q<list.length;q++){ rects[q]=list[q].getBoundingClientRect(); ows[q]=list[q].offsetWidth; }
       for(var i=0;list.length>i;i++){
         var b=list[i];
         if(!ev){ if(b!==focused)set(b,false); goo(b,0); continue;}
@@ -259,7 +263,7 @@ if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.
         var p=inside?1:(d2<=ZONE*ZONE?1-Math.sqrt(d2)/ZONE:0);
         if(p>0)any_near=p>any_near?p:any_near;
         if(!(b===focused&&!inside))set(b,inside);
-        if(FINEnow())goo(b,p,ev.x,ev.y);
+        if(FINEnow())goo(b,p,ev.x,ev.y,r,ows[i]);
       }
       window.__mcGooNear=any_near;
     }
@@ -364,11 +368,14 @@ if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.
     // El punto verde solo existe en desktop con ratón. En un teléfono el toque
     // genera un mousemove sintético y el punto aparecía y se quedaba puesto,
     // estorbando. Aquí ni siquiera se crea el elemento.
+    // (2026-10-21) la media query se crea una vez (su .matches sigue al día) y la opacidad
+    // del punto solo se escribe si cambia
+    var mq=window.matchMedia && window.matchMedia('(hover:hover) and (pointer:fine)');
     var fine=function(){
-      return !!(window.matchMedia && window.matchMedia('(hover:hover) and (pointer:fine)').matches)
-        && window.innerWidth>=768;
+      return !!(mq && mq.matches) && window.innerWidth>=768;
     };
-    var d=null;
+    var d=null, op=null;
+    function opac(v){ if(d&&v!==op){ d.style.opacity=v; op=v; } }
     function dot(){
       if(d)return d;
       d=document.createElement('div'); d.id='cursor-dot';
@@ -376,31 +383,49 @@ if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.
       return d;
     }
     document.addEventListener('mousemove',function(e){
-      if(!fine()){ if(d)d.style.opacity='0'; return; }
+      if(!fine()){ opac('0'); return; }
       var el=dot();
       el.style.transform='translate3d('+e.clientX+'px,'+e.clientY+'px,0) translate(-50%,-50%)';
-      el.style.opacity=e.target&&e.target.closest&&e.target.closest('.page')?(1-(window.__mcGooNear||0)).toFixed(3):'0';
+      opac(e.target&&e.target.closest&&e.target.closest('.page')?(1-(window.__mcGooNear||0)).toFixed(3):'0');
     });
-    document.addEventListener('mouseleave',function(){if(d)d.style.opacity='0';});
+    document.addEventListener('mouseleave',function(){opac('0');});
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
 </script>
 <!-- /SHARED:JS-CURSOR -->
 <!-- SHARED:GRAIN -->
-<!-- GRAIN-OVERLAY:START — 2a capa de grano sobre el .grain original. Ajuste aprobado 2026-09-20 -->
+<!-- GRAIN-OVERLAY:START — capa de grano. Ajuste aprobado 2026-09-20; el .grain original se retiró 2026-10-21 -->
 <div class="grain-overlay" aria-hidden="true"></div>
 <style>
-  .grain-overlay{position:fixed;inset:0;pointer-events:none;z-index:2147483000;
-    background-image:url('./assets/shared/texture-grain.png');background-repeat:repeat;
-    background-size:281.6px 281.6px;   /* grano en pantalla 1.1 px */
-    opacity:.42;mix-blend-mode:overlay;will-change:transform;
+  /* (2026-10-21) Grano sin mix-blend-mode (un blend obliga a la GPU a leer y volver a mezclar lo de debajo en
+     cada frame de scroll), FIJO en pantalla como el overlay de antes y sin tapar textos. Misma estructura en light y dark.
+     Texturas: scripts/graingen.py a partir de texture-grain.png (mismo patrón de ruido).
+     · Fondo: .grain-overlay va DETRÁS del contenido (z-index:-1) con texture-grain-dark.png (intensidad 2,
+       oscuros 1, densidad 55 %, 0.6 px; en light texture-grain-light.png). body y .page sin color de fondo (lo pinta html), así el grano queda
+       detrás de textos, líneas e imágenes y se ve a través de las manchas.
+     · Imágenes (.shot en el home, .media en case studies): texture-grain-img.png (2.5 / oscuros .15 / 100 % /
+       0.5 px), fijo, visto por una ventana: clip-path:border-box sigue el border-radius y recorta también al
+       hijo fijo. Se pinta una vez; en el scroll la GPU solo mueve la ventana. */
+  .grain-overlay{position:fixed;inset:0;z-index:-1;pointer-events:none;will-change:transform;
     min-height:100lvh}                 /* móvil: cubre también la franja que destapa la barra del navegador al scrollear */
-  /* light: overlay sobre fondo claro devuelve el mismo fondo y el grano
-     desaparece; multiply lo oscurece en cualquier fondo, al mismo coste.
-     Opacidades calibradas para el mismo contraste (ΔL*) que en dark. */
-  :root[data-theme="light"] .grain{mix-blend-mode:multiply;opacity:.056}
-  :root[data-theme="light"] .grain-overlay{mix-blend-mode:multiply;opacity:.14}
+  /* Una capa por tema que se funden con --fade-p, al mismo paso que el color de fondo (antes la textura cambiaba
+     de golpe y durante el cruce de .45 s se veía la de un tema sobre el fondo del otro). Quietas no cuestan: la
+     que queda a opacidad 0 no se dibuja. Las dos están siempre cargadas, así el cambio no espera a la descarga. */
+  .grain-overlay::before,.grain-overlay::after{content:"";position:absolute;inset:0}
+  .grain-overlay::before{background:url('./assets/shared/texture-grain-dark.png') 0 0/153.6px 153.6px repeat;opacity:calc(1 - var(--fade-p,0))}   /* dark: 2 / oscuros 1 / 55 % / 0.6 px */
+  .grain-overlay::after{background:url('./assets/shared/texture-grain-light.png') 0 0/115.2px 115.2px repeat;opacity:var(--fade-p,0)}   /* light: 3.35 / oscuros .15 / 100 % / 0.45 px */
+  :is(body,.page){background-color:transparent}   /* html pinta el color; body tapaba la capa z-index:-1 */
+  /* .grid2 .col (mosaico, desktop): contain:size en vez de size+layout. Con 'layout' la columna pasa a ser la
+     referencia de lo fijo y el grano de esas imágenes se movía con ella (medido: el layout extra es despreciable). */
+  @media (min-width:768px){.grid2 .col{contain:size}}
+  .shot{clip-path:border-box}
+  .shot::before{content:"";position:fixed;inset:0;pointer-events:none;background:url('./assets/shared/texture-grain-img.png') 0 0/128px 128px repeat}
+  /* z-index:1 = encima de los <video> (.vid>video es absoluto). Las de cortina (data-reveal="wipe") quitan su
+     clip-path al terminar: se repone la ventana. */
+  .media{position:relative;clip-path:border-box}
+  :root.js main [data-reveal="wipe"] .media.ir-done:not(.ba__img){clip-path:border-box}
+  .media::before{content:"";position:fixed;inset:0;z-index:1;pointer-events:none;background:url('./assets/shared/texture-grain-img.png') 0 0/128px 128px repeat}
 </style>
 <!-- GRAIN-OVERLAY:END -->
 <!-- /SHARED:GRAIN -->

@@ -1470,8 +1470,8 @@ class Component extends DCLogic {
       // duración), pero durante la reproducción solo se dibuja cada ~33 ms.
       // 30 divide exacto 60, 90 y 120 Hz (2, 3 y 4 refrescos por frame): sin
       // cadencia irregular, y la mitad de pintado. El aterrizaje (frozen) se
-      // dibuja siempre; el arrastre (física viva) va al refresco de la pantalla.
-      if (this.playing && !this.frozen) {
+      // dibuja siempre. (2026-10-21) El arrastre (física viva) también a 30 fps máx.
+      if (!this.frozen) {
         if (this.tdraw != null && t - this.tdraw < 1000 / 30 - 2) return this.kick();
         this.tdraw = t;
       }

@@ -184,6 +184,7 @@ body { margin: 0; }
 .cta-blob g { transform-origin: 50px 50px; animation: cta-blob-spin 18s linear infinite; }
 .circle-cta:focus-visible .cta-blob { transform: scale(1.05); }   /* solo teclado; con ratón la interacción es la gota que sigue al cursor (goo, como los .btn) */
 @keyframes cta-blob-spin { to { transform: rotate(360deg); } }
+.circle-cta.cta-quieta .cta-blob g { animation-play-state: paused; }   /* fuera de pantalla (js/contact.js) */
 .circle-cta-fluid { position: absolute; inset: 0; pointer-events: none; }
 .circle-cta .btn-dot { pointer-events: none; }
 @media (hover: hover) and (pointer: fine) and (min-width: 768px) { .circle-cta.goo .circle-cta-fluid { filter: url(#goo); }

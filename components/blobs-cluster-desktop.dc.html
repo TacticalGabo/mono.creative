@@ -74,6 +74,10 @@ const BULGE = 1 - Math.cos(Math.PI / 16), SLACK = 0.6;
 const K_AREA = 0.9, K_CR = 0.1716, ITERS = 6;
 const CRADLE_R = 2.0;   // radio de la cuna en múltiplos del radio del blob
 const CRADLE_SPAN = 0.8; // hasta dónde llegan los flancos
+// (2026-10-21) Equipo modesto: 4 núcleos o menos, o 4 GB de RAM o menos (deviceMemory, solo Chromium).
+// Lectura instantánea, sin medir nada. Ahí el pintado de los blobs se limita a 30 fps; en el resto va al
+// refresco de la pantalla (60 fps).
+const LOW_END = (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4;
 
 const THEMES = {
   dark: {
@@ -970,6 +974,13 @@ class Component extends DCLogic {
       // ve como tirón. Ahora se guarda hasta dos frames de deuda y se recupera en
       // los siguientes, que es lo que el ojo lee como continuo.
       this.acc = acc > DT * 2 ? DT * 2 : acc;
+      // (2026-10-21) Solo en equipos modestos (LOW_END): máx. 30 fps de pintado, caída y arrastre. La
+      // física sigue a 60 pasos/s (misma trayectoria y duración), solo se dibuja cada ~33 ms. El reposo
+      // (frozen) solo se decide tras un frame dibujado, así que lo último pintado es exacto.
+      if (LOW_END && !this.frozen) {
+        if (this.tdraw != null && t - this.tdraw < 1000 / 30 - 2) return this.kick();
+        this.tdraw = t;
+      }
       if (!n) return this.kick();
       this.draw(false);
       if (!this.settled && this.frames > 140) {

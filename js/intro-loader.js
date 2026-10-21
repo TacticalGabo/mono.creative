@@ -169,6 +169,10 @@
   }
 
   var BG_LIGHT='#9BD700', BG_DARK='#101913', SWAP_AT=1.2, PAD_X=72, PAD_Y=30;
+  // (2026-10-21) mismo grano fijo que el fondo de la página (.grain-overlay): anclado a la pantalla igual,
+  // así al salir la pantalla de carga el grano coincide sin salto. Estático: no cuesta por frame.
+  var GR_DARK=' url(./assets/shared/texture-grain-dark.png) 0 0/153.6px 153.6px repeat',
+      GR_LIGHT=' url(./assets/shared/texture-grain-light.png) 0 0/115.2px 115.2px repeat';
   var leaving=false, minOk=false, t0=0, host, cv, worker=null, raf=0;
 
   // tapa también los clics: debajo la página aún no está lista (se liberan al salir)
@@ -193,7 +197,7 @@
     var dk;
     if(waapi){
       dk=document.createElement('div');
-      dk.style.cssText='position:absolute;inset:0;background-color:'+BG_DARK+';opacity:0;';
+      dk.style.cssText='position:absolute;inset:0;background:'+BG_DARK+GR_DARK+';opacity:0;';
       host.appendChild(dk);
     }
     cv=document.createElement('canvas');
@@ -235,7 +239,7 @@
   // fundió su contenido antes de navegar (mc-leaving), así que aquí no hay que fundir color.
   function cover(){
     var claro=document.documentElement.getAttribute('data-theme')==='light';
-    host.style.cssText=BASE+'background-color:'+(claro?'#f8fbf9':'#101913')+';transition:opacity 450ms ease;';
+    host.style.cssText=BASE+'background:'+(claro?'#f8fbf9'+GR_LIGHT:'#101913'+GR_DARK)+';transition:opacity 450ms ease;';
     minOk=true;
   }
 
