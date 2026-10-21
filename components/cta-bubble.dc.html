@@ -131,8 +131,60 @@ var self = this;
     };
   }
 
+  // (2026-10-21) Tabla de longitudes de la silueta, en JS: cada cúbica en 64 tramos rectos con su
+  // longitud acumulada. Sustituye a getPointAtLength, que en Chrome recorre el path entero en CADA
+  // llamada: 900 llamadas = ~925 ms de CPU en un móvil, y troceadas en huecos libres de 5 ms (que
+  // casi no hay mientras se scrollea) el globo tardaba segundos en salir. Esto tarda ~10 ms y da los
+  // mismos puntos (error máximo medido 0,001 unidades del viewBox, ~0,001 px en pantalla).
+  // Solo entiende M/L/C/Z absolutos (las siluetas de MC_GEOM.bubble son M + C + Z): con cualquier
+  // otra cosa devuelve null y sample() vuelve al método del SVG de siempre.
+  pathTable(d) {
+    const tk = d.match(/[a-zA-Z]|-?(?:\d+\.?\d*|\.\d+)(?:e[-+]?\d+)?/g) || [];
+    const pts = [[0, 0]], len = [0];
+    let x = 0, y = 0, sx = 0, sy = 0, i = 0, cmd = '';
+    const num = () => { const v = +tk[i++]; if (v !== v) throw new Error('path'); return v; };
+    const seg = (fx, fy, k) => {
+      for (let j = 1; j <= k; j++) {
+        const q = fx(j / k), r = fy(j / k), p = pts[pts.length - 1];
+        const dx = q - p[0], dy = r - p[1];
+        len.push(len[len.length - 1] + Math.sqrt(dx * dx + dy * dy));
+        pts.push([q, r]);
+      }
+    };
+    const line = (nx, ny) => { const ax = x, ay = y; seg(t => ax + (nx - ax) * t, t => ay + (ny - ay) * t, 1); x = nx; y = ny; };
+    const cub = (a, c1, c2, e) => t => { const u = 1 - t; return u * u * u * a + 3 * u * u * t * c1 + 3 * u * t * t * c2 + t * t * t * e; };
+    try {
+      while (i < tk.length) {
+        if (/[a-zA-Z]/.test(tk[i])) cmd = tk[i++];
+        if (cmd === 'M') { if (len.length > 1) return null; x = sx = num(); y = sy = num(); pts[0] = [x, y]; cmd = 'L'; }
+        else if (cmd === 'L') line(num(), num());
+        else if (cmd === 'C') {
+          const x1 = num(), y1 = num(), x2 = num(), y2 = num(), x3 = num(), y3 = num();
+          seg(cub(x, x1, x2, x3), cub(y, y1, y2, y3), 64);
+          x = x3; y = y3;
+        } else if (cmd === 'Z') { if (x !== sx || y !== sy) line(sx, sy); cmd = ''; if (i < tk.length) return null; }
+        else return null;
+      }
+    } catch (e) { return null; }
+    return len.length > 1 ? { pts: pts, len: len, total: len[len.length - 1] } : null;
+  }
+
+  pointAt(tb, s) {
+    const L = tb.len;
+    let lo = 0, hi = L.length - 1;
+    while (hi - lo > 1) { const m = (lo + hi) >> 1; if (L[m] < s) lo = m; else hi = m; }
+    const a = tb.pts[lo], b = tb.pts[hi], t = L[hi] > L[lo] ? (s - L[lo]) / (L[hi] - L[lo]) : 0;
+    return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+  }
+
   // Generador: un punto por paso (ver prepare). Mismas llamadas, mismo orden.
   *sample(d, n) {
+    const tb = this.pathTable(d);
+    if (tb) {
+      const out = [];
+      for (let i = 0; i < n; i++) { out.push(this.pointAt(tb, (i / n) * tb.total)); yield; }
+      return out;
+    }
     this.sampleEl.setAttribute('d', d);
     const total = this.sampleEl.getTotalLength();
     const out = [];

@@ -105,7 +105,11 @@ if(!r[u+'react-dom@18.3.1/umd/react-dom.production.min.js'])r[u+'react-dom@18.3.
     // (2026-10-16) el clúster de blobs del ancho visible se DESCARGA ya a la caché HTTP (solo red,
     // prioridad baja; montarlo sigue esperando a soltar()): si se scrollea nada más cargar, el
     // montaje sale del primer scroll sin esperar además el viaje de red.
-    try{ F('./components/blobs-cluster-'+(se_ve('d')?'desktop':'mobile')+'.dc.html',{priority:'low'}).then(function(r){ return r.arrayBuffer(); }).catch(function(){}); }catch(e){}
+    // (2026-10-21) lo mismo para cta-bubble (~9 KB comprimido): con un scroll rápido nada más
+    // cargar, el globo esperaba además su viaje de red al soltarse en el primer scroll.
+    ['blobs-cluster-'+(se_ve('d')?'desktop':'mobile'),'cta-bubble'].forEach(function(n){
+      try{ F('./components/'+n+'.dc.html',{priority:'low'}).then(function(r){ return r.arrayBuffer(); }).catch(function(){}); }catch(e){}
+    });
     if(document.readyState==='complete')tras_load(); else addEventListener('load',tras_load,{once:true});
     ['scroll','touchstart','wheel','keydown','pointerdown'].forEach(function(e){ addEventListener(e,soltar,{once:true,passive:true}); });
     // (2026-10-17) SOLO desktop: se sueltan ya, en el primer hueco libre tras quitar la pantalla de
@@ -1786,9 +1790,12 @@ html.ov-arm .oval.ov-in span{transition:color .5s ease,opacity .4s ease .65s}
   function init(){
     var o=document.querySelector('.oval');
     if(!o||document.querySelector('x-dc'))return setTimeout(init,120);
+    // (2026-10-21) .98 y no 1: en el móvil el óvalo es lo último de .cta (overflow:hidden) y su
+    // alto (86.185px) asoma ~0,03px por debajo de la sección al redondear el layout. Recortado
+    // así su ratio se queda en 0.9996, nunca llegaba a 1 y el óvalo no aparecía nunca.
     var io=new IntersectionObserver(function(es){
-      for(var i=0;es.length>i;i++)if(es[i].isIntersecting){es[i].target.classList.add('ov-in');io.unobserve(es[i].target);}
-    },{threshold:1,rootMargin:'0px 0px -8% 0px'});
+      for(var i=0;es.length>i;i++)if(es[i].isIntersecting&&es[i].intersectionRatio>=.98){es[i].target.classList.add('ov-in');io.unobserve(es[i].target);}
+    },{threshold:.98,rootMargin:'0px 0px -8% 0px'});
     io.observe(o);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
