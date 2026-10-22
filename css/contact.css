@@ -179,7 +179,7 @@ body { margin: 0; }
    rebote al hover y al pulsar. Tamaño: 180 desktop, 168 mobile. */
 .circle-cta { position: relative; background: none; width: 180px !important; height: 180px !important; }
 .circle-cta .circle-cta-inner, .circle-cta:hover .circle-cta-inner, .circle-cta:focus-visible .circle-cta-inner, .circle-cta:disabled .circle-cta-inner { position: relative; background: transparent; border-color: transparent; }
-.circle-cta-inner > #cta-label { position: relative; z-index: 1; font-weight: 400; font-size: 14px; text-align: center; }
+.circle-cta-inner > #cta-label { position: relative; z-index: 1; font-weight: 700; font-size: 20px; text-align: center; }
 .circle-cta svg.cta-blob { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; transition: transform .5s cubic-bezier(.34,1.56,.64,1); }
 .cta-blob g { transform-origin: 50px 50px; animation: cta-blob-spin 18s linear infinite; }
 .circle-cta:focus-visible .cta-blob { transform: scale(1.05); }   /* solo teclado; con ratón la interacción es la gota que sigue al cursor (goo, como los .btn) */

@@ -66,3 +66,25 @@
   .ty-mail{font-size:max(30px,calc(54 * 100cqw / 1200));line-height:1}
   .ty-mail .br-m{display:none}
 }
+
+/* (2026-10-21) aviso de respuesta sobre los botones, línea propia y centrada */
+.ty-eta{flex-basis:100%;margin:0 0 56px;font-family:var(--sans);font-size:16px;line-height:24px;color:#87918B;text-align:center}
+/* titular -> frase 24px, frase -> botones 64px (margen inferior = 64 - row-gap del wrap) */
+@media (max-width:767.98px){.ty-eta{text-align:left;margin-top:-16px;margin-bottom:24px}}
+@media (min-width:768px){.ty-btn-wrap{align-content:flex-start;padding-top:24px}.ty-eta{margin-bottom:58px}}
+
+/* (2026-10-21) titular desktop según Figma "Group 1126" (1440): centrado en 2 líneas, 72px,
+   símbolo a la izquierda de la línea 1; "so," fuera y coma tras "in". Mobile sin cambios. */
+.ty-d{display:none}
+@media (min-width:768px){
+  .ty-d{display:inline}
+  .ty-m{display:none}
+  .ty-title{display:table;margin-inline:auto;text-align:center;font-size:calc(72 * 100cqw / 1200);line-height:1.1111}
+  .ty-title .ty-l1{text-align:center;padding-left:1.973em}
+  .ty-title .ty-l2{text-align:center}
+  .ty-symbol{top:var(--ty-sym-top,.36em)}
+  .ty-main{padding-top:calc(22 * 100cqw / 1200 + 128px)}
+}
+
+/* (2026-10-21) email con la misma transparencia que el número del 404 (10%); hover sigue en --accent */
+@media (min-width:768px){.ty-mail{color:color-mix(in srgb,var(--txt) 10%,transparent)}}

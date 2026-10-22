@@ -19,10 +19,10 @@
 @font-face{font-family:'Space Mono';font-style:normal;font-weight:400;font-display:swap;src:url(./fonts/space-mono/webfont/SpaceMono-400-normal-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 @font-face{font-family:'Space Mono';font-style:normal;font-weight:700;font-display:swap;src:url(./fonts/space-mono/webfont/SpaceMono-700-normal-latin.woff2) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}   /* bold: idioma activo del footer */
 </style>
-<link rel="stylesheet" href="./css/case-study.css?v=27">
+<link rel="stylesheet" href="./css/case-study.css?v=28">
 <!-- ASSETS — hero (LCP): precarga solo la del breakpoint activo -->
-<link rel="preload" as="image" href="./assets/casestudy_GVRN/01-hero.webp" media="(min-width:768px)" fetchpriority="high">
-<link rel="preload" as="image" href="./assets/casestudy_GVRN/01-hero-mobile.webp" media="(max-width:767.98px)" fetchpriority="high">
+<link rel="preload" as="image" href="./assets/casestudy_GVRN/01-hero.webp?v=2" media="(min-width:768px)" fetchpriority="high">
+<link rel="preload" as="image" href="./assets/casestudy_GVRN/01-hero-mobile.webp?v=2" media="(max-width:767.98px)" fetchpriority="high">
 <script>/* hero: avisa (html.hero-ok) cuando la imagen del breakpoint activo está decodificada; el CSS espera a esto para su fade */(function(){var d=document.documentElement,ok=function(){d.classList.add('hero-ok')},l=[].filter.call(document.querySelectorAll('link[rel=preload][as=image]'),function(x){return !x.media||matchMedia(x.media).matches})[0];if(!l)return ok();var i=new Image();i.src=l.href;(i.decode?i.decode():new Promise(function(r){i.onload=i.onerror=r})).then(ok,ok);setTimeout(ok,2500)})()</script>
 <!-- (2026-10-04) CARGA: React desde el propio dominio, igual que el home (mismos bytes,
      sha384 idéntico al SRI de support.js). Además, con window.__resources definido
@@ -115,15 +115,15 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
        Si cambias la extensión (.png/.jpg), cámbiala solo aquí.
        Sin archivo, el hueco muestra el color placeholder (--media).
    ========================================================================== */
-[data-asset="hero"]{background-image:url(./assets/casestudy_GVRN/01-hero.webp)}
-@media (max-width:767.98px){[data-asset="hero"]{background-image:url(./assets/casestudy_GVRN/01-hero-mobile.webp)}}
-[data-asset="exploration-1"]{background-image:url(./assets/casestudy_GVRN/04-exploration-1.webp)}
-[data-asset="exploration-2"]{background-image:url(./assets/casestudy_GVRN/04-exploration-2.webp)}
-[data-asset="exploration-3a"]{background-image:url(./assets/casestudy_GVRN/04-exploration-3a.webp)}
-[data-asset="exploration-3b"]{background-image:url(./assets/casestudy_GVRN/04-exploration-3b.webp)}
-[data-asset="direction-1"]{background-image:url(./assets/casestudy_GVRN/05-direction-1.webp)}
-[data-asset="direction-2"]{background-image:url(./assets/casestudy_GVRN/05-direction-2.webp)}
-[data-asset="direction-wide"]{background-image:url(./assets/casestudy_GVRN/05-direction-wide.webp)}
+[data-asset="hero"]{background-image:url(./assets/casestudy_GVRN/01-hero.webp?v=2)}
+@media (max-width:767.98px){[data-asset="hero"]{background-image:url(./assets/casestudy_GVRN/01-hero-mobile.webp?v=2)}}
+[data-asset="exploration-1"]{background-image:url(./assets/casestudy_GVRN/04-exploration-1.webp?v=2)}
+[data-asset="exploration-2"]{background-image:url(./assets/casestudy_GVRN/04-exploration-2.webp?v=2)}
+[data-asset="exploration-3a"]{background-image:url(./assets/casestudy_GVRN/04-exploration-3a.webp?v=2)}
+[data-asset="exploration-3b"]{background-image:url(./assets/casestudy_GVRN/04-exploration-3b.webp?v=2)}
+[data-asset="direction-1"]{background-image:url(./assets/casestudy_GVRN/05-direction-1.webp?v=2)}
+[data-asset="direction-2"]{background-image:url(./assets/casestudy_GVRN/05-direction-2.webp?v=2)}
+[data-asset="direction-wide"]{background-image:url(./assets/casestudy_GVRN/05-direction-wide.webp?v=2)}
 /* tamaños propios de este caso (Figma 6. GVRN, 1440 / 360) */
 @media (max-width:767.98px){
   .zz__media:not(.zz__media--split){aspect-ratio:360/230}
@@ -636,7 +636,7 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
           <div class="cs-hero__meta">
             <div class="meta--year"><span class="meta__label">Year</span><span class="meta__value">2026</span></div>
             <div class="meta--role"><span class="meta__label">Role</span><span class="meta__value">UX/UI Designers</span></div>
-            <div class="avatars"><span class="avatar" data-asset="team-1" tabindex="0" aria-label="Gabriel Luyo"><span class="pcard" role="tooltip"><svg class="pcard__ring" viewBox="0 0 288 95" preserveAspectRatio="none" aria-hidden="true"><ellipse pathLength="1" cx="144" cy="47.5" rx="143.5" ry="45" transform="rotate(-1.5 144 47.5)"/><ellipse pathLength="1" cx="145" cy="48.5" rx="143" ry="46" transform="rotate(1 145 48.5)"/></svg><span class="pcard__name">Gabriel Luyo</span><span class="pcard__links"><a href="https://www.behance.net/gabriel_luyo" target="_blank" rel="noopener noreferrer" aria-label="Behance">Be</a><a href="https://www.linkedin.com/in/gabriel-luyo/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">In</a></span></span></span><span class="avatar" data-asset="team-2" tabindex="0" aria-label="Ale Serruto"><span class="pcard" role="tooltip"><svg class="pcard__ring" viewBox="0 0 288 95" preserveAspectRatio="none" aria-hidden="true"><ellipse pathLength="1" cx="144" cy="47.5" rx="143.5" ry="45" transform="rotate(-1.5 144 47.5)"/><ellipse pathLength="1" cx="145" cy="48.5" rx="143" ry="46" transform="rotate(1 145 48.5)"/></svg><span class="pcard__name">Ale Serruto</span><span class="pcard__links"><a href="https://www.behance.net/AlessandraSerruto" target="_blank" rel="noopener noreferrer" aria-label="Behance">Be</a><a href="https://www.linkedin.com/in/alessandra-serruto/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">In</a><a data-pending="1">Ig</a></span></span></span></div>
+            <div class="avatars"><span class="avatar" data-asset="team-1" tabindex="0" aria-label="Gabriel Luyo"><span class="pcard" role="tooltip"><svg class="pcard__ring" viewBox="0 0 288 95" preserveAspectRatio="none" aria-hidden="true"><clipPath id="pc-front-1"><path clip-rule="evenodd" d="M-20 -20H308V115H-20ZM287.45 43.74L287.42 45.16L287.24 46.58L286.93 47.99L286.47 49.41L285.87 50.83L285.13 52.24L284.25 53.65L283.24 55.05L282.08 56.44L280.79 57.83L279.37 59.20L277.81 60.57L276.12 61.92L274.30 63.25L272.35 64.58L270.27 65.88L268.07 67.17L265.75 68.43L263.31 69.68L260.75 70.90L258.07 72.10L255.28 73.28L252.38 74.43L249.38 75.56L246.27 76.65L243.06 77.72L239.75 78.76L236.35 79.77L232.85 80.74L229.27 81.69L225.61 82.59L221.86 83.47L218.04 84.31L214.14 85.11L210.17 85.88L206.14 86.60L202.05 87.29L197.90 87.94L193.70 88.55L189.45 89.12L185.15 89.65L180.82 90.14L176.44 90.58L172.04 90.98L167.60 91.34L163.15 91.66L158.67 91.93L154.18 92.16L149.68 92.34L145.18 92.48L140.67 92.58L136.17 92.63L131.67 92.64L127.19 92.60L122.72 92.52L118.28 92.39L113.86 92.22L109.47 92.01L105.11 91.75L100.79 91.44L96.52 91.10L92.29 90.71L88.11 90.28L83.99 89.80L79.92 89.29L75.92 88.73L71.99 88.13L68.13 87.49L64.34 86.82L60.63 86.10L57.01 85.35L53.47 84.56L50.02 83.73L46.66 82.86L43.40 81.97L40.24 81.03L37.17 80.07L34.22 79.07L31.37 78.04L28.64 76.98L26.02 75.89L23.51 74.78L21.13 73.63L18.86 72.46L16.72 71.27L14.70 70.05L12.82 68.81L11.06 67.55L9.43 66.27L7.93 64.97L6.57 63.66L5.35 62.33L4.26 60.98L3.31 59.62L2.50 58.25L1.83 56.86L1.30 55.47L0.91 54.07L0.66 52.67L0.55 51.26L0.58 49.84L0.76 48.42L1.07 47.01L1.53 45.59L2.13 44.17L2.87 42.76L3.75 41.35L4.76 39.95L5.92 38.56L7.21 37.17L8.63 35.80L10.19 34.43L11.88 33.08L13.70 31.75L15.65 30.42L17.73 29.12L19.93 27.83L22.25 26.57L24.69 25.32L27.25 24.10L29.93 22.90L32.72 21.72L35.62 20.57L38.62 19.44L41.73 18.35L44.94 17.28L48.25 16.24L51.65 15.23L55.15 14.26L58.73 13.31L62.39 12.41L66.14 11.53L69.96 10.69L73.86 9.89L77.83 9.12L81.86 8.40L85.95 7.71L90.10 7.06L94.30 6.45L98.55 5.88L102.85 5.35L107.18 4.86L111.56 4.42L115.96 4.02L120.40 3.66L124.85 3.34L129.33 3.07L133.82 2.84L138.32 2.66L142.82 2.52L147.33 2.42L151.83 2.37L156.33 2.36L160.81 2.40L165.28 2.48L169.72 2.61L174.14 2.78L178.53 2.99L182.89 3.25L187.21 3.56L191.48 3.90L195.71 4.29L199.89 4.72L204.01 5.20L208.08 5.71L212.08 6.27L216.01 6.87L219.87 7.51L223.66 8.18L227.37 8.90L230.99 9.65L234.53 10.44L237.98 11.27L241.34 12.14L244.60 13.03L247.76 13.97L250.83 14.93L253.78 15.93L256.63 16.96L259.36 18.02L261.98 19.11L264.49 20.22L266.87 21.37L269.14 22.54L271.28 23.73L273.30 24.95L275.18 26.19L276.94 27.45L278.57 28.73L280.07 30.03L281.43 31.34L282.65 32.67L283.74 34.02L284.69 35.38L285.50 36.75L286.17 38.14L286.70 39.53L287.09 40.93L287.34 42.33Z"/></clipPath><ellipse pathLength="1" cx="144" cy="47.5" rx="143.5" ry="45" transform="rotate(-1.5 144 47.5)"/><ellipse clip-path="url(#pc-front-1)" pathLength="1" cx="145" cy="48.5" rx="143" ry="46" transform="rotate(1 145 48.5)"/></svg><span class="pcard__name">Gabriel Luyo</span><span class="pcard__links"><a href="https://www.behance.net/gabriel_luyo" target="_blank" rel="noopener noreferrer" aria-label="Behance">Be</a><a href="https://www.linkedin.com/in/gabriel-luyo/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">In</a></span></span></span><span class="avatar" data-asset="team-2" tabindex="0" aria-label="Ale Serruto"><span class="pcard" role="tooltip"><svg class="pcard__ring" viewBox="0 0 288 95" preserveAspectRatio="none" aria-hidden="true"><clipPath id="pc-front-2"><path clip-rule="evenodd" d="M-20 -20H308V115H-20ZM287.45 43.74L287.42 45.16L287.24 46.58L286.93 47.99L286.47 49.41L285.87 50.83L285.13 52.24L284.25 53.65L283.24 55.05L282.08 56.44L280.79 57.83L279.37 59.20L277.81 60.57L276.12 61.92L274.30 63.25L272.35 64.58L270.27 65.88L268.07 67.17L265.75 68.43L263.31 69.68L260.75 70.90L258.07 72.10L255.28 73.28L252.38 74.43L249.38 75.56L246.27 76.65L243.06 77.72L239.75 78.76L236.35 79.77L232.85 80.74L229.27 81.69L225.61 82.59L221.86 83.47L218.04 84.31L214.14 85.11L210.17 85.88L206.14 86.60L202.05 87.29L197.90 87.94L193.70 88.55L189.45 89.12L185.15 89.65L180.82 90.14L176.44 90.58L172.04 90.98L167.60 91.34L163.15 91.66L158.67 91.93L154.18 92.16L149.68 92.34L145.18 92.48L140.67 92.58L136.17 92.63L131.67 92.64L127.19 92.60L122.72 92.52L118.28 92.39L113.86 92.22L109.47 92.01L105.11 91.75L100.79 91.44L96.52 91.10L92.29 90.71L88.11 90.28L83.99 89.80L79.92 89.29L75.92 88.73L71.99 88.13L68.13 87.49L64.34 86.82L60.63 86.10L57.01 85.35L53.47 84.56L50.02 83.73L46.66 82.86L43.40 81.97L40.24 81.03L37.17 80.07L34.22 79.07L31.37 78.04L28.64 76.98L26.02 75.89L23.51 74.78L21.13 73.63L18.86 72.46L16.72 71.27L14.70 70.05L12.82 68.81L11.06 67.55L9.43 66.27L7.93 64.97L6.57 63.66L5.35 62.33L4.26 60.98L3.31 59.62L2.50 58.25L1.83 56.86L1.30 55.47L0.91 54.07L0.66 52.67L0.55 51.26L0.58 49.84L0.76 48.42L1.07 47.01L1.53 45.59L2.13 44.17L2.87 42.76L3.75 41.35L4.76 39.95L5.92 38.56L7.21 37.17L8.63 35.80L10.19 34.43L11.88 33.08L13.70 31.75L15.65 30.42L17.73 29.12L19.93 27.83L22.25 26.57L24.69 25.32L27.25 24.10L29.93 22.90L32.72 21.72L35.62 20.57L38.62 19.44L41.73 18.35L44.94 17.28L48.25 16.24L51.65 15.23L55.15 14.26L58.73 13.31L62.39 12.41L66.14 11.53L69.96 10.69L73.86 9.89L77.83 9.12L81.86 8.40L85.95 7.71L90.10 7.06L94.30 6.45L98.55 5.88L102.85 5.35L107.18 4.86L111.56 4.42L115.96 4.02L120.40 3.66L124.85 3.34L129.33 3.07L133.82 2.84L138.32 2.66L142.82 2.52L147.33 2.42L151.83 2.37L156.33 2.36L160.81 2.40L165.28 2.48L169.72 2.61L174.14 2.78L178.53 2.99L182.89 3.25L187.21 3.56L191.48 3.90L195.71 4.29L199.89 4.72L204.01 5.20L208.08 5.71L212.08 6.27L216.01 6.87L219.87 7.51L223.66 8.18L227.37 8.90L230.99 9.65L234.53 10.44L237.98 11.27L241.34 12.14L244.60 13.03L247.76 13.97L250.83 14.93L253.78 15.93L256.63 16.96L259.36 18.02L261.98 19.11L264.49 20.22L266.87 21.37L269.14 22.54L271.28 23.73L273.30 24.95L275.18 26.19L276.94 27.45L278.57 28.73L280.07 30.03L281.43 31.34L282.65 32.67L283.74 34.02L284.69 35.38L285.50 36.75L286.17 38.14L286.70 39.53L287.09 40.93L287.34 42.33Z"/></clipPath><ellipse pathLength="1" cx="144" cy="47.5" rx="143.5" ry="45" transform="rotate(-1.5 144 47.5)"/><ellipse clip-path="url(#pc-front-2)" pathLength="1" cx="145" cy="48.5" rx="143" ry="46" transform="rotate(1 145 48.5)"/></svg><span class="pcard__name">Ale Serruto</span><span class="pcard__links"><a href="https://www.behance.net/AlessandraSerruto" target="_blank" rel="noopener noreferrer" aria-label="Behance">Be</a><a href="https://www.linkedin.com/in/alessandra-serruto/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">In</a><a data-pending="1">Ig</a></span></span></span></div>
           </div>
         </div>
         <div class="cs-hero__right">
@@ -698,6 +698,8 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
     <div class="wrap"><p class="m2w__caption">Each path keeps its own primary action. Start setup leads to the jurisdiction explorer, package configurator and checkout, while Book a Call opens a scoped advisory with a named expert.</p></div>
   </section>
 
+  <!-- OCULTO 2026-10-21 (guardado para luego): quitar <template> para volver a mostrarlo -->
+  <template data-hidden-block>
   <!-- ===== 6.7 Before / After (B09) ===== -->
   <section class="cs-before-after fx" data-block="6.7 Before / After (B09)">
     <div class="wrap">
@@ -710,6 +712,7 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
       </div>
     </div>
   </section>
+  </template>
 
   <!-- ===== 6.8 Tradeoffs (B04) ===== -->
   <section class="cs-list-numbered fx" data-block="6.8 Tradeoffs (B04)">
@@ -726,6 +729,8 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
     </div>
   </section>
 
+  <!-- OCULTO 2026-10-21 (guardado para luego): quitar <template> para volver a mostrarlo -->
+  <template data-hidden-block>
   <!-- ===== 6.10 Outcome (B02) ===== -->
   <section class="cs-closing-scene fx" data-block="6.10 Outcome (B02)">
     <div class="wrap">
@@ -738,6 +743,7 @@ window.MCgeom = function(cb){ (function p(){ if(window.MC_GEOM) cb(window.MC_GEO
     </div>
     <div class="csc__scene media" data-asset="closing-scene"><div class="csc__inner" data-asset="closing-screen"></div></div>
   </section>
+  </template>
 
   </main>
 

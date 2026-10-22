@@ -369,7 +369,7 @@ html:not([data-theme="light"]) .theme-toggle .tt-half{transform:rotate(180deg)}
 .btn .btn-arr{position:absolute;top:14.75px;transition:color .25s ease-out}
 .btn .al{left:11.9px}
 .btn .ar{left:113.5px;opacity:0}
-.btn .btn-label{position:absolute;left:50%;top:0;height:41.5px;line-height:41.5px;white-space:nowrap;font-family:var(--mono);font-size:13px;letter-spacing:.002em;transform:translateX(-50%) translateX(16.5px);transition:transform 368ms cubic-bezier(.35,.9,.25,1),color .25s ease-out}
+.btn .btn-label{position:absolute;left:50%;top:0;height:41.5px;line-height:41.5px;white-space:nowrap;font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.002em;transform:translateX(-50%) translateX(16.5px);transition:transform 368ms cubic-bezier(.35,.9,.25,1),color .25s ease-out}
 /* botones del header y footer a 48 px de alto (geometria en JS via data-h) */
 .btn.nav-btn,.btn.foot-btn{height:48px;width:158px}
 .btn.nav-btn .btn-arr,.btn.foot-btn .btn-arr{top:16.67px}
@@ -591,7 +591,7 @@ html .page .sc-placeholder::before{display:none}
 @media (max-width:767.98px){.cs-hero .avatars:has(>.avatar:nth-child(3)) .pcard{left:175px;padding-inline:clamp(24px,50vw - 155px,40px)}}   /* 3 avatares: 159 px abiertos + 16; bajo 390 el óvalo se estrecha para caber */
 .pcard__ring{position:absolute;inset:0;width:100%;height:100%;overflow:visible;fill:none;stroke:var(--border);stroke-width:1;pointer-events:none}
 .pcard__ring ellipse{stroke-dasharray:1 1;stroke-dashoffset:1;transition:stroke-dashoffset 0s linear .2s}
-.pcard__ring ellipse:first-child{fill:var(--bg)}
+.pcard__ring ellipse:first-child{fill:var(--bg)}   /* con <clipPath> delante (casestudy_GVRN) deja de ser :first-child: sin relleno, se ve el grano y el trazo de atrás se recorta con la forma del de adelante */
 .pcard__name,.pcard__links{position:relative;transform:rotate(-3deg);opacity:0;transition:opacity .15s ease}
 .pcard__name{font:400 16px/24px var(--ff-sans);letter-spacing:-.32px;color:var(--text-title)}
 .pcard__links{display:flex;gap:10px}

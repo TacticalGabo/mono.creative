@@ -1,7 +1,7 @@
 # casestudy_GVRN — imágenes y vídeos del case study
 
 Página: `../../casestudy_GVRN.html` · Origen: `mono.cases/cases_psd/` (copias optimizadas; los originales no se tocan).
-Actualizado: 2026-10-15.
+Actualizado: 2026-10-21 (re-export de los 9 PSD; URLs con ?v=2).
 
 - El tamaño del hueco lo manda el frame de Figma (Desktop 1440 / Mobile 360), no el archivo:
   Figma FILL = `background-size:cover` / `object-fit:cover` centrado (ver `xlogClaude/figma-fill-imagenes.md`).
@@ -12,8 +12,8 @@ Actualizado: 2026-10-15.
 
 | Archivo | Bloque | Peso | Tamaño |
 |---|---|---|---|
-| `01-hero-mobile.webp` | Hero (B01) · mobile | 38 KB | 1000×1056 |
-| `01-hero.webp` | Hero (B01) · desktop | 68 KB | 1920×1080 |
+| `01-hero-mobile.webp` | Hero (B01) · mobile | 40 KB | 1000×1056 |
+| `01-hero.webp` | Hero (B01) · desktop | 52 KB | 1920×924 (recorte 1056/508 anclado abajo) |
 | `04-exploration-1.webp` | 6.4 Exploration (B08) | 46 KB | 1200×675 |
 | `04-exploration-2.webp` | 6.4 Exploration (B08) | 86 KB | 1200×675 |
 | `04-exploration-3a.webp` | 6.4 Exploration (B08) | 43 KB | 717×1000 |

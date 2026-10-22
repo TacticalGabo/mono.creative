@@ -109,6 +109,7 @@
       const input = find('#' + id);
       const validators = { name: rules.validateName, email: rules.validateEmail, telegram: rules.validateTelegram, brief: rules.validateBrief };
       const result = validators[id](input.value);
+      if (id === 'brief' && !result.error && !result.value) result.error = 'Tell us a bit about your project'; // obligatorio (2026-10-21)
       input.value = result.value;
       if ((id === 'name' || id === 'brief') && rules.isSpam(id === 'name' ? input.value : '', id === 'brief' ? input.value : '')) {
         result.error = id === 'name' ? 'Just your name is fine' : 'Please keep this about your project, without HTML or promotions';
@@ -126,7 +127,7 @@
 
     function validateServices() {
       const services = all('[name="services"]:checked').map((input) => input.value);
-      const invalid = !services.length;
+      const invalid = false; // opcional (2026-10-21)
       find('#services-field').classList.toggle('is-invalid', invalid);
       find('#services-field').setAttribute('aria-invalid', String(invalid));
       find('#services-error').textContent = invalid ? "Pick at least one, or 'Not sure yet'" : '';
@@ -155,10 +156,10 @@
       const results = ['name', 'email', 'telegram', 'brief'].map(validateField);
       const links = validateLinks();
       const fileError = validateAttachment();
-      const valid = services.length && results.every((result) => !result.error) && links.errors.every((error) => !error) && !fileError;
+      const valid = results.every((result) => !result.error) && links.errors.every((error) => !error) && !fileError;
       if (!valid) {
         if (state.step !== 1) setStep(1, false);
-        const target = !services.length ? find('[name="services"]') : find('input[aria-invalid="true"], textarea[aria-invalid="true"]');
+        const target = find('input[aria-invalid="true"], textarea[aria-invalid="true"]');
         if (target) {
           const focusTarget = target.id === 'deck' ? find('#attach-deck') : target;
           focusTarget.focus();
@@ -183,7 +184,7 @@
         else item.removeAttribute('aria-current');
       });
       find('#back-step').hidden = step === 1;
-      find('#cta-label').textContent = step === 1 ? 'Setup a call' : "Let's do this";
+      find('#cta-label').textContent = step === 1 ? 'Send' : "Let's do this";
       find('#step-caption').replaceChildren();
       find('#step-caption').hidden = step === 1;
       if (step === 2) find('#step-caption').append('Your next chapter starts here.', document.createElement('br'), "Let's make it a good one.");
@@ -365,7 +366,7 @@
       } catch (_) {
         controls.forEach((control, i) => { control.disabled = disabledStates[i]; });
         cta.disabled = false;
-        find('#cta-label').textContent = "Let's do this";
+        find('#cta-label').textContent = 'Send';
         offerEmail(data, 'Something went wrong. Try again or email us.', true);
       } finally {
         state.busy = false;
@@ -491,18 +492,16 @@
     find('#back-step').addEventListener('click', () => setStep(1));
     form.addEventListener('submit', (event) => {
       event.preventDefault();
+      // sin paso 2 (2026-10-21): Send valida y envía directo -> thank-you
       if (testing) {
-        if (state.step === 1) setStep(2);
-        else {
-          find('#direct-submit').hidden = true;
-          form.dispatchEvent(new CustomEvent('mono:contact-test', { detail: payload(), bubbles: true }));
-          toThankYou();
-        }
+        if (!validateProject()) return;
+        find('#direct-submit').hidden = true;
+        form.dispatchEvent(new CustomEvent('mono:contact-test', { detail: payload(), bubbles: true }));
+        toThankYou();
         return;
       }
       if (state.busy || state.sent) return;
-      if (state.step === 1) { if (validateProject()) setStep(2); }
-      else sendBrief();
+      sendBrief();
     });
 
     Array.from(document.querySelectorAll('.page .nav-btn, .page .foot-btn')).filter((b) => !b.closest('x-dc')).forEach((button) => {
@@ -626,7 +625,7 @@
 (function(){
   if(window.__mcCtaBlob)return; window.__mcCtaBlob=1;
   var reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var map={"let’s connect":"Setup a call","let's connect":"Setup a call","send my brief":"Let's do this"};
+  var map={"let’s connect":"Send","let's connect":"Send","send my brief":"Let's do this"};
   function replay(el,cls){el.classList.remove(cls);void el.offsetWidth;el.classList.add(cls);}
   function init(){
     var form=[].find.call(document.querySelectorAll("#contact-form"),function(f){return !f.closest("x-dc")}), cta=form&&form.querySelector("#form-cta"), l=form&&form.querySelector("#cta-label");
